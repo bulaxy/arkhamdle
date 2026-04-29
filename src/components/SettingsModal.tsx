@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, RefreshCw, ChevronDown, ChevronUp, Github } from 'lucide-react';
 import { useGameContext } from '../context/GameContext';
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
@@ -166,10 +166,29 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             )}
           </div>
           
-          <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
             <button className="premium-btn" onClick={async () => { await refreshData(); onClose(); }} style={{ width: '100%' }}>
               <RefreshCw size={18} /> Force Refresh Data
             </button>
+            
+            <a 
+              href="https://github.com/bulaxy/arkhamdle" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem', 
+                color: 'var(--text-secondary)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                transition: 'color 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              <Github size={18} /> Issues & Feedback
+            </a>
           </div>
 
         </div>
