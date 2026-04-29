@@ -151,37 +151,58 @@ export default function WordleGame() {
       )}
 
       {guesses.length > 0 && (
-        <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '1rem' }}>
-          <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'separate', borderSpacing: '0.5rem' }}>
-            <thead>
-              <tr style={{ color: 'var(--text-secondary)', textAlign: 'left', fontSize: '0.875rem' }}>
-                <th>Card</th>
-                <th>Type</th>
-                <th>Class</th>
-                <th>XP</th>
-                <th>Traits</th>
-                <th>Slot</th>
-                <th>Cost</th>
-                <th>Agi</th>
-                <th>Cmb</th>
-                <th>Int</th>
-                <th>Wld</th>
-                <th>Wil</th>
-              </tr>
-            </thead>
-            <tbody>
-              {guesses.map((g, i) => (
-                <tr key={`${g.id}-${i}`} className="fade-in">
-                  <td style={{ padding: '0.5rem', background: 'var(--glass-bg)', borderRadius: '0.25rem', whiteSpace: 'nowrap' }}>{g.fullName}</td>
-                  {ATTRIBUTES.map(attr => (
-                    <td key={attr} className={getAttributeClass(g, attr)} style={{ padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', transition: 'all 0.3s' }}>
-                      {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
-                    </td>
-                  ))}
+        <div style={{ width: '100%', paddingBottom: '1rem' }}>
+          {/* Desktop Table View */}
+          <div className="desktop-only" style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'separate', borderSpacing: '0.5rem' }}>
+              <thead>
+                <tr style={{ color: 'var(--text-secondary)', textAlign: 'left', fontSize: '0.875rem' }}>
+                  <th>Card</th>
+                  <th>Type</th>
+                  <th>Class</th>
+                  <th>XP</th>
+                  <th>Traits</th>
+                  <th>Slot</th>
+                  <th>Cost</th>
+                  <th>Agi</th>
+                  <th>Cmb</th>
+                  <th>Int</th>
+                  <th>Wld</th>
+                  <th>Wil</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {guesses.map((g, i) => (
+                  <tr key={`${g.id}-${i}`} className="fade-in">
+                    <td style={{ padding: '0.5rem', background: 'var(--glass-bg)', borderRadius: '0.25rem', whiteSpace: 'nowrap' }}>{g.fullName}</td>
+                    {ATTRIBUTES.map(attr => (
+                      <td key={attr} className={getAttributeClass(g, attr)} style={{ padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', transition: 'all 0.3s' }}>
+                        {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile/iPad Grid View */}
+          <div className="mobile-only guesses-container">
+            {guesses.map((g, i) => (
+              <div key={`${g.id}-${i}`} className="guess-card wordle-grid fade-in">
+                <div className="guess-cell name-cell">
+                  <span className="label">Card</span>
+                  {g.fullName}
+                </div>
+                {ATTRIBUTES.map(attr => (
+                  <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
+                    <span className="label">{attr === 'typeName' ? 'Type' : attr}</span>
+                    {Array.isArray(g[attr]) && (g[attr] as any[]).length > 1 ? (g[attr] as any[]).join(', ') : g[attr]}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

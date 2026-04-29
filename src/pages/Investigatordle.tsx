@@ -181,34 +181,55 @@ export default function Investigatordle() {
       )}
 
       {guesses.length > 0 && (
-        <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '1rem' }}>
-          <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'separate', borderSpacing: '0.5rem' }}>
-            <thead>
-              <tr style={{ color: 'var(--text-secondary)', textAlign: 'left', fontSize: '0.875rem' }}>
-                <th>Investigator</th>
-                <th>Faction</th>
-                <th>Health</th>
-                <th>Sanity</th>
-                <th>Agi</th>
-                <th>Cmb</th>
-                <th>Int</th>
-                <th>Wil</th>
-                <th>Traits</th>
-              </tr>
-            </thead>
-            <tbody>
-              {guesses.map((g, i) => (
-                <tr key={`${g.id}-${i}`} className="fade-in">
-                  <td style={{ padding: '0.5rem', background: 'var(--glass-bg)', borderRadius: '0.25rem', whiteSpace: 'nowrap' }}>{g.fullName}</td>
-                  {ATTRIBUTES.map(attr => (
-                    <td key={attr} className={getAttributeClass(g, attr)} style={{ padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', transition: 'all 0.3s' }}>
-                      {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
-                    </td>
-                  ))}
+        <div style={{ width: '100%', paddingBottom: '1rem' }}>
+          {/* Desktop Table View */}
+          <div className="desktop-only" style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'separate', borderSpacing: '0.5rem' }}>
+              <thead>
+                <tr style={{ color: 'var(--text-secondary)', textAlign: 'left', fontSize: '0.875rem' }}>
+                  <th>Investigator</th>
+                  <th>Faction</th>
+                  <th>Health</th>
+                  <th>Sanity</th>
+                  <th>Agi</th>
+                  <th>Cmb</th>
+                  <th>Int</th>
+                  <th>Wil</th>
+                  <th>Traits</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {guesses.map((g, i) => (
+                  <tr key={`${g.id}-${i}`} className="fade-in">
+                    <td style={{ padding: '0.5rem', background: 'var(--glass-bg)', borderRadius: '0.25rem', whiteSpace: 'nowrap' }}>{g.fullName}</td>
+                    {ATTRIBUTES.map(attr => (
+                      <td key={attr} className={getAttributeClass(g, attr)} style={{ padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', transition: 'all 0.3s' }}>
+                        {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile/iPad Grid View */}
+          <div className="mobile-only guesses-container">
+            {guesses.map((g, i) => (
+              <div key={`${g.id}-${i}`} className="guess-card investigator-grid fade-in">
+                <div className="guess-cell name-cell">
+                  <span className="label">Investigator</span>
+                  {g.fullName}
+                </div>
+                {ATTRIBUTES.map(attr => (
+                  <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
+                    <span className="label">{attr.replace('_', ' ')}</span>
+                    {Array.isArray(g[attr]) && (g[attr] as any[]).length > 1 ? (g[attr] as any[]).join(', ') : g[attr]}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, RefreshCw, ChevronDown, ChevronUp, Github } from 'lucide-react';
+import { X, RefreshCw, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { useGameContext } from '../context/GameContext';
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
@@ -28,7 +28,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
           <h2>Settings</h2>
           <button className="close-btn" onClick={onClose}><X size={24} /></button>
         </div>
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="modal-body">
           
           {/* Global Packs Section */}
           <div style={{ border: '1px solid var(--glass-border)', borderRadius: '0.5rem', overflow: 'hidden' }}>
@@ -187,7 +187,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
               onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
               onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
             >
-              <Github size={18} /> Issues & Feedback
+              <ExternalLink size={18} /> Issues & Feedback
             </a>
           </div>
 
