@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, RefreshCw, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { useGameContext } from '../context/GameContext';
+import './SettingsModal.scss';
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings, refreshData } = useGameContext();

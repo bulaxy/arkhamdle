@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../context/GameContext';
 import type { TransformedInvestigator } from '../types';
+import './Guesses.scss';
+import './Investigatordle.scss';
 
 const ATTRIBUTES = ['faction_code', 'health', 'sanity', 'agility', 'combat', 'intellect', 'willpower', 'traits'] as const;
 
@@ -123,23 +125,23 @@ export default function Investigatordle() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>Investigatordle</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Guess the Arkham Horror LCG Investigator</p>
+    <div className="investigator-container">
+      <div className="investigator-header">
+        <h1>Investigatordle</h1>
+        <p>Guess the Arkham Horror LCG Investigator</p>
       </div>
 
       {win || gaveUp ? (
-        <div className="glass-panel fade-in" style={{ textAlign: 'center', borderColor: win ? 'var(--correct-color)' : 'var(--wrong-color)', width: '100%', maxWidth: '400px' }}>
-          <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '1rem' }}>
+        <div className="glass-panel fade-in investigator-result-panel" style={{ borderColor: win ? 'var(--correct-color)' : 'var(--wrong-color)' }}>
+          <h2 className={win ? 'win' : 'lose'}>
             {win ? 'Correct!' : 'Game Over'}
           </h2>
-          <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} style={{ width: '100%', borderRadius: '0.5rem', marginBottom: '1rem' }} />
-          <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>{answer?.fullName}</p>
+          <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} />
+          <p>{answer?.fullName}</p>
           <button className="premium-btn" onClick={resetGame} autoFocus>Play Again</button>
         </div>
       ) : (
-        <div style={{ width: '100%', maxWidth: '400px', position: 'relative', textAlign: 'center' }}>
+        <div className="investigator-input-section">
           <input
             type="text"
             className="premium-input"
@@ -149,16 +151,11 @@ export default function Investigatordle() {
             onKeyDown={handleKeyDown}
           />
           {suggestions.length > 0 && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '0.5rem', marginTop: '0.5rem', zIndex: 10, textAlign: 'left' }}>
+            <div className="investigator-suggestions">
               {suggestions.map((s, idx) => (
                 <div 
                   key={s.id} 
-                  style={{ 
-                    padding: '0.75rem 1rem', 
-                    cursor: 'pointer', 
-                    borderBottom: '1px solid var(--glass-border)',
-                    background: idx === selectedIdx ? 'rgba(255,255,255,0.1)' : 'transparent'
-                  }}
+                  className={`investigator-suggestion-item ${idx === selectedIdx ? 'selected' : ''}`}
                   onClick={() => submitGuess(s)}
                   onMouseEnter={() => setSelectedIdx(idx)}
                   onMouseLeave={() => setSelectedIdx(-1)}
@@ -171,9 +168,8 @@ export default function Investigatordle() {
           
           {guesses.length >= 5 && (
             <button 
-              className="premium-btn" 
+              className="premium-btn investigator-give-up" 
               onClick={() => setGaveUp(true)} 
-              style={{ marginTop: '1rem', background: 'var(--wrong-color)', width: '100%' }}
             >
               Give Up
             </button>
@@ -182,12 +178,12 @@ export default function Investigatordle() {
       )}
 
       {guesses.length > 0 && (
-        <div style={{ width: '100%', paddingBottom: '1rem' }}>
+        <div className="investigator-guesses">
           {/* Desktop Table View */}
-          <div className="desktop-only" style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'separate', borderSpacing: '0.5rem' }}>
+          <div className="desktop-only">
+            <table className="investigator-table">
               <thead>
-                <tr style={{ color: 'var(--text-secondary)', textAlign: 'left', fontSize: '0.875rem' }}>
+                <tr>
                   <th>Investigator</th>
                   <th>Faction</th>
                   <th>Health</th>
@@ -202,9 +198,9 @@ export default function Investigatordle() {
               <tbody>
                 {guesses.map((g, i) => (
                   <tr key={`${g.id}-${i}`} className="fade-in">
-                    <td style={{ padding: '0.5rem', background: 'var(--glass-bg)', borderRadius: '0.25rem', whiteSpace: 'nowrap' }}>{g.fullName}</td>
+                    <td className="investigator-guess-cell investigator-name-cell">{g.fullName}</td>
                     {ATTRIBUTES.map(attr => (
-                      <td key={attr} className={getAttributeClass(g, attr)} style={{ padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', transition: 'all 0.3s' }}>
+                      <td key={attr} className={`investigator-guess-cell ${getAttributeClass(g, attr)}`}>
                         {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
                       </td>
                     ))}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../context/GameContext';
 import type { TransformedInvestigator } from '../types';
+import './StoryGuesser.scss';
 
 export default function StoryGuesser() {
   const { filteredInvestigators, settings } = useGameContext();
@@ -165,32 +166,32 @@ export default function StoryGuesser() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>Story Guesser</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Guess the Investigator by their scrambled story!</p>
+    <div className="story-container">
+      <div className="story-header">
+        <h1>Story Guesser</h1>
+        <p>Guess the Investigator by their scrambled story!</p>
       </div>
 
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '600px', textAlign: 'center' }}>
+      <div className="glass-panel story-panel">
         {win || gaveUp ? (
-          <div className="fade-in">
-            <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '1rem' }}>
+          <div className="fade-in story-result">
+            <h2 className={win ? 'win' : 'lose'}>
               {win ? 'Correct!' : 'Game Over'}
             </h2>
-            <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} style={{ width: '100%', maxWidth: '300px', borderRadius: '0.5rem', marginBottom: '0.5rem' }} />
-            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>{answer?.fullName}</p>
-            <div style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '1.5rem', whiteSpace: 'pre-wrap' }}>
+            <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} />
+            <p>{answer?.fullName}</p>
+            <div className="story-text">
               {answer?.back_flavor?.replace(/<\/?[^>]+(>|$)/g, "")}
             </div>
             <button className="premium-btn" onClick={resetGame} autoFocus>Play Again</button>
           </div>
         ) : null}
           <div>
-            <div style={{ fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2rem', fontStyle: 'italic', padding: '1rem', background: 'var(--glass-bg)', borderRadius: '0.5rem', whiteSpace: 'pre-wrap' }}>
+            <div className="story-text">
               {scrambledFlavor}
             </div>
             
-            <div style={{ width: '100%', position: 'relative', marginBottom: '1rem' }}>
+            <div className="story-input-wrapper">
               <input
                 type="text"
                 className="premium-input"
@@ -200,16 +201,11 @@ export default function StoryGuesser() {
                 onKeyDown={handleKeyDown}
               />
               {suggestions.length > 0 && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '0.5rem', marginTop: '0.5rem', zIndex: 10, textAlign: 'left' }}>
+                <div className="story-suggestions">
                   {suggestions.map((s, idx) => (
                     <div 
                       key={s.id} 
-                      style={{ 
-                        padding: '0.75rem 1rem', 
-                        cursor: 'pointer', 
-                        borderBottom: '1px solid var(--glass-border)',
-                        background: idx === selectedIdx ? 'rgba(255,255,255,0.1)' : 'transparent'
-                      }}
+                      className={`story-suggestion-item ${idx === selectedIdx ? 'selected' : ''}`}
                       onClick={() => submitGuess(s)}
                       onMouseEnter={() => setSelectedIdx(idx)}
                       onMouseLeave={() => setSelectedIdx(-1)}
@@ -222,9 +218,8 @@ export default function StoryGuesser() {
               
               {wrongGuesses.length >= 5 && !win && !gaveUp &&(
                 <button 
-                  className="premium-btn" 
+                  className="premium-btn story-give-up" 
                   onClick={() => setGaveUp(true)} 
-                  style={{ marginTop: '1rem', background: 'var(--wrong-color)', width: '100%' }}
                 >
                   Give Up
                 </button>
@@ -232,9 +227,9 @@ export default function StoryGuesser() {
             </div>
             
             {wrongGuesses.length > 0 && (
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div className="story-wrong-guesses">
                 {wrongGuesses.map(g => (
-                  <div key={g.id} style={{ padding: '0.25rem 0.5rem', background: 'var(--wrong-color)', color: 'white', borderRadius: '0.25rem', fontSize: '0.85rem' }}>
+                  <div key={g.id} className="story-wrong-badge">
                     {g.fullName}
                   </div>
                 ))}

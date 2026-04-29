@@ -91,7 +91,6 @@ export const transformInvestigators = (cards: ArkhamCard[]): TransformedInvestig
         pack_code: o.pack_code,
         pack_name: pack_name,
         subtype_code: o.subtype_code,
-
         faction_code: [o.faction_code],
         health: [o.health ?? 0],
         sanity: [o.sanity ?? 0],

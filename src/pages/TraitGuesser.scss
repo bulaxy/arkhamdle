@@ -1,0 +1,155 @@
+.trait-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.trait-header {
+  text-align: center;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.trait-mode-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.trait-mode-button {
+  &.active {
+    background: var(--accent-color);
+    opacity: 1;
+  }
+
+  &.inactive {
+    background: var(--glass-bg);
+    opacity: 0.7;
+  }
+}
+
+.trait-panel {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.trait-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: var(--accent-color);
+}
+
+.trait-result {
+  h2 {
+    margin-bottom: 1.5rem;
+
+    &.win {
+      color: var(--correct-color);
+    }
+
+    &.lose {
+      color: var(--wrong-color);
+    }
+  }
+}
+
+.trait-card-display {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+
+  .trait-card {
+    text-align: center;
+
+    img {
+      width: 100px;
+      border-radius: 0.25rem;
+    }
+
+    .card-name {
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+.trait-guessed-count {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+.trait-input-wrapper {
+  width: 100%;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.trait-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-color);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  z-index: 10;
+  text-align: left;
+}
+
+.trait-suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--glass-border);
+
+  &:hover,
+  &.selected {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.trait-give-up {
+  margin-bottom: 1rem;
+  background: var(--wrong-color);
+  width: 100%;
+}
+
+.trait-correct-guesses {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.trait-correct-badge {
+  padding: 0.25rem 0.5rem;
+  background: var(--correct-color);
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.trait-wrong-guesses {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.trait-wrong-badge {
+  padding: 0.25rem 0.5rem;
+  background: var(--wrong-color);
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+}
