@@ -104,7 +104,8 @@ export default function FlavourGuesser() {
             <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '1rem' }}>
               {win ? 'Correct!' : 'Game Over'}
             </h2>
-            <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} style={{ width: '100%', maxWidth: '300px', borderRadius: '0.5rem', marginBottom: '1.5rem' }} />
+            <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} style={{ width: '100%', maxWidth: '300px', borderRadius: '0.5rem', marginBottom: '0.5rem' }} />
+            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>{answer?.fullName}</p>
             <div>
               <button className="premium-btn" onClick={resetGame} autoFocus>Play Again</button>
             </div>

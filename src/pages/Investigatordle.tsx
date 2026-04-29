@@ -135,6 +135,7 @@ export default function Investigatordle() {
             {win ? 'Correct!' : 'Game Over'}
           </h2>
           <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} style={{ width: '100%', borderRadius: '0.5rem', marginBottom: '1rem' }} />
+          <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>{answer?.fullName}</p>
           <button className="premium-btn" onClick={resetGame} autoFocus>Play Again</button>
         </div>
       ) : (

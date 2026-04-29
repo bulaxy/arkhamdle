@@ -177,13 +177,14 @@ export default function StoryGuesser() {
             <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '1rem' }}>
               {win ? 'Correct!' : 'Game Over'}
             </h2>
-            <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} style={{ width: '100%', maxWidth: '300px', borderRadius: '0.5rem', marginBottom: '1rem' }} />
+            <img src={`https://arkhamdb.com${answer?.imagesrc}`} alt={answer?.fullName} style={{ width: '100%', maxWidth: '300px', borderRadius: '0.5rem', marginBottom: '0.5rem' }} />
+            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>{answer?.fullName}</p>
             <div style={{ fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '1.5rem', whiteSpace: 'pre-wrap' }}>
               {answer?.back_flavor?.replace(/<\/?[^>]+(>|$)/g, "")}
             </div>
             <button className="premium-btn" onClick={resetGame} autoFocus>Play Again</button>
           </div>
-        ) : (
+        ) : null}
           <div>
             <div style={{ fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2rem', fontStyle: 'italic', padding: '1rem', background: 'var(--glass-bg)', borderRadius: '0.5rem', whiteSpace: 'pre-wrap' }}>
               {scrambledFlavor}
@@ -219,7 +220,7 @@ export default function StoryGuesser() {
                 </div>
               )}
               
-              {wrongGuesses.length >= 5 && (
+              {wrongGuesses.length >= 5 && !win && !gaveUp &&(
                 <button 
                   className="premium-btn" 
                   onClick={() => setGaveUp(true)} 
@@ -240,7 +241,6 @@ export default function StoryGuesser() {
               </div>
             )}
           </div>
-        )}
       </div>
     </div>
   );

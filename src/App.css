@@ -165,6 +165,7 @@
   padding: 1.5rem;
   overflow-y: auto;
   flex: 1;
+  min-height: 0; /* Allow flex child to shrink and enable scrolling */
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -251,6 +252,8 @@
   .modal-content {
     max-height: 100vh;
     height: 100vh;
+    max-height: 100dvh; /* overrides vh on browsers that support dynamic viewport */
+    height: 100dvh;
     border-radius: 0;
     max-width: none;
   }

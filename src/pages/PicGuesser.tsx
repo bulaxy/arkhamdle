@@ -142,9 +142,10 @@ export default function PicGuesser() {
 
         {win || gaveUp ? (
           <div className="fade-in" style={{ width: '100%', textAlign: 'center' }}>
-            <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '1rem' }}>
+            <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '0.5rem' }}>
               {win ? 'Correct!' : 'Game Over'}
             </h2>
+            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>{answer?.fullName}</p>
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
               <button className="premium-btn" onClick={() => setShowFull(!showFull)} style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}>
                 {showFull ? <><EyeOff size={18}/> Hide Full</> : <><Eye size={18}/> Show Full</>}
