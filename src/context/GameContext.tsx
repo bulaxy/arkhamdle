@@ -37,7 +37,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setSettings = (newSettings: AppSettings) => {
     setSettingsState(newSettings);
-    localforage.setItem('ahcardle_settings', newSettings);
+    localforage.setItem('arkhamdle_settings', newSettings);
   };
 
   const loadData = async (forceRefresh = false) => {
@@ -69,7 +69,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const init = async () => {
-      const savedSettings = await localforage.getItem<AppSettings>('ahcardle_settings');
+      const savedSettings = await localforage.getItem<AppSettings>('arkhamdle_settings');
       if (savedSettings) {
         setSettingsState({
           ...savedSettings,

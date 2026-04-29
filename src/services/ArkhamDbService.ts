@@ -4,7 +4,7 @@ import type { TransformedCard, TransformedInvestigator, ArkhamCard } from '../ty
 import { buildPackCodeToGroupMap } from '../data/packStructure';
 
 localforage.config({
-  name: 'ahcardle',
+  name: 'arkhamdle',
   storeName: 'arkhamdb_data'
 });
 

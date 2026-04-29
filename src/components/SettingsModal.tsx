@@ -4,7 +4,7 @@ import { useGameContext } from '../context/GameContext';
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings, refreshData } = useGameContext();
-  const [openSection, setOpenSection] = useState<string>('packs'); // 'packs', 'picGuesser', 'storyGuesser'
+  const [openSection, setOpenSection] = useState<string>(''); // 'packs', 'picGuesser', 'storyGuesser'
 
   const handleToggle = (packGroup: string) => {
     const isFiltered = settings.filteredPacks.includes(packGroup);

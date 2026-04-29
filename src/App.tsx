@@ -19,7 +19,7 @@ function App() {
     <div className="app-container">
       <nav className="top-nav">
         <div className="nav-links">
-          <NavLink to="/" className="title-logo">AHCardle</NavLink>
+          <NavLink to="/" className="title-logo">Arkhamdle</NavLink>
           <NavLink to="/" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} end>Classic Mode</NavLink>
           <NavLink to="/pic-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>Pic Guesser</NavLink>
           <NavLink to="/investigatordle" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>Investigatordle</NavLink>
