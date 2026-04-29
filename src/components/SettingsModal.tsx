@@ -170,7 +170,9 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             <button className="premium-btn" onClick={async () => { await refreshData(); onClose(); }} style={{ width: '100%' }}>
               <RefreshCw size={18} /> Force Refresh Data
             </button>
-            
+            <button className="premium-btn" onClick={onClose} style={{ width: '100%', background: 'var(--accent-color)' }}>
+              Close Settings
+            </button>
             <a 
               href="https://github.com/bulaxy/arkhamdle" 
               target="_blank" 
