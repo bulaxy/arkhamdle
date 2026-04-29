@@ -1,7 +1,7 @@
 import localforage from 'localforage';
-import { TypeCode, SubtypeCode } from '../types';
-import type { TransformedCard, TransformedInvestigator, ArkhamCard } from '../types';
 import { buildPackCodeToGroupMap } from '../data/packStructure';
+import type { ArkhamCard, TransformedCard, TransformedInvestigator } from '../types';
+import { SubtypeCode, TypeCode } from '../types';
 
 localforage.config({
   name: 'arkhamdle',
@@ -51,7 +51,6 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
         pack_name: packGroupMap.get(o.pack_code) || 'other',
         flavor: o.flavor || '',
         subtype_code: o.subtype_code,
-
         cardName: [o.subname ? `${o.real_name || o.name} - ${o.subname}` : (o.real_name || o.name)],
         typeName: [o.type_name],
         class: Array.from(new Set([o.faction_code, o.faction2_code, o.faction3_code].filter(Boolean) as any[])),
@@ -67,7 +66,7 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
       };
     })
     .filter((card, _, array) => {
-      const sameNameList = array.filter(item => item.name === card.name);
+      const sameNameList = array.filter(item => item.cardName === card.cardName && item.class === card.class && item.xp[0] === card.xp[0]);
       if (sameNameList.length > 1) {
         return sameNameList[0].id === card.id;
       }
