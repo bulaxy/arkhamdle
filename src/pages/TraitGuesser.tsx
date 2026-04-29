@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../context/GameContext';
 import type { TransformedCard, TransformedInvestigator } from '../types';
+import './TraitGuesser.scss';
 
 type Mode = 'Investigator' | 'Player Cards';
 
@@ -129,16 +130,15 @@ export default function TraitGuesser() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>Trait Guesser</h1>
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1rem' }}>
+    <div className="trait-container">
+      <div className="trait-header">
+        <h1>Trait Guesser</h1>
+        <div className="trait-mode-buttons">
           {(['Investigator', 'Player Cards'] as Mode[]).map(m => (
             <button 
               key={m} 
-              className="premium-btn" 
+              className={`premium-btn trait-mode-button ${mode === m ? 'active' : 'inactive'}`}
               onClick={() => setMode(m)}
-              style={{ background: mode === m ? 'var(--accent-color)' : 'var(--glass-bg)', opacity: mode === m ? 1 : 0.7 }}
             >
               {m}
             </button>
@@ -146,22 +146,22 @@ export default function TraitGuesser() {
         </div>
       </div>
 
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '500px', textAlign: 'center' }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '2rem', color: 'var(--accent-color)' }}>
+      <div className="glass-panel trait-panel">
+        <div className="trait-name">
           {trait || 'Loading...'}
         </div>
 
         {win || gaveUp ? (
-          <div className="fade-in">
-            <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '1.5rem' }}>
+          <div className="fade-in trait-result">
+            <h2 className={win ? 'win' : 'lose'}>
               {win ? 'Correct!' : 'Game Over'}
             </h2>
             {mode === 'Player Cards' && win && (
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <div className="trait-card-display">
                 {cardGuesses.map(g => (
-                  <div key={g.id} style={{ textAlign: 'center' }}>
-                    <img src={`https://arkhamdb.com${g.imagesrc}`} alt={g.name} style={{ width: '100px', borderRadius: '0.25rem' }} />
-                    <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>{g.name}</div>
+                  <div key={g.id} className="trait-card">
+                    <img src={`https://arkhamdb.com${g.imagesrc}`} alt={g.name} />
+                    <div className="card-name">{g.name}</div>
                   </div>
                 ))}
               </div>
@@ -171,12 +171,12 @@ export default function TraitGuesser() {
         ) : (
           <div>
             {mode === 'Player Cards' && (
-              <div style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+              <div className="trait-guessed-count">
                 Guessed: {cardGuesses.length} / 3
               </div>
             )}
             
-            <div style={{ width: '100%', position: 'relative', marginBottom: '1rem' }}>
+            <div className="trait-input-wrapper">
               <input
                 type="text"
                 className="premium-input"
@@ -186,16 +186,11 @@ export default function TraitGuesser() {
                 onKeyDown={handleKeyDown}
               />
               {suggestions.length > 0 && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '0.5rem', marginTop: '0.5rem', zIndex: 10, textAlign: 'left' }}>
+                <div className="trait-suggestions">
                   {suggestions.map((s, idx) => (
                     <div 
                       key={s.id} 
-                      style={{ 
-                        padding: '0.75rem 1rem', 
-                        cursor: 'pointer', 
-                        borderBottom: '1px solid var(--glass-border)',
-                        background: idx === selectedIdx ? 'rgba(255,255,255,0.1)' : 'transparent'
-                      }}
+                      className={`trait-suggestion-item ${idx === selectedIdx ? 'selected' : ''}`}
                       onClick={() => submitGuess(s)}
                       onMouseEnter={() => setSelectedIdx(idx)}
                       onMouseLeave={() => setSelectedIdx(-1)}
@@ -209,18 +204,17 @@ export default function TraitGuesser() {
 
             {wrongGuesses.length >= 5 && (
               <button 
-                className="premium-btn" 
+                className="premium-btn trait-give-up" 
                 onClick={() => setGaveUp(true)} 
-                style={{ marginBottom: '1rem', background: 'var(--wrong-color)', width: '100%' }}
               >
                 Give Up
               </button>
             )}
 
             {cardGuesses.length > 0 && (
-              <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div className="trait-correct-guesses">
                 {cardGuesses.map(g => (
-                  <div key={g.id} style={{ padding: '0.25rem 0.5rem', background: 'var(--correct-color)', color: 'white', borderRadius: '0.25rem', fontSize: '0.85rem' }}>
+                  <div key={g.id} className="trait-correct-badge">
                     {g.fullName}
                   </div>
                 ))}
@@ -228,9 +222,9 @@ export default function TraitGuesser() {
             )}
 
             {wrongGuesses.length > 0 && (
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div className="trait-wrong-guesses">
                 {wrongGuesses.map(g => (
-                  <div key={g.id} style={{ padding: '0.25rem 0.5rem', background: 'var(--wrong-color)', color: 'white', borderRadius: '0.25rem', fontSize: '0.85rem' }}>
+                  <div key={g.id} className="trait-wrong-badge">
                     {g.fullName}
                   </div>
                 ))}

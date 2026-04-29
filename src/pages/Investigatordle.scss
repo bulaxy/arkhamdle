@@ -1,0 +1,159 @@
+.investigator-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.investigator-header {
+  text-align: center;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+.investigator-result-panel {
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+
+  h2 {
+    margin-bottom: 1rem;
+
+    &.win {
+      color: var(--correct-color);
+    }
+
+    &.lose {
+      color: var(--wrong-color);
+    }
+  }
+
+  img {
+    width: 100%;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+}
+
+.investigator-input-section {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  text-align: center;
+}
+
+.investigator-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-color);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  z-index: 10;
+  text-align: left;
+}
+
+.investigator-suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--glass-border);
+
+  &:hover,
+  &.selected {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.investigator-give-up {
+  margin-top: 1rem;
+  background: var(--wrong-color);
+  width: 100%;
+}
+
+.investigator-guesses {
+  width: 100%;
+  padding-bottom: 1rem;
+}
+
+.investigator-table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0.5rem;
+
+  thead {
+    tr {
+      color: var(--text-secondary);
+      text-align: left;
+      font-size: 0.875rem;
+    }
+  }
+
+  tbody {
+    tr {
+      &.fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.investigator-guess-cell {
+  padding: 0.5rem;
+  background: var(--glass-bg);
+  border-radius: 0.25rem;
+  text-align: center;
+  transition: all 0.3s;
+
+  &.makeGreen {
+    background: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+    font-weight: bold;
+  }
+
+  &.makeYellow {
+    background: rgba(234, 179, 8, 0.3);
+    color: #eab308;
+    font-weight: bold;
+  }
+
+  &.makeRed {
+    background: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+
+    &.yearBefore::after {
+      content: ' ↑';
+    }
+
+    &.yearAfter::after {
+      content: ' ↓';
+    }
+  }
+}
+
+.investigator-name-cell {
+  white-space: nowrap;
+}

@@ -1,6 +1,6 @@
 import { Routes, Route, NavLink } from 'react-router-dom';
 import { Settings, Menu, X as CloseIcon } from 'lucide-react';
-import './App.css';
+import './App.scss';
 import { useGameContext } from './context/GameContext';
 import WordleGame from './pages/WordleGame';
 import PicGuesser from './pages/PicGuesser';

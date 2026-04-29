@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameContext } from '../context/GameContext';
 import type { TransformedCard } from '../types';
 import { Eye, EyeOff } from 'lucide-react';
+import './PicGuesser.scss';
 
 export default function PicGuesser() {
   const { filteredCards, settings } = useGameContext();
@@ -98,63 +99,45 @@ export default function PicGuesser() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>Pic Guesser</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Identify the card from a zoomed-in image.</p>
+    <div className="pic-container">
+      <div className="pic-header">
+        <h1>Pic Guesser</h1>
+        <p>Identify the card from a zoomed-in image.</p>
       </div>
 
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', overflow: 'hidden' }}>
-        <div style={{ 
-          width: '300px', 
-          height: '420px', 
-          overflow: 'hidden', 
-          position: 'relative',
-          borderRadius: '0.5rem',
-          background: '#000',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+      <div className="glass-panel pic-panel">
+        <div className="pic-image-container">
           {answer && answer.imagesrc ? (
              <img
               src={`https://arkhamdb.com${answer.imagesrc}`}
               alt="Guess this card"
+              className={showFull ? 'pic-image-full' : 'pic-image-zoomed'}
               style={
-                showFull ? {
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  margin: 0
-                } : {
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  transform: `scale(${sizeMultiplier}) translateX(${offsetX / sizeMultiplier}px) translateY(${offsetY / sizeMultiplier}px)`,
-                  transition: 'transform 0.3s ease'
-                }
+                !showFull ? {
+                  transform: `scale(${sizeMultiplier}) translateX(${offsetX / sizeMultiplier}px) translateY(${offsetY / sizeMultiplier}px)`
+                } : {}
               }
             />
           ) : (
-            <div style={{ color: 'var(--text-secondary)' }}>Image not available</div>
+            <div className="pic-image-unavailable">Image not available</div>
           )}
         </div>
 
         {win || gaveUp ? (
-          <div className="fade-in" style={{ width: '100%', textAlign: 'center' }}>
-            <h2 style={{ color: win ? 'var(--correct-color)' : 'var(--wrong-color)', marginBottom: '0.5rem' }}>
+          <div className="fade-in pic-result">
+            <h2 className={win ? 'win' : 'lose'}>
               {win ? 'Correct!' : 'Game Over'}
             </h2>
-            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>{answer?.fullName}</p>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-              <button className="premium-btn" onClick={() => setShowFull(!showFull)} style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}>
+            <p>{answer?.fullName}</p>
+            <div className="pic-result-buttons">
+              <button className="premium-btn pic-result-button" onClick={() => setShowFull(!showFull)}>
                 {showFull ? <><EyeOff size={18}/> Hide Full</> : <><Eye size={18}/> Show Full</>}
               </button>
               <button className="premium-btn" onClick={resetGame} autoFocus>Play Again</button>
             </div>
           </div>
         ) : (
-          <div style={{ width: '100%', position: 'relative', textAlign: 'center' }} className={animation}>
+          <div className={`pic-input-wrapper ${animation}`}>
             <input
               type="text"
               className="premium-input"
@@ -164,16 +147,11 @@ export default function PicGuesser() {
               onKeyDown={handleKeyDown}
             />
             {suggestions.length > 0 && (
-              <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, background: 'var(--bg-color)', border: '1px solid var(--glass-border)', borderRadius: '0.5rem', marginBottom: '0.5rem', zIndex: 10, textAlign: 'left' }}>
+              <div className="pic-suggestions">
                 {suggestions.map((s, idx) => (
                   <div 
                     key={s.id} 
-                    style={{ 
-                      padding: '0.75rem 1rem', 
-                      cursor: 'pointer', 
-                      borderBottom: '1px solid var(--glass-border)',
-                      background: idx === selectedIdx ? 'rgba(255,255,255,0.1)' : 'transparent'
-                    }}
+                    className={`pic-suggestion-item ${idx === selectedIdx ? 'selected' : ''}`}
                     onClick={() => submitGuess(s)}
                     onMouseEnter={() => setSelectedIdx(idx)}
                     onMouseLeave={() => setSelectedIdx(-1)}
@@ -186,9 +164,8 @@ export default function PicGuesser() {
             
             {guesses.length >= 5 && (
               <button 
-                className="premium-btn" 
+                className="premium-btn pic-give-up" 
                 onClick={() => { setGaveUp(true); setShowFull(true); }} 
-                style={{ marginTop: '1rem', background: 'var(--wrong-color)', width: '100%' }}
               >
                 Give Up
               </button>
@@ -197,13 +174,11 @@ export default function PicGuesser() {
         )}
       </div>
 
-      <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div className="pic-guesses-container">
         {guesses.map((g, i) => (
-          <div key={`${g.id}-${i}`} className="glass-panel fade-in" style={{ padding: '1rem', borderColor: g.id === answer?.id ? 'var(--correct-color)' : 'var(--wrong-color)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>{g.fullName}</span>
-              {g.id === answer?.id ? <span style={{ color: 'var(--correct-color)' }}>Correct</span> : <span style={{ color: 'var(--wrong-color)' }}>Incorrect</span>}
-            </div>
+          <div key={`${g.id}-${i}`} className={`glass-panel pic-guess-item fade-in ${g.id === answer?.id ? 'correct' : 'incorrect'}`}>
+            <span>{g.fullName}</span>
+            <span className="result-text">{g.id === answer?.id ? 'Correct' : 'Incorrect'}</span>
           </div>
         ))}
       </div>

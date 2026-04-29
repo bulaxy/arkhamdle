@@ -3,9 +3,9 @@
  * Used to group individual card packs into logical collections for filtering.
  */
 export const PACK_STRUCTURE: Record<string, string[]> = {
-  "core": ["core", "core_encounter"],
+  core: ["core", "core_encounter"],
   "core 2026": ["core_2026", "core_2026_encounter"],
-  "rcore": ["rcore"],
+  rcore: ["rcore"],
   dwl: ["bota", "bota_encounter", "dwl", "dwl_encounter", "litas", "litas_encounter", "tece", "tece_encounter", "tmm", "tmm_encounter", "uau", "uau_encounter", "wda", "wda_encounter"],
   ptc: ["apot", "apot_encounter", "bsr", "bsr_encounter", "dca", "dca_encounter", "eotp", "eotp_encounter", "ptc", "ptc_encounter", "tpm", "tpm_encounter", "tuo", "tuo_encounter"],
   tfa: ["hote", "hote_encounter", "sha", "sha_encounter", "tbb", "tbb_encounter", "tcoa", "tcoa_encounter", "tdoy", "tdoy_encounter", "tfa", "tfa_encounter", "tof", "tof_encounter"],
