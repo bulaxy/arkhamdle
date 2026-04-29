@@ -3,8 +3,7 @@ import type {
   TypeCode, 
   FactionCode, 
   SubtypeCode, 
-  Slot,
-  ArkhamCard 
+  Slot
 } from './types/arkham';
 
 export * from './types/arkham';
