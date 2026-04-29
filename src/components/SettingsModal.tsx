@@ -59,7 +59,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
                   </label>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', marginTop: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', marginTop: '1.5rem', maxHeight: '50vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
                 {packs.map(packGroup => {
                   const isChecked = !settings.filteredPacks.includes(packGroup);
                   return (
