@@ -26,7 +26,7 @@ export default function Investigatordle() {
 
   const getDisplayText = (inv: TransformedCard): string => {
     if (!dupeNames.has(inv.name)) return inv.name;
-    return `${inv.name} (${inv.subname})`;
+    return `${inv.name} (${inv.pack_name})`;
   };
 
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
