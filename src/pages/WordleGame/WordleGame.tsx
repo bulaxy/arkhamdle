@@ -75,11 +75,22 @@ export default function WordleGame() {
     if (areEqual) return 'makeGreen';
     if (common.length > 0) return 'makeYellow';
 
-    if (['xp', 'cost', 'wild', 'intellect', 'willpower', 'combat', 'agility'].includes(attr)) {
-      if ((ansArray[0] as number) < (guessArray[0] as number)) return 'makeRed yearBefore';
-      if ((ansArray[0] as number) > (guessArray[0] as number)) return 'makeRed yearAfter';
-    }
     return 'makeRed';
+  };
+
+  // This was done this way as it was buggy with some mobile device not displaying the arrow correctly
+  const getArrow = (guess: TransformedCard, attr: typeof ATTRIBUTES[number]) => {
+    if (!answer) return '';
+    if (!['xp', 'cost', 'wild', 'intellect', 'willpower', 'combat', 'agility'].includes(attr)) return '';
+    const ansVal = answer[attr];
+    const guessVal = guess[attr];
+
+    const ansArray = Array.isArray(ansVal) ? ansVal : [ansVal];
+    const guessArray = Array.isArray(guessVal) ? guessVal : [guessVal];
+
+    if ((ansArray[0] as number) < (guessArray[0] as number)) return ' ↓';
+    if ((ansArray[0] as number) > (guessArray[0] as number)) return ' ↑';
+    return '';
   };
 
   return (
@@ -144,6 +155,7 @@ export default function WordleGame() {
                     {ATTRIBUTES.map(attr => (
                       <td key={attr} className={`wordle-guess-cell ${getAttributeClass(g, attr)}`}>
                         {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
+                        {getArrow(g, attr) && <span style={{ fontWeight: 'bold' }}>{getArrow(g, attr)}</span>}
                       </td>
                     ))}
                   </tr>
@@ -164,6 +176,7 @@ export default function WordleGame() {
                   <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
                     <span className="label">{attr === 'typeName' ? 'Type' : attr}</span>
                     {Array.isArray(g[attr]) && (g[attr] as any[]).length > 1 ? (g[attr] as any[]).join(', ') : g[attr]}
+                    {getArrow(g, attr) && <span style={{ fontWeight: 'bold' }}>{getArrow(g, attr)}</span>}
                   </div>
                 ))}
               </div>

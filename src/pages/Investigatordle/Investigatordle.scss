@@ -144,14 +144,6 @@
   &.makeRed {
     background: rgba(239, 68, 68, 0.3);
     color: #ef4444;
-
-    &.yearAfter::after {
-      content: ' ↑';
-    }
-
-    &.yearBefore::after {
-      content: ' ↓';
-    }
   }
 }
 
