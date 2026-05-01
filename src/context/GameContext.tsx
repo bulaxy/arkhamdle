@@ -11,6 +11,7 @@ import type {
   TransformedCard,
   TransformedInvestigator,
 } from "../types";
+import { TypeCode as TypeCodeEnum } from "../types/arkham";
 
 interface GameContextType {
   cards: TransformedCard[];
@@ -19,7 +20,7 @@ interface GameContextType {
   setSettings: (settings: AppSettings) => void;
   isLoading: boolean;
   loadingMessage: string;
-  refreshData: () => Promise<void>;
+  refreshData: (includeEncounter?: boolean) => Promise<void>;
   filteredCards: TransformedCard[];
   investigators: TransformedInvestigator[];
   filteredInvestigators: TransformedInvestigator[];
@@ -43,6 +44,42 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     storyGuesserSliceScale: 0.5,
     storyGuesserHideName: true,
     includeWeakness: false,
+    includeSignatures: true,
+    flavourGuesserTypeFilters: {
+      [TypeCodeEnum.ASSET]: true,
+      [TypeCodeEnum.EVENT]: true,
+      [TypeCodeEnum.SKILL]: true,
+      [TypeCodeEnum.ENEMY]: true,
+      [TypeCodeEnum.TREACHERY]: true,
+      [TypeCodeEnum.LOCATION]: true,
+      [TypeCodeEnum.STORY]: true,
+      [TypeCodeEnum.INVESTIGATOR]: true,
+    },
+    traitGuesserTypeFilters: {
+      [TypeCodeEnum.ASSET]: true,
+      [TypeCodeEnum.EVENT]: true,
+      [TypeCodeEnum.SKILL]: true,
+      [TypeCodeEnum.ENEMY]: false,
+      [TypeCodeEnum.TREACHERY]: false,
+      [TypeCodeEnum.LOCATION]: false,
+      [TypeCodeEnum.STORY]: false,
+      [TypeCodeEnum.INVESTIGATOR]: true,
+    },
+    picGuesserTypeFilters: {
+      [TypeCodeEnum.ASSET]: true,
+      [TypeCodeEnum.EVENT]: true,
+      [TypeCodeEnum.SKILL]: true,
+      [TypeCodeEnum.ENEMY]: false,
+      [TypeCodeEnum.TREACHERY]: false,
+      [TypeCodeEnum.LOCATION]: false,
+      [TypeCodeEnum.STORY]: false,
+      [TypeCodeEnum.INVESTIGATOR]: false,
+    },
+    traitGuesserMinCards: 3,
+    traitGuesserMaxCards: 0,
+    traitGuesserRequirementType: "Fixed Number",
+    traitGuesserRequirementValue: 3,
+    includeEncounter: false,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -52,13 +89,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     localforage.setItem("arkhamdle_settings", newSettings);
   };
 
-  const loadData = async (forceRefresh = false) => {
+  const loadData = async (forceRefresh = false, includeEncounter = settings.includeEncounter) => {
     setIsLoading(true);
     try {
       setLoadingMessage(
-        "Loading cards data (This may take a moment for the first time, ~3MB)...",
+        includeEncounter ? "Loading all cards including encounter data (~11MB)..." : "Loading player cards data (~3MB)..."
       );
-      const cardsData = await fetchCards(forceRefresh);
+      const cardsData = await fetchCards(includeEncounter, forceRefresh);
 
       setLoadingMessage("Processing cards...");
       const transformed = transformCards(cardsData);
@@ -97,14 +134,52 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           storyGuesserSliceScale: savedSettings.storyGuesserSliceScale ?? 0.5,
           storyGuesserHideName: savedSettings.storyGuesserHideName ?? true,
           includeWeakness: savedSettings.includeWeakness ?? false,
+          includeSignatures: savedSettings.includeSignatures ?? true,
+          flavourGuesserTypeFilters: savedSettings.flavourGuesserTypeFilters || {
+            [TypeCodeEnum.ASSET]: true,
+            [TypeCodeEnum.EVENT]: true,
+            [TypeCodeEnum.SKILL]: true,
+            [TypeCodeEnum.ENEMY]: true,
+            [TypeCodeEnum.TREACHERY]: true,
+            [TypeCodeEnum.LOCATION]: true,
+            [TypeCodeEnum.STORY]: true,
+            [TypeCodeEnum.INVESTIGATOR]: true,
+          },
+          traitGuesserTypeFilters: savedSettings.traitGuesserTypeFilters || {
+            [TypeCodeEnum.ASSET]: true,
+            [TypeCodeEnum.EVENT]: true,
+            [TypeCodeEnum.SKILL]: true,
+            [TypeCodeEnum.ENEMY]: false,
+            [TypeCodeEnum.TREACHERY]: false,
+            [TypeCodeEnum.LOCATION]: false,
+            [TypeCodeEnum.STORY]: false,
+            [TypeCodeEnum.INVESTIGATOR]: true,
+          },
+          picGuesserTypeFilters: savedSettings.picGuesserTypeFilters || {
+            [TypeCodeEnum.ASSET]: true,
+            [TypeCodeEnum.EVENT]: true,
+            [TypeCodeEnum.SKILL]: true,
+            [TypeCodeEnum.ENEMY]: false,
+            [TypeCodeEnum.TREACHERY]: false,
+            [TypeCodeEnum.LOCATION]: false,
+            [TypeCodeEnum.STORY]: false,
+            [TypeCodeEnum.INVESTIGATOR]: false,
+          },
+          traitGuesserMinCards: savedSettings.traitGuesserMinCards ?? 3,
+          traitGuesserMaxCards: savedSettings.traitGuesserMaxCards ?? 0,
+          traitGuesserRequirementType: savedSettings.traitGuesserRequirementType || "Fixed Number",
+          traitGuesserRequirementValue: savedSettings.traitGuesserRequirementValue ?? 3,
+          includeEncounter: savedSettings.includeEncounter ?? false,
         });
+        loadData(false, savedSettings.includeEncounter ?? false);
+      } else {
+        loadData();
       }
-      await loadData();
     };
     init();
   }, []);
 
-  // Compute filtered cards based on settings — now filtering by pack group name and weakness
+  // Compute filtered cards based on settings — filtering by pack group name, weakness, and signatures
   const filteredCards = cards.filter((card) => {
     const passPack =
       settings.filteredPacks.length === 0 ||
@@ -112,7 +187,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     const isWeakness =
       card.subtype_code === "basicweakness" || card.subtype_code === "weakness";
     const passWeakness = settings.includeWeakness || !isWeakness;
-    return passPack && passWeakness;
+    const isSignature = card.restrictions?.investigator;
+    const passSignature = settings.includeSignatures || !isSignature;
+    return passPack && passWeakness && passSignature;
   });
 
   const filteredInvestigators = investigators.filter((inv) => {
@@ -134,7 +211,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         setSettings,
         isLoading,
         loadingMessage,
-        refreshData: () => loadData(true),
+        refreshData: (includeEnc?: boolean) => loadData(true, includeEnc ?? settings.includeEncounter),
         filteredCards,
         investigators,
         filteredInvestigators,

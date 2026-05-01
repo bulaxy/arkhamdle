@@ -1,0 +1,414 @@
+
+Card selection logic need to be revisited
+All cards should be under 1 massive list. Then depends on the game or gamemode, it will select the filter the card out. Note, all card should go through packGroupMap
+In the global setting 
+- Packs (which pack is included) (already exist)
+- Include weakness & basic weakness or not (already exist)
+- Include Signatures card or not (new, this is filter by card.restrictions.investigator got value (string/array of string) exist or not)
+
+Each game, on the top, give a info button to explain the game and the card set in it. 
+Each game, the card in the dropdown menu must not show duplicate based on the answer evaluation criteria (if multiple card match all evaluation, only 1 should be shown)
+
+These common rules apply to all games unless otherwise specified
+Common Card Filter Rule
+- Card that include `duplicate_of_code` field are removed from the game. EXCEPT Pic Guesser
+
+Common Answer Selection 
+- Show Card Class Color (each class will have own color, if it contain multiple class (maximum of 3), the option area will divided into 3 color, showing all 3 color) EXCEPT Wordle Game
+
+Answer Evaluation
+- User must select a card that match all classes, pack and name and XP of the card.
+
+Game individual ruling
+
+*Wordle Game*
+Card Filter Rule
+- Togglable in setting type_code - Story Cards 
+Answer Selection 
+- Show genic color, do not show the class color
+- Text - Show `name (${xp}$)` If multiple same cards with the same name and xp, show `subname` like `name (subname)`
+Answer Evaluation
+- User must select a card that match all classes, subname and name and XP of the card.
+
+*PicGuesser*
+Card Filter Rule
+- type_code - Asset/Event/Skill only
+- Togglable in setting type_code - Story Cards 
+Answer Selection 
+- Common Answer Selection 
+- Text - Card's name and pack name will be shown in `{name} ({pack} - ${xp}XP)`
+Answer Evaluation
+- User must select a card that match all classes, pack and name and XP of the card.
+
+*Trait Guesser - Investigator Mode*
+Card Filter Rule
+- type_code - Investigator only
+Answer Selection 
+- Text - Card's name and pack name will be shown in `{name} ({pack})`
+Answer Evaluation
+- User must select a card that match name and pack and class
+
+*Trait Guesser - Card Mode*
+Card Filter Rule
+- type_code - Investigator only
+Answer Selection 
+- Text - Card's name and pack name will be shown in `{name} ({pack})`
+Answer Evaluation
+- User must select a card that match name and pack and class
+
+*Story Guesser*
+Card Filter Rule
+- type_code - Investigator only
+Answer Selection 
+- Text - Card's name and pack name will be shown in `{name} ({pack})`
+Answer Evaluation
+- User must select a card that match all classes, pack and name and XP of the card.
+
+*Flavour Guesser*
+Card Filter Rule
+- All Type Code got individal toggle in setting (button on/off based on color)
+Answer Selection 
+- Common Answer Selection 
+- Text - Card's name and pack name will be shown in `{name} ({pack})`
+Answer Evaluation
+- User must select a card that match all classes, pack and name and XP of the card.
+
+
+*Investigatordle Guesser*
+Card Filter Rule
+- type_code - Investigator only
+Answer Selection 
+- Common Answer Selection 
+- Text - Card's name and pack name will be shown in `{name} ({subname})`
+Answer Evaluation
+- User must select a card that match name and pack and class
+
+Note. In all Answer Selection Text, only ever show anything in the bracket if at least 1 other item in the list contain the same name. 
+
+
+
+# Plan: Card Selection Logic Refactor
+
+## TL;DR
+Consolidate card filtering into a centralized system where all cards flow through GameContext with game-specific filters applied. Add "Include Signatures" global setting (ON by default), remove duplicate_of_code cards from most games, deduplicate answer choices per game based on evaluation criteria, and add info buttons explaining each game's card set.
+
+## Clarifications & Decisions Made
+
+### Settings & Behavior
+- **Signature Cards**: ON by default; toggle OFF to exclude (filters by `restrictions.investigator` existing)
+- **Duplicates**: Remove `duplicate_of_code` cards during transformation (Exception: PicGuesser keeps them, filters in dropdown only)
+- **Info Button**: Show detailed rules + current filter state + evaluation criteria
+- **Story Guesser**: Works with investigator cards only (uses `back_flavor`, no story-type cards)
+
+## Implementation Phases
+
+### Phase 1: Types & Data Layer
+1. **Update `src/types.ts` — AppSettings interface**
+   - Add `includeSignatures: boolean` (default: `true`)
+   - Add `flavourGuesserTypeFilters: Record<TypeCode, boolean>` (all initially `true`)
+
+2. **Update `src/types.ts` — TransformedCard interface**
+   - Add `type_code: TypeCode` field
+   - Add `restrictions?: Restrictions` field
+   - Add `duplicate_of_code?: string` field
+
+3. **Update `src/types/arkham.ts`**
+   - Ensure `Restrictions` interface exists and is typed correctly:
+     ```typescript
+     export interface Restrictions {
+       investigator?: Record<string, string>; // key: investigator code
+       [key: string]: any;
+     }
+     ```
+
+### Phase 2: Service Layer — Centralized Filtering
+4. **Create `src/services/CardFilter.ts` (NEW FILE)**
+   - Game-specific filter functions:
+     - `filterForWordle(cards: TransformedCard[]): TransformedCard[]` — all cards, already filtered
+     - `filterForPicGuesser(cards: TransformedCard[]): TransformedCard[]` — asset/event/skill only
+     - `filterForTraitGuesser(cards: TransformedCard[]): TransformedCard[]` — investigator only (handled by game)
+     - `filterForStoryGuesser(cards: TransformedInvestigator[]): TransformedInvestigator[]` — investigator only (handled by game)
+     - `filterForFlavourGuesser(cards: TransformedCard[], typeFilters: Record<TypeCode, boolean>): TransformedCard[]` — all types (Asset, Event, Skill, Enemy, Treachery, Location, Story) with toggles
+     - `filterForInvestigatordle(cards: TransformedInvestigator[]): TransformedInvestigator[]` — investigator only (handled by game)
+   
+   - Core deduplication function:
+     ```typescript
+     interface DeduplicateCriteria {
+       name?: boolean;
+       subname?: boolean;
+       pack?: boolean;
+       class?: boolean;
+       xp?: boolean;
+     }
+     
+     export function deduplicateByEvaluationCriteria(
+       cards: TransformedCard[] | TransformedInvestigator[],
+       criteria: DeduplicateCriteria
+     ): (TransformedCard | TransformedInvestigator)[] {
+       const seen = new Set<string>();
+       return cards.filter(card => {
+         const key = buildKeyFromCriteria(card, criteria);
+         if (seen.has(key)) return false;
+         seen.add(key);
+         return true;
+       });
+     }
+     
+     function buildKeyFromCriteria(card: any, criteria: DeduplicateCriteria): string {
+       const parts = [];
+       if (criteria.name) parts.push(card.name);
+       if (criteria.subname) parts.push(card.subname || '');
+       if (criteria.pack) parts.push(card.pack_name);
+       if (criteria.class) parts.push(card.class?.join(',') || card.faction_code?.[0] || '');
+       if (criteria.xp) parts.push(String(card.xp ?? 0));
+       return parts.join('|');
+     }
+     ```
+   
+   - Game evaluation criteria constants:
+     ```typescript
+     export const GAME_EVALUATION_CRITERIA = {
+       wordle: { name: true, subname: true, xp: true, class: true },
+       picGuesser: { class: true, pack: true, name: true, xp: true },
+       traitGuesserInv: { name: true, pack: true, class: true },
+       traitGuesserCard: { name: true, pack: true, class: true },
+       storyGuesser: { class: true, pack: true, name: true, xp: true },
+       flavourGuesser: { class: true, pack: true, name: true, xp: true },
+       investigatordle: { name: true, pack: true, class: true },
+     } as const;
+     ```
+
+5. **Update `src/services/ArkhamDbService.ts` — transformCards**
+   - Include `type_code`, `restrictions`, and `duplicate_of_code` in returned TransformedCard
+   - Filter out cards with `duplicate_of_code` during transformation (these are variant copies)
+   - Keep the deduplication logic that removes duplicates within transformCards (name/class/xp matching)
+
+### Phase 3: Context Layer — Global Filtering
+6. **Update `src/context/GameContext.tsx`**
+   - Add new settings to default state:
+     ```typescript
+     includeSignatures: true,
+     flavourGuesserTypeFilters: {
+       [TypeCode.ASSET]: true,
+       [TypeCode.EVENT]: true,
+       [TypeCode.SKILL]: true,
+       [TypeCode.ENEMY]: true,
+       [TypeCode.TREACHERY]: true,
+       [TypeCode.LOCATION]: true,
+       [TypeCode.STORY]: true,
+     }
+     ```
+   - Add to settings merge in useEffect
+   - Update `filteredCards` computation to include signature filtering:
+     ```typescript
+     const filteredCards = cards.filter((card) => {
+       const passPack = settings.filteredPacks.length === 0 || 
+         !settings.filteredPacks.includes(card.pack_name);
+       const isWeakness = card.subtype_code === "basicweakness" || 
+         card.subtype_code === "weakness";
+       const passWeakness = settings.includeWeakness || !isWeakness;
+       const isSignature = card.restrictions?.investigator;
+       const passSignature = settings.includeSignatures || !isSignature;
+       return passPack && passWeakness && passSignature;
+     });
+     ```
+
+### Phase 4: Settings UI — New Toggles
+7. **Update `src/components/SettingsModal/PackFiltersSection.tsx`**
+   - Add checkbox for "Include Signature Cards" below weakness checkbox
+   - Pass handler to parent
+
+8. **Update `src/components/SettingsModal/SettingsModal.tsx`**
+   - Add handler for `onIncludeSignaturesChange`
+   - Create new section component for FlavourGuesser type filters
+   - Add `FlavourGuesserTypeFiltersSection` to modal body (collapsed by default)
+
+9. **Create `src/components/SettingsModal/FlavourGuesserTypeFiltersSection.tsx` (NEW FILE)**
+   - 7 toggle buttons (one per TypeCode: Asset, Event, Skill, Enemy, Treachery, Location, Story)
+   - Each button labeled with type name
+   - Shows which types are currently selected
+
+### Phase 5: Info Button Component
+10. **Create `src/components/GameInfoButton/GameInfoButton.tsx` (NEW FILE)**
+    ```typescript
+    interface GameInfoButtonProps {
+      gameName: string;
+      gameRules: {
+        title: string;
+        cardTypes: string;
+        answerEvaluation: string;
+        currentFilters: string;
+      };
+    }
+    
+    export default function GameInfoButton({ gameName, gameRules }: GameInfoButtonProps) {
+      const [showInfo, setShowInfo] = useState(false);
+      // Info icon button → modal with gameRules displayed
+    }
+    ```
+
+11. **Create `src/components/GameInfoButton/GameInfoButton.scss` (NEW FILE)**
+
+### Phase 6: Game Component Updates
+12. **Update each game component to apply deduplication + game-specific filters:**
+
+    **WordleGame.tsx**
+    ```typescript
+    const gameCards = useMemo(() => {
+      let cards = filteredCards;
+      // Remove duplicate_of_code cards (already filtered in context)
+      const deduped = deduplicateByEvaluationCriteria(
+        cards, 
+        GAME_EVALUATION_CRITERIA.wordle
+      );
+      return deduped;
+    }, [filteredCards]);
+    ```
+    - Add GameInfoButton in header:
+      ```
+      Card Types: Skill, Asset, Event, Weakness
+      Answer Matches: Name, Subname, XP, Class
+      Current Filters: [packs], [weaknesses], [signatures]
+      ```
+
+    **PicGuesser.tsx**
+    ```typescript
+    const gameCards = useMemo(() => {
+      const assetEventSkill = filteredCards.filter(c => 
+        [TypeCode.ASSET, TypeCode.EVENT, TypeCode.SKILL].includes(c.type_code)
+      );
+      // NOTE: Do NOT remove duplicate_of_code here; keep all cards but deduplicate in dropdown
+      const deduped = deduplicateByEvaluationCriteria(
+        assetEventSkill,
+        GAME_EVALUATION_CRITERIA.picGuesser
+      );
+      return deduped;
+    }, [filteredCards]);
+    ```
+    - Add GameInfoButton
+      ```
+      Card Types: Asset, Event, Skill (only)
+      Answer Matches: Class, Pack, Name, XP
+      Current Filters: [packs], [weaknesses], [signatures]
+      ```
+
+    **TraitGuesser.tsx**
+    - Investigator mode: use `filteredInvestigators`, deduplicate by `{ name: true, pack: true, class: true }`
+    - Card mode: use `filteredCards`, deduplicate by same
+    - Add GameInfoButton
+      ```
+      Card Types: Investigator (Investigator Mode) / Cards (Card Mode)
+      Answer Matches: Name, Pack, Class
+      Current Filters: [packs], [weaknesses], [signatures]
+      ```
+
+    **StoryGuesser.tsx**
+    ```typescript
+    const uniqueInvestigators = useMemo(() => {
+      const withFlavor = filteredInvestigators.filter(inv => inv.back_flavor);
+      return deduplicateByEvaluationCriteria(
+        withFlavor,
+        GAME_EVALUATION_CRITERIA.storyGuesser
+      );
+    }, [filteredInvestigators]);
+    ```
+    - Add GameInfoButton
+      ```
+      Card Types: Investigator (only, back flavor text)
+      Answer Matches: Class, Pack, Name, XP
+      Current Filters: [packs], [weaknesses], [signatures]
+      ```
+
+    **FlavourGuesser.tsx**
+    ```typescript
+    const flavourCards = useMemo(() => {
+      let cards = filteredCards;
+      // Apply type filters from settings (filter by TypeCode, not class)
+      const filtered = filterForFlavourGuesser(
+        cards,
+        settings.flavourGuesserTypeFilters
+      );
+      // Remove cards without flavor
+      const withFlavor = filtered.filter(c => c.flavor?.trim());
+      // Deduplicate
+      return deduplicateByEvaluationCriteria(
+        withFlavor,
+        GAME_EVALUATION_CRITERIA.flavourGuesser
+      );
+    }, [filteredCards, settings.flavourGuesserTypeFilters]);
+    ```
+    - Add GameInfoButton
+      ```
+      Card Types: Asset, Event, Skill, Enemy, Treachery, Location, Story (Configurable via Type Filters)
+      Answer Matches: Class, Pack, Name, XP
+      Current Filters: [packs], [weaknesses], [signatures], [type filters]
+      ```
+
+    **Investigatordle.tsx**
+    ```typescript
+    const gameInvestigators = useMemo(() => {
+      const deduped = deduplicateByEvaluationCriteria(
+        filteredInvestigators,
+        GAME_EVALUATION_CRITERIA.investigatordle
+      );
+      return deduped;
+    }, [filteredInvestigators]);
+    ```
+    - Add GameInfoButton
+      ```
+      Card Types: Investigator (only)
+      Answer Matches: Name, Pack, Class
+      Current Filters: [packs], [weaknesses], [signatures]
+      ```
+
+## Answer Selection Text Rules
+
+**Global Rule**: Only show anything in brackets if at least 1 other item in the list shares the same name.
+
+**Per-Game Text Display**:
+- **Wordle**: `name (xp)` or `name (subname)` if duplicate names
+- **PicGuesser**: `{name} ({pack} - ${xp}XP)`
+- **TraitGuesser**: `{name} ({pack})`
+- **StoryGuesser**: `{name} ({pack})`
+- **FlavourGuesser**: `{name} ({pack})`
+- **Investigatordle**: `{name} ({subname})`
+
+Implement this logic in `GuessInput` component to dynamically decide what to show.
+
+## Files to Create
+1. `src/services/CardFilter.ts` — centralized filtering logic
+2. `src/components/GameInfoButton/GameInfoButton.tsx` — game info modal
+3. `src/components/GameInfoButton/GameInfoButton.scss` — styling
+4. `src/components/SettingsModal/FlavourGuesserTypeFiltersSection.tsx` — type filter toggles
+
+## Files to Modify
+1. `src/types.ts` — AppSettings, TransformedCard interfaces
+2. `src/types/arkham.ts` — Restrictions interface
+3. `src/services/ArkhamDbService.ts` — transformCards to include new fields, filter duplicates
+4. `src/context/GameContext.tsx` — add signature filter, update defaults
+5. `src/components/SettingsModal/SettingsModal.tsx` — add new sections
+6. `src/components/SettingsModal/PackFiltersSection.tsx` — add signature toggle
+7. `src/pages/WordleGame/WordleGame.tsx` — apply filter + deduplication + info button
+8. `src/pages/PicGuesser/PicGuesser.tsx` — apply filter + deduplication + info button
+9. `src/pages/TraitGuesser/TraitGuesser.tsx` — apply filter + deduplication + info button
+10. `src/pages/StoryGuesser/StoryGuesser.tsx` — apply filter + deduplication + info button
+11. `src/pages/FlavourGuesser/FlavourGuesser.tsx` — apply filter + deduplication + info button
+12. `src/pages/Investigatordle/Investigatordle.tsx` — apply filter + deduplication + info button
+13. `src/components/GuessInput/GuessInput.tsx` — dynamic text display logic
+
+## Testing Checklist
+- [ ] TypeScript compilation passes with no errors
+- [ ] Global filters work: pack filtering, weakness toggle, signature toggle
+- [ ] Each game shows only correct card types
+- [ ] Deduplication works: no duplicate entries in dropdown per game's criteria
+- [ ] Answer matching works: winning requires matching all criteria per game
+- [ ] Settings persist: new toggles save/load correctly
+- [ ] Info button displays correct rules + active filters for each game
+- [ ] GuessInput text display follows per-game rules
+- [ ] FlavourGuesser type filters work correctly
+
+## Notes
+- PicGuesser is an exception: keeps duplicate_of_code cards in transformCards but deduplicates only in dropdown display
+- All other games filter out duplicate_of_code during transformation
+- Signature cards determined by `restrictions.investigator` field existing (any value)
+- Type filters for FlavourGuesser are faction-based (Guardian, Mystic, etc.) and applied to transformed cards

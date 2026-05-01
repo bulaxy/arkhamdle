@@ -163,6 +163,22 @@ export interface DeckOptions {
 
 export interface Restrictions {
   investigator?: Record<string, string>;
+  faction?: Record<string, { min: boolean; max: boolean }>;
+  trait?: string[];
+}
+
+export interface BondedCard {
+  code: string;
+  count: number;
+}
+
+export interface LinkedCard extends Record<string, unknown> {
+  code: string;
+  name: string;
+}
+
+export interface CustomizationOption extends Record<string, unknown> {
+  xp: number;
 }
 
 export interface ArkhamCard {
@@ -197,19 +213,20 @@ export interface ArkhamCard {
   deck_limit?: number;
   slot?: Slot;
   real_slot?: string;
-  traits?: string;
-  real_traits?: string;
-  imagesrc?: string;
-  url?: string;
+  traits: string;
+  real_traits: string;
+  imagesrc: string;
+  url: string;
   octgn_id?: string;
-  text?: string;
+  text: string;
+  real_text: string;
   flavor?: string;
   deck_requirements?: DeckRequirements;
   deck_options?: DeckOptions[];
-  illustrator?: string;
-  is_unique?: boolean;
-  permanent?: boolean;
-  double_sided?: boolean;
+  illustrator: string;
+  is_unique: boolean;
+  permanent: boolean;
+  double_sided: boolean;
   backimagesrc?: string;
   duplicated_by?: string[];
   alternated_by?: string[];
@@ -235,12 +252,18 @@ export interface ArkhamCard {
   back_illustrator?: string;
   back_link?: string;
   back_subname?: string;
-  alternate_of?: string;
-  duplicate_of?: string;
+  alternate_of_code?: string;
+  alternate_of_name?: string;
+  duplicate_of_code?: string;
+  duplicate_of_name?: string;
   bonded_count?: number;
   bonded_to?: string;
+  bonded_cards?: BondedCard[];
+  linked_to_code?: string;
+  linked_to_name?: string;
+  linked_card?: LinkedCard;
   customization_change?: string;
-  customization_options?: any[];
+  customization_options?: CustomizationOption[];
   customization_text?: string;
   encounter_code?: string;
   encounter_position?: number;

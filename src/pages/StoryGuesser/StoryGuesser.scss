@@ -49,11 +49,36 @@
     margin-bottom: 1rem;
   }
 
-  .story-text {
+  .story-result-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: left;
+    margin-top: 1rem;
+
+    h4 {
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .story-text-box {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 0.5rem;
     font-style: italic;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
+    line-height: 1.5;
     white-space: pre-wrap;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+  }
+
+  .story-highlight {
+    color: var(--correct-color);
+    font-weight: bold;
   }
 }
 

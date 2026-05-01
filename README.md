@@ -1,73 +1,24 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- Encounter Card / Story / Location Card guessing related game, got an idea, need to look further (blurred photo + some clue to guess the which pack is it from, with additional challenge )
+- Hint System Review
+- Give Up/Answer Review Section Review
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Review these
 ```
+export default function TraitGuesser() {
+  const { filteredCards, filteredInvestigators, settings } = useGameContext();
+  const [trait, setTrait] = useState<string>('');
+  const [win, setWin] = useState(false);
+  const [correctGuesses, setCorrectGuesses] = useState<(TransformedCard | TransformedInvestigator)[]>([]);
+  const [wrongGuesses, setWrongGuesses] = useState<(TransformedCard | TransformedInvestigator)[]>([]);
+  const [gaveUp, setGaveUp] = useState(false);
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+  const allPossibleOptions = useMemo(() => {
+    const cards = filterDuplicateOfCode(filteredCards);
+    const investigators = filterDuplicateOfCode(filteredInvestigators);
+    
+    return [
+      // TODO: Review thess filter
+      ...cards.filter(c => settings.traitGuesserTypeFilters[c.type_code] ?? true),
+      ...investigators.filter(_ => settings.traitGuesserTypeFilters['investigator'] ?? true)
+      ```

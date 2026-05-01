@@ -1,0 +1,36 @@
+.result-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  border: 2px solid transparent;
+
+  img {
+    max-width: 250px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin: 0;
+
+    &.win {
+      color: var(--correct-color);
+      text-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+    }
+
+    &.lose {
+      color: var(--wrong-color);
+      text-shadow: 0 0 10px rgba(244, 67, 54, 0.4);
+    }
+  }
+
+  p {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+  }
+}

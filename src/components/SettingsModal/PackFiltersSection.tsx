@@ -4,24 +4,28 @@ interface PackFiltersSectionProps {
   packs: string[];
   filteredPacks: string[];
   includeWeakness: boolean;
+  includeSignatures: boolean;
   isOpen: boolean;
   onToggle: () => void;
   onPackToggle: (packGroup: string) => void;
   onSelectAll: () => void;
   onFilterAll: () => void;
   onIncludeWeaknessChange: (include: boolean) => void;
+  onIncludeSignaturesChange: (include: boolean) => void;
 }
 
 export default function PackFiltersSection({
   packs,
   filteredPacks,
   includeWeakness,
+  includeSignatures,
   isOpen,
   onToggle,
   onPackToggle,
   onSelectAll,
   onFilterAll,
   onIncludeWeaknessChange,
+  onIncludeSignaturesChange,
 }: PackFiltersSectionProps) {
   return (
     <div className="settings-section">
@@ -53,6 +57,16 @@ export default function PackFiltersSection({
               />
               <span className="bold">
                 Include Weaknesses (Basic & Non-Basic)
+              </span>
+            </label>
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={includeSignatures}
+                onChange={(e) => onIncludeSignaturesChange(e.target.checked)}
+              />
+              <span className="bold">
+                Include Signature Cards
               </span>
             </label>
           </div>

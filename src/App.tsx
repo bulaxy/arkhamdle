@@ -2,13 +2,13 @@ import { Routes, Route, NavLink } from 'react-router-dom';
 import { Settings, Menu, X as CloseIcon } from 'lucide-react';
 import './App.scss';
 import { useGameContext } from './context/GameContext';
-import WordleGame from './pages/WordleGame';
-import PicGuesser from './pages/PicGuesser';
-import Investigatordle from './pages/Investigatordle';
-import StoryGuesser from './pages/StoryGuesser';
-import TraitGuesser from './pages/TraitGuesser';
-import FlavourGuesser from './pages/FlavourGuesser';
-import SettingsModal from './components/SettingsModal';
+import WordleGame from './pages/WordleGame/WordleGame';
+import PicGuesser from './pages/PicGuesser/PicGuesser';
+import Investigatordle from './pages/Investigatordle/Investigatordle';
+import StoryGuesser from './pages/StoryGuesser/StoryGuesser';
+import TraitGuesser from './pages/TraitGuesser/TraitGuesser';
+import FlavourGuesser from './pages/FlavourGuesser/FlavourGuesser';
+import SettingsModal from './components/SettingsModal/SettingsModal';
 import { useState } from 'react';
 
 function App() {

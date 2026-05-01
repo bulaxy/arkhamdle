@@ -1,9 +1,9 @@
-import type { 
-  PackCode, 
-  TypeCode, 
-  FactionCode, 
-  SubtypeCode, 
-  Slot
+import type {
+  FactionCode,
+  PackCode,
+  Slot,
+  SubtypeCode,
+  TypeCode
 } from './types/arkham';
 
 export * from './types/arkham';
@@ -52,30 +52,42 @@ export interface AppSettings {
   storyGuesserSliceScale: number;
   storyGuesserHideName: boolean;
   includeWeakness: boolean;
+  includeSignatures: boolean;
+  flavourGuesserTypeFilters: Record<TypeCode, boolean>;
+  traitGuesserTypeFilters: Record<TypeCode, boolean>;
+  picGuesserTypeFilters: Record<TypeCode, boolean>;
+  traitGuesserMinCards: number;
+  traitGuesserMaxCards: number;
+  traitGuesserRequirementType: 'All' | 'Percentage' | 'Fixed Number';
+  traitGuesserRequirementValue: number;
+  includeEncounter: boolean;
 }
 
 export interface TransformedCard {
   id: string;
   name: string;
+  subname: string;
   fullName: string;
   imagesrc: string;
   pack_code: PackCode;
   pack_name: string;
   flavor: string;
   subtype_code?: SubtypeCode;
-  
-  cardName: string[];
-  typeName: string[];
+  cardName: string;
+  typeName: string;
+  type_code: TypeCode;
   class: FactionCode[];
-  xp: number[];
+  xp: number;
   traits: string[];
-  slot: string[];
-  cost: number[];
-  agility: number[];
-  combat: number[];
-  intellect: number[];
-  wild: number[];
-  willpower: number[];
+  slot?: Slot;
+  cost: number;
+  agility: number;
+  combat: number;
+  intellect: number;
+  wild: number;
+  willpower: number;
+  restrictions?: any;
+  duplicate_of_code?: string;
 }
 
 export interface TransformedInvestigator {
@@ -87,14 +99,14 @@ export interface TransformedInvestigator {
   pack_code: PackCode;
   pack_name: string;
   subtype_code?: SubtypeCode;
-  
   faction_code: FactionCode[];
-  health: number[];
-  sanity: number[];
-  agility: number[];
-  combat: number[];
-  intellect: number[];
-  willpower: number[];
+  health: number;
+  sanity: number;
+  agility: number;
+  combat: number;
+  intellect: number;
+  willpower: number;
   traits: string[];
   back_flavor: string;
+  duplicate_of_code?: string;
 }
