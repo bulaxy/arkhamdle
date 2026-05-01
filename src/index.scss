@@ -99,8 +99,8 @@ body {
 .makeGreen { background-color: var(--correct-color) !important; color: white !important; }
 .makeYellow { background-color: var(--partial-color) !important; color: white !important; }
 .makeRed { background-color: var(--wrong-color) !important; color: white !important; }
-.yearBefore::after { content: ' ↓'; font-weight: bold; }
-.yearAfter::after { content: ' ↑'; font-weight: bold; }
+.yearBefore::after { content: ' ↑'; font-weight: bold; }
+.yearAfter::after { content: ' ↓'; font-weight: bold; }
 
 /* Micro animations */
 @keyframes shakeAnimation {
