@@ -96,9 +96,28 @@
 .settings-text {
   font-size: 0.9rem;
   color: var(--text-secondary);
+
+  &.small {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
 }
 
-// Button row
+.hint-section {
+  padding: 15px;
+}
+
+.hint-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hint-toggle-title {
+  margin: 0;
+}
 .button-row {
   display: flex;
   gap: 0.5rem;
@@ -231,6 +250,75 @@
   &:hover {
     color: var(--text-primary);
   }
+}
+
+.settings-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.settings-warning {
+  color: #ff4444;
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+
+.trait-table-container {
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.trait-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: white;
+  text-align: left;
+
+  th, td {
+    padding: 4px;
+  }
+
+  thead tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .text-right {
+    text-align: right;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mb-8 {
+  margin-bottom: 8px;
+}
+
+.mt-5 {
+  margin-top: 5px;
+}
+
+.mt-10 {
+  margin-top: 10px;
 }
 
 @media (max-width: 1024px) {

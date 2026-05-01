@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
 import type { TransformedCard } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames } from '../../services/CardFilter';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './WordleGame.scss';
@@ -19,8 +19,9 @@ export default function WordleGame() {
 
   const gameCards = useMemo(() => {
     const noDupes = filterDuplicateOfCode(filteredCards);
+    const wordleCards = filterForWordle(noDupes);
     const deduped = deduplicateByEvaluationCriteria(
-      noDupes,
+      wordleCards,
       GAME_EVALUATION_CRITERIA.wordle
     );
     return deduped as TransformedCard[];
@@ -42,11 +43,14 @@ export default function WordleGame() {
 
   useEffect(() => {
     if (gameCards.length > 0 && !answer) {
-      setAnswer(gameCards[Math.floor(Math.random() * gameCards.length)]);
+      const selected = gameCards[Math.floor(Math.random() * gameCards.length)];
+      console.log('[WordleGame] Answer:', selected);
+      setAnswer(selected);
     }
   }, [gameCards, answer]);
 
   const submitGuess = (card: TransformedCard) => {
+    console.log('[WordleGame] Guess:', card);
     if (guesses.some(g => g.id === card.id)) return;
     setGuesses([card, ...guesses]);
     if (card.id === answer?.id) {
@@ -97,7 +101,7 @@ export default function WordleGame() {
     <div className="wordle-container">
       <div className="wordle-header">
         <h1>Classic Mode</h1>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <div className="game-header-row">
           <p>Guess the Arkham Horror LCG Card</p>
           <GameInfoButton
             gameName="Wordle"
@@ -106,6 +110,7 @@ export default function WordleGame() {
               cardTypes: 'Skill, Asset, Event, Weakness',
               answerEvaluation: 'Must match: Name, Subname, XP, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
+              howToPlay: 'Wordle game - similar to wordle, guess a player card, it will show whether it is correct or not, and guess the card'
             }}
           />
         </div>
@@ -128,9 +133,9 @@ export default function WordleGame() {
       )}
 
       {guesses.length > 0 && (
-        <div style={{ width: '100%', paddingBottom: '1rem' }}>
+        <div className="wordle-guesses-wrapper">
           {/* Desktop Table View */}
-          <div className="desktop-only" style={{ overflowX: 'auto' }}>
+          <div className="desktop-only wordle-table-container">
             <table className="wordle-table">
               <thead>
                 <tr>
@@ -155,7 +160,7 @@ export default function WordleGame() {
                     {ATTRIBUTES.map(attr => (
                       <td key={attr} className={`wordle-guess-cell ${getAttributeClass(g, attr)}`}>
                         {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
-                        {getArrow(g, attr) && <span style={{ fontWeight: 'bold' }}>{getArrow(g, attr)}</span>}
+                        {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                       </td>
                     ))}
                   </tr>
@@ -176,7 +181,7 @@ export default function WordleGame() {
                   <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
                     <span className="label">{attr === 'typeName' ? 'Type' : attr}</span>
                     {Array.isArray(g[attr]) && (g[attr] as any[]).length > 1 ? (g[attr] as any[]).join(', ') : g[attr]}
-                    {getArrow(g, attr) && <span style={{ fontWeight: 'bold' }}>{getArrow(g, attr)}</span>}
+                    {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                   </div>
                 ))}
               </div>

@@ -9,6 +9,7 @@ interface GameInfoButtonProps {
     cardTypes: string;
     answerEvaluation: string;
     currentFilters: string;
+    howToPlay: React.ReactNode;
   };
 }
 
@@ -45,6 +46,13 @@ export default function GameInfoButton({
             </div>
 
             <div className="info-modal-body">
+              {gameRules.howToPlay && (
+                <div className="info-section">
+                  <h3>How to Play</h3>
+                  <div className="info-how-to-play">{gameRules.howToPlay}</div>
+                </div>
+              )}
+
               <div className="info-section">
                 <h3>Card Types</h3>
                 <p>{gameRules.cardTypes}</p>

@@ -20,8 +20,7 @@ export default function ResultPanel({
 }: ResultPanelProps) {
   return (
     <div 
-      className={`glass-panel fade-in result-panel ${className}`} 
-      style={{ borderColor: win ? 'var(--correct-color)' : 'var(--wrong-color)' }}
+      className={`glass-panel fade-in result-panel ${win ? 'win-border' : 'lose-border'} ${className}`} 
     >
       <h2 className={win ? 'win' : 'lose'}>
         {win ? 'Correct!' : 'Game Over'}

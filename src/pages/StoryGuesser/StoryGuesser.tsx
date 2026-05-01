@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
-import type { TransformedInvestigator } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getInvestigatorFactionColors, filterDuplicateOfCode } from '../../services/CardFilter';
+import type { TransformedCard } from '../../types';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './StoryGuesser.scss';
@@ -9,34 +9,37 @@ import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
 export default function StoryGuesser() {
-  const { filteredInvestigators, settings } = useGameContext();
+  const { filteredCards, settings } = useGameContext();
 
   const uniqueInvestigators = useMemo(() => {
-    const withFlavor = filteredInvestigators.filter(inv => inv.back_flavor);
+    const investigators = filteredCards.filter(c => c.typeName === 'investigator');
+    const withFlavor = investigators.filter(inv => inv.back_flavor);
     const noDupes = filterDuplicateOfCode(withFlavor);
     return deduplicateByEvaluationCriteria(
       noDupes,
       GAME_EVALUATION_CRITERIA.storyGuesser
-    ) as TransformedInvestigator[];
-  }, [filteredInvestigators]);
+    );
+  }, [filteredCards]);
 
   const dupeNames = useMemo(() => findDuplicateNames(uniqueInvestigators), [uniqueInvestigators]);
 
-  const getDisplayText = (inv: TransformedInvestigator): string => {
+  const getDisplayText = (inv: TransformedCard): string => {
     if (!dupeNames.has(inv.name)) return inv.name;
     return `${inv.name} (${inv.pack_name})`;
   };
 
-  const [answer, setAnswer] = useState<TransformedInvestigator | null>(null);
+  const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [win, setWin] = useState(false);
-  const [wrongGuesses, setWrongGuesses] = useState<TransformedInvestigator[]>([]);
+  const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
   const [scrambledFlavor, setScrambledFlavor] = useState('');
   const [sliceIdx, setSliceIdx] = useState<number | null>(null);
   const [gaveUp, setGaveUp] = useState(false);
 
   useEffect(() => {
     if (uniqueInvestigators.length > 0 && !answer) {
-      setAnswer(uniqueInvestigators[Math.floor(Math.random() * uniqueInvestigators.length)]);
+      const selected = uniqueInvestigators[Math.floor(Math.random() * uniqueInvestigators.length)];
+      console.log('[StoryGuesser] Answer:', selected);
+      setAnswer(selected);
     }
   }, [uniqueInvestigators, answer]);
 
@@ -122,7 +125,8 @@ export default function StoryGuesser() {
     setSliceIdx(currentSliceIdx);
   }, [answer, settings.storyGuesserScrambleLetters, settings.storyGuesserScrambleWords, settings.storyGuesserHideName, settings.storyGuesserSliceScale]);
 
-  const submitGuess = (card: TransformedInvestigator) => {
+  const submitGuess = (card: TransformedCard) => {
+    console.log('[StoryGuesser] Guess:', card);
     if (wrongGuesses.some(g => g.id === card.id)) return;
     
     if (card.id === answer?.id) {
@@ -156,15 +160,16 @@ export default function StoryGuesser() {
     <div className="story-container">
       <div className="story-header">
         <h1>Story Guesser</h1>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <div className="game-header-row">
           <p>Guess the Investigator by their scrambled story!</p>
           <GameInfoButton
             gameName="StoryGuesser"
             gameRules={{
               title: 'Story Guesser',
               cardTypes: 'Investigator (only, back flavor text)',
-              answerEvaluation: 'Must match: Class, Pack, Name, XP',
+              answerEvaluation: 'Must match: Class, Pack, Name',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
+              howToPlay: "The investigator's backstory is scrambled.\nNote: Card Like TCU's Disappearance at the Twilight Estate's investigators and Yithian Body are all included if other filters allow.\nHints available after 3 wrong guesses."
             }}
           />
         </div>
@@ -189,6 +194,12 @@ export default function StoryGuesser() {
             <div className="story-text">
               {scrambledFlavor}
             </div>
+
+            {settings.enableHints && wrongGuesses.length >= 3 && !win && answer && (
+              <div className="story-hint hint-text">
+                💡 Hint — Class: {answer.class.join(', ')}
+              </div>
+            )}
             
             <GuessInput
               options={uniqueInvestigators}
@@ -199,7 +210,7 @@ export default function StoryGuesser() {
               giveUpThreshold={5}
               className="story-input-wrapper"
               getDisplayText={getDisplayText}
-              getOptionColors={getInvestigatorFactionColors}
+              getOptionColors={getCardFactionColors}
             />
             
             {wrongGuesses.length > 0 && (

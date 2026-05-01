@@ -45,11 +45,14 @@ export default function FlavourGuesser() {
     setGaveUp(false);
     setWrongGuesses([]);
     if (flavourCards.length > 0) {
-      setAnswer(flavourCards[Math.floor(Math.random() * flavourCards.length)]);
+      const selected = flavourCards[Math.floor(Math.random() * flavourCards.length)];
+      console.log('[FlavourGuesser] Answer:', selected);
+      setAnswer(selected);
     }
   };
 
   const submitGuess = (card: TransformedCard) => {
+    console.log('[FlavourGuesser] Guess:', card);
     if (card.id === answer?.id) {
       setWin(true);
     } else {
@@ -61,7 +64,7 @@ export default function FlavourGuesser() {
     <div className="flavour-container">
       <div className="flavour-header">
         <h1>Flavour Text Guesser</h1>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <div className="game-header-row">
           <p>Guess the card by its flavour text!</p>
           <GameInfoButton
             gameName="FlavourGuesser"
@@ -70,6 +73,7 @@ export default function FlavourGuesser() {
               cardTypes: 'Asset, Event, Skill, Enemy, Treachery, Location, Story (Configurable via Type Filters in Settings)',
               answerEvaluation: 'Must match: Class, Pack, Name, XP',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter, Type filters',
+              howToPlay: 'A flavour text of a card is shown, guess what card is it?\nHints available after 3 wrong guesses.'
             }}
           />
         </div>
@@ -80,9 +84,10 @@ export default function FlavourGuesser() {
           "{answer?.flavor}"
         </div>
 
-        {wrongGuesses.length >= 3 && !win && answer && (
+        {settings.enableHints && wrongGuesses.length >= 3 && !win && answer && (
           <div className="flavour-hint">
             💡 Hint — Class: {answer.class.join(', ')}
+            {wrongGuesses.length >= 5 && ` | Pack: ${answer.pack_name}`}
           </div>
         )}
 

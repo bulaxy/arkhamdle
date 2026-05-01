@@ -1,19 +1,19 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import type { TypeCode } from "../../types";
-import { TypeCode as TypeCodeEnum } from "../../types/arkham";
+import type { TypeName } from "../../types";
+import { TypeName as TypeNameEnum } from "../../types/arkham";
 
 type Difficulty = "Hard" | "Normal" | "Easy";
 
 interface PicGuesserSectionProps {
   difficulty: Difficulty;
-  typeFilters: Record<TypeCode, boolean>;
+  typeFilters: Record<TypeName, boolean>;
   isOpen: boolean;
   onToggle: () => void;
   onDifficultyChange: (diff: Difficulty) => void;
-  onTypeFilterChange: (typeCode: TypeCode, include: boolean) => void;
+  onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
 }
 
-const TYPE_DISPLAY_NAMES: Record<TypeCode, string> = {
+const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
   asset: "Asset",
   enemy: "Enemy",
   event: "Event",
@@ -22,6 +22,11 @@ const TYPE_DISPLAY_NAMES: Record<TypeCode, string> = {
   skill: "Skill",
   story: "Story",
   treachery: "Treachery",
+  scenario: "Scenario",
+  agenda: "Agenda",
+  act: "Act",
+  key: "Key",
+  enemyLocation: "Enemy Location",
 };
 
 export default function PicGuesserSection({
@@ -32,15 +37,15 @@ export default function PicGuesserSection({
   onDifficultyChange,
   onTypeFilterChange,
 }: PicGuesserSectionProps) {
-  const typeCodes: TypeCode[] = [
-    TypeCodeEnum.ASSET,
-    TypeCodeEnum.EVENT,
-    TypeCodeEnum.SKILL,
-    TypeCodeEnum.ENEMY,
-    TypeCodeEnum.TREACHERY,
-    TypeCodeEnum.LOCATION,
-    TypeCodeEnum.STORY,
-    TypeCodeEnum.INVESTIGATOR,
+  const typeCodes: TypeName[] = [
+    TypeNameEnum.ASSET,
+    TypeNameEnum.EVENT,
+    TypeNameEnum.SKILL,
+    TypeNameEnum.ENEMY,
+    TypeNameEnum.TREACHERY,
+    TypeNameEnum.LOCATION,
+    TypeNameEnum.STORY,
+    TypeNameEnum.ENEMY_LOCATION,
   ];
 
   return (
@@ -50,9 +55,9 @@ export default function PicGuesserSection({
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (
-        <div className="settings-section-content" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div className="settings-section-content settings-column">
           <div>
-            <p className="settings-text" style={{ marginBottom: '8px' }}>
+            <p className="settings-text mb-8">
               How much it zooms out each time you guess incorrectly.
             </p>
             <div className="button-row tight">
@@ -69,7 +74,7 @@ export default function PicGuesserSection({
           </div>
 
           <div>
-            <p className="settings-text" style={{ marginBottom: '8px' }}>
+            <p className="settings-text mb-8">
               Select which card types to include.
             </p>
             <div className="type-filter-buttons">

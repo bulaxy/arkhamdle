@@ -3,46 +3,10 @@ import type {
   PackCode,
   Slot,
   SubtypeCode,
-  TypeCode
+  TypeName
 } from './types/arkham';
 
 export * from './types/arkham';
-
-export interface Card {
-  id: string;
-  code: string;
-  name: string;
-  real_name?: string;
-  subname?: string;
-  type_code: TypeCode;
-  type_name: string;
-  faction_code: FactionCode;
-  faction_name: string;
-  faction2_code?: FactionCode;
-  faction2_name?: string;
-  faction3_code?: FactionCode;
-  faction3_name?: string;
-  pack_code: PackCode;
-  imagesrc?: string;
-  xp?: number;
-  traits?: string;
-  slot?: Slot | string;
-  cost?: number;
-  skill_willpower?: number;
-  skill_intellect?: number;
-  skill_combat?: number;
-  skill_agility?: number;
-  skill_wild?: number;
-  health?: number;
-  sanity?: number;
-  flavor?: string;
-  back_flavor?: string;
-  duplicate_of?: string;
-  restrictions?: any;
-  subtype_code?: SubtypeCode;
-  bonded_to?: string;
-  pack_name?: string;
-}
 
 export interface AppSettings {
   filteredPacks: string[];
@@ -53,14 +17,15 @@ export interface AppSettings {
   storyGuesserHideName: boolean;
   includeWeakness: boolean;
   includeSignatures: boolean;
-  flavourGuesserTypeFilters: Record<TypeCode, boolean>;
-  traitGuesserTypeFilters: Record<TypeCode, boolean>;
-  picGuesserTypeFilters: Record<TypeCode, boolean>;
+  flavourGuesserTypeFilters: Record<TypeName, boolean>;
+  traitGuesserTypeFilters: Record<TypeName, boolean>;
+  picGuesserTypeFilters: Record<TypeName, boolean>;
   traitGuesserMinCards: number;
   traitGuesserMaxCards: number;
   traitGuesserRequirementType: 'All' | 'Percentage' | 'Fixed Number';
   traitGuesserRequirementValue: number;
   includeEncounter: boolean;
+  enableHints: boolean;
 }
 
 export interface TransformedCard {
@@ -74,8 +39,7 @@ export interface TransformedCard {
   flavor: string;
   subtype_code?: SubtypeCode;
   cardName: string;
-  typeName: string;
-  type_code: TypeCode;
+  typeName: TypeName;
   class: FactionCode[];
   xp: number;
   traits: string[];
@@ -88,25 +52,18 @@ export interface TransformedCard {
   willpower: number;
   restrictions?: any;
   duplicate_of_code?: string;
+  health?: number;
+  sanity?: number;
+  enemy_damage?: number;
+  enemy_horror?: number;
+  enemy_fight?: number;
+  enemy_evade?: number;
+  clues?: number;
+  shroud?: number;
+  doom?: number;
+  victory?: number;
+  vengeance?: number;
+  health_per_investigator?: boolean;
+  back_flavor?: string;
 }
 
-export interface TransformedInvestigator {
-  id: string;
-  name: string;
-  subname: string;
-  fullName: string;
-  imagesrc: string;
-  pack_code: PackCode;
-  pack_name: string;
-  subtype_code?: SubtypeCode;
-  faction_code: FactionCode[];
-  health: number;
-  sanity: number;
-  agility: number;
-  combat: number;
-  intellect: number;
-  willpower: number;
-  traits: string[];
-  back_flavor: string;
-  duplicate_of_code?: string;
-}

@@ -84,6 +84,15 @@
   width: 100%;
 }
 
+.wordle-guesses-wrapper {
+  width: 100%;
+  padding-bottom: 1rem;
+}
+
+.wordle-table-container {
+  overflow-x: auto;
+}
+
 .wordle-table {
   width: 100%;
   min-width: 800px;

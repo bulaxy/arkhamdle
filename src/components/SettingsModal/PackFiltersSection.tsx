@@ -30,7 +30,7 @@ export default function PackFiltersSection({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Global: Pack Filters</h3>
+        <h3>Global: Cards Filter</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (

@@ -4,14 +4,12 @@ import { PACK_STRUCTURE } from "../data/packStructure";
 import {
   fetchCards,
   transformCards,
-  transformInvestigators,
 } from "../services/ArkhamDbService";
 import type {
   AppSettings,
   TransformedCard,
-  TransformedInvestigator,
 } from "../types";
-import { TypeCode as TypeCodeEnum } from "../types/arkham";
+import { TypeName as TypeNameEnum } from "../types/arkham";
 
 interface GameContextType {
   cards: TransformedCard[];
@@ -22,8 +20,6 @@ interface GameContextType {
   loadingMessage: string;
   refreshData: (includeEncounter?: boolean) => Promise<void>;
   filteredCards: TransformedCard[];
-  investigators: TransformedInvestigator[];
-  filteredInvestigators: TransformedInvestigator[];
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -32,9 +28,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [cards, setCards] = useState<TransformedCard[]>([]);
-  const [investigators, setInvestigators] = useState<TransformedInvestigator[]>(
-    [],
-  );
+
   const [packs, setPacks] = useState<string[]>([]);
   const [settings, setSettingsState] = useState<AppSettings>({
     filteredPacks: [],
@@ -46,40 +40,55 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     includeWeakness: false,
     includeSignatures: true,
     flavourGuesserTypeFilters: {
-      [TypeCodeEnum.ASSET]: true,
-      [TypeCodeEnum.EVENT]: true,
-      [TypeCodeEnum.SKILL]: true,
-      [TypeCodeEnum.ENEMY]: true,
-      [TypeCodeEnum.TREACHERY]: true,
-      [TypeCodeEnum.LOCATION]: true,
-      [TypeCodeEnum.STORY]: true,
-      [TypeCodeEnum.INVESTIGATOR]: true,
+      [TypeNameEnum.ASSET]: true,
+      [TypeNameEnum.EVENT]: true,
+      [TypeNameEnum.SKILL]: true,
+      [TypeNameEnum.ENEMY]: true,
+      [TypeNameEnum.TREACHERY]: true,
+      [TypeNameEnum.LOCATION]: true,
+      [TypeNameEnum.STORY]: true,
+      [TypeNameEnum.INVESTIGATOR]: true,
+      [TypeNameEnum.SCENARIO]: true,
+      [TypeNameEnum.AGENDA]: true,
+      [TypeNameEnum.ACT]: true,
+      [TypeNameEnum.KEY]: true,
+      [TypeNameEnum.ENEMY_LOCATION]: true,
     },
     traitGuesserTypeFilters: {
-      [TypeCodeEnum.ASSET]: true,
-      [TypeCodeEnum.EVENT]: true,
-      [TypeCodeEnum.SKILL]: true,
-      [TypeCodeEnum.ENEMY]: false,
-      [TypeCodeEnum.TREACHERY]: false,
-      [TypeCodeEnum.LOCATION]: false,
-      [TypeCodeEnum.STORY]: false,
-      [TypeCodeEnum.INVESTIGATOR]: true,
+      [TypeNameEnum.ASSET]: true,
+      [TypeNameEnum.EVENT]: true,
+      [TypeNameEnum.SKILL]: true,
+      [TypeNameEnum.ENEMY]: false,
+      [TypeNameEnum.TREACHERY]: false,
+      [TypeNameEnum.LOCATION]: false,
+      [TypeNameEnum.STORY]: false,
+      [TypeNameEnum.INVESTIGATOR]: true,
+      [TypeNameEnum.SCENARIO]: false,
+      [TypeNameEnum.AGENDA]: false,
+      [TypeNameEnum.ACT]: false,
+      [TypeNameEnum.KEY]: false,
+      [TypeNameEnum.ENEMY_LOCATION]: false,
     },
     picGuesserTypeFilters: {
-      [TypeCodeEnum.ASSET]: true,
-      [TypeCodeEnum.EVENT]: true,
-      [TypeCodeEnum.SKILL]: true,
-      [TypeCodeEnum.ENEMY]: false,
-      [TypeCodeEnum.TREACHERY]: false,
-      [TypeCodeEnum.LOCATION]: false,
-      [TypeCodeEnum.STORY]: false,
-      [TypeCodeEnum.INVESTIGATOR]: false,
+      [TypeNameEnum.ASSET]: true,
+      [TypeNameEnum.EVENT]: true,
+      [TypeNameEnum.SKILL]: true,
+      [TypeNameEnum.ENEMY]: false,
+      [TypeNameEnum.TREACHERY]: false,
+      [TypeNameEnum.LOCATION]: false,
+      [TypeNameEnum.STORY]: false,
+      [TypeNameEnum.SCENARIO]: false,
+      [TypeNameEnum.AGENDA]: false,
+      [TypeNameEnum.ACT]: false,
+      [TypeNameEnum.KEY]: false,
+      [TypeNameEnum.ENEMY_LOCATION]: false,
     },
     traitGuesserMinCards: 3,
     traitGuesserMaxCards: 0,
     traitGuesserRequirementType: "Fixed Number",
     traitGuesserRequirementValue: 3,
     includeEncounter: false,
+    enableHints: true,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -101,14 +110,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       const transformed = transformCards(cardsData);
       setCards(transformed);
 
-      const transformedInvestigators = transformInvestigators(cardsData);
-      setInvestigators(transformedInvestigators);
-
-      // Build pack groups list from structure + detect "other"
-      const groupNames = Object.keys(PACK_STRUCTURE);
-      const allCards = [...transformed, ...transformedInvestigators];
-      const hasOther = allCards.some((c) => c.pack_name === "other");
-      setPacks(hasOther ? [...groupNames, "other"] : groupNames);
+      // Build pack groups list from structure + detect "OTHER"
+      const groupNames = Object.keys(PACK_STRUCTURE).map(k => k.toUpperCase());
+      const allCards = transformed;
+      const hasOther = allCards.some((c) => c.pack_name === "OTHER");
+      if (transformed.filter(c => c.pack_name === "OTHER").length > 0) {
+        console.error("Other card should not exist", transformed.filter(c => c.pack_name === "OTHER"))
+      }
+      setPacks(hasOther ? [...groupNames, "OTHER"] : groupNames);
     } catch (error) {
       console.error("Failed to load ArkhamDB data", error);
       setLoadingMessage(
@@ -136,40 +145,55 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           includeWeakness: savedSettings.includeWeakness ?? false,
           includeSignatures: savedSettings.includeSignatures ?? true,
           flavourGuesserTypeFilters: savedSettings.flavourGuesserTypeFilters || {
-            [TypeCodeEnum.ASSET]: true,
-            [TypeCodeEnum.EVENT]: true,
-            [TypeCodeEnum.SKILL]: true,
-            [TypeCodeEnum.ENEMY]: true,
-            [TypeCodeEnum.TREACHERY]: true,
-            [TypeCodeEnum.LOCATION]: true,
-            [TypeCodeEnum.STORY]: true,
-            [TypeCodeEnum.INVESTIGATOR]: true,
+            [TypeNameEnum.ASSET]: true,
+            [TypeNameEnum.EVENT]: true,
+            [TypeNameEnum.SKILL]: true,
+            [TypeNameEnum.ENEMY]: true,
+            [TypeNameEnum.TREACHERY]: true,
+            [TypeNameEnum.LOCATION]: true,
+            [TypeNameEnum.STORY]: true,
+            [TypeNameEnum.INVESTIGATOR]: true,
+            [TypeNameEnum.SCENARIO]: true,
+            [TypeNameEnum.AGENDA]: true,
+            [TypeNameEnum.ACT]: true,
+            [TypeNameEnum.KEY]: true,
+            [TypeNameEnum.ENEMY_LOCATION]: true,
           },
           traitGuesserTypeFilters: savedSettings.traitGuesserTypeFilters || {
-            [TypeCodeEnum.ASSET]: true,
-            [TypeCodeEnum.EVENT]: true,
-            [TypeCodeEnum.SKILL]: true,
-            [TypeCodeEnum.ENEMY]: false,
-            [TypeCodeEnum.TREACHERY]: false,
-            [TypeCodeEnum.LOCATION]: false,
-            [TypeCodeEnum.STORY]: false,
-            [TypeCodeEnum.INVESTIGATOR]: true,
+            [TypeNameEnum.ASSET]: true,
+            [TypeNameEnum.EVENT]: true,
+            [TypeNameEnum.SKILL]: true,
+            [TypeNameEnum.ENEMY]: false,
+            [TypeNameEnum.TREACHERY]: false,
+            [TypeNameEnum.LOCATION]: false,
+            [TypeNameEnum.STORY]: false,
+            [TypeNameEnum.INVESTIGATOR]: true,
+            [TypeNameEnum.SCENARIO]: false,
+            [TypeNameEnum.AGENDA]: false,
+            [TypeNameEnum.ACT]: false,
+            [TypeNameEnum.KEY]: false,
+            [TypeNameEnum.ENEMY_LOCATION]: false,
           },
           picGuesserTypeFilters: savedSettings.picGuesserTypeFilters || {
-            [TypeCodeEnum.ASSET]: true,
-            [TypeCodeEnum.EVENT]: true,
-            [TypeCodeEnum.SKILL]: true,
-            [TypeCodeEnum.ENEMY]: false,
-            [TypeCodeEnum.TREACHERY]: false,
-            [TypeCodeEnum.LOCATION]: false,
-            [TypeCodeEnum.STORY]: false,
-            [TypeCodeEnum.INVESTIGATOR]: false,
+            [TypeNameEnum.ASSET]: true,
+            [TypeNameEnum.EVENT]: true,
+            [TypeNameEnum.SKILL]: true,
+            [TypeNameEnum.ENEMY]: false,
+            [TypeNameEnum.TREACHERY]: false,
+            [TypeNameEnum.LOCATION]: false,
+            [TypeNameEnum.STORY]: false,
+            [TypeNameEnum.SCENARIO]: false,
+            [TypeNameEnum.AGENDA]: false,
+            [TypeNameEnum.ACT]: false,
+            [TypeNameEnum.KEY]: false,
+            [TypeNameEnum.ENEMY_LOCATION]: false,
           },
           traitGuesserMinCards: savedSettings.traitGuesserMinCards ?? 3,
           traitGuesserMaxCards: savedSettings.traitGuesserMaxCards ?? 0,
           traitGuesserRequirementType: savedSettings.traitGuesserRequirementType || "Fixed Number",
           traitGuesserRequirementValue: savedSettings.traitGuesserRequirementValue ?? 3,
           includeEncounter: savedSettings.includeEncounter ?? false,
+          enableHints: savedSettings.enableHints ?? true,
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {
@@ -192,15 +216,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     return passPack && passWeakness && passSignature;
   });
 
-  const filteredInvestigators = investigators.filter((inv) => {
-    const passPack =
-      settings.filteredPacks.length === 0 ||
-      !settings.filteredPacks.includes(inv.pack_name);
-    const isWeakness =
-      inv.subtype_code === "basicweakness" || inv.subtype_code === "weakness";
-    const passWeakness = settings.includeWeakness || !isWeakness;
-    return passPack && passWeakness;
-  });
+
 
   return (
     <GameContext.Provider
@@ -213,8 +229,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         loadingMessage,
         refreshData: (includeEnc?: boolean) => loadData(true, includeEnc ?? settings.includeEncounter),
         filteredCards,
-        investigators,
-        filteredInvestigators,
       }}
     >
       {children}

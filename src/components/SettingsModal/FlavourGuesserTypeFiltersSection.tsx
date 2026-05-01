@@ -1,15 +1,15 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import type { TypeCode } from "../../types";
-import { TypeCode as TypeCodeEnum } from "../../types/arkham";
+import type { TypeName } from "../../types";
+import { TypeName as TypeNameEnum } from "../../types/arkham";
 
 interface FlavourGuesserTypeFiltersSectionProps {
-  typeFilters: Record<TypeCode, boolean>;
+  typeFilters: Record<TypeName, boolean>;
   isOpen: boolean;
   onToggle: () => void;
-  onTypeFilterChange: (typeCode: TypeCode, include: boolean) => void;
+  onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
 }
 
-const TYPE_DISPLAY_NAMES: Record<TypeCode, string> = {
+const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
   asset: "Asset",
   enemy: "Enemy",
   event: "Event",
@@ -18,6 +18,11 @@ const TYPE_DISPLAY_NAMES: Record<TypeCode, string> = {
   skill: "Skill",
   story: "Story",
   treachery: "Treachery",
+  scenario: "Scenario",
+  agenda: "Agenda",
+  act: "Act",
+  key: "Key",
+  enemyLocation: "Enemy Location",
 };
 
 export default function FlavourGuesserTypeFiltersSection({
@@ -26,14 +31,20 @@ export default function FlavourGuesserTypeFiltersSection({
   onToggle,
   onTypeFilterChange,
 }: FlavourGuesserTypeFiltersSectionProps) {
-  const typeCodes: TypeCode[] = [
-    TypeCodeEnum.ASSET,
-    TypeCodeEnum.EVENT,
-    TypeCodeEnum.SKILL,
-    TypeCodeEnum.ENEMY,
-    TypeCodeEnum.TREACHERY,
-    TypeCodeEnum.LOCATION,
-    TypeCodeEnum.STORY,
+  const typeNames: TypeName[] = [
+    TypeNameEnum.ASSET,
+    TypeNameEnum.EVENT,
+    TypeNameEnum.SKILL,
+    TypeNameEnum.ENEMY,
+    TypeNameEnum.TREACHERY,
+    TypeNameEnum.LOCATION,
+    TypeNameEnum.STORY,
+    TypeNameEnum.INVESTIGATOR,
+    TypeNameEnum.SCENARIO,
+    TypeNameEnum.AGENDA,
+    TypeNameEnum.ACT,
+    TypeNameEnum.KEY,
+    TypeNameEnum.ENEMY_LOCATION,
   ];
 
   return (
@@ -48,7 +59,7 @@ export default function FlavourGuesserTypeFiltersSection({
             Select which card types to include in Flavour Guesser.
           </p>
           <div className="type-filter-buttons">
-            {typeCodes.map((typeCode) => (
+            {typeNames.map((typeCode) => (
               <button
                 key={typeCode}
                 className={`pack-btn ${typeFilters[typeCode] ? "active" : ""}`}

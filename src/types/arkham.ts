@@ -87,17 +87,22 @@ export const PackCode = {
 } as const;
 export type PackCode = typeof PackCode[keyof typeof PackCode];
 
-export const TypeCode = {
+export const TypeName = {
   ASSET: "asset",
-  ENEMY: "enemy",
   EVENT: "event",
-  INVESTIGATOR: "investigator",
-  LOCATION: "location",
   SKILL: "skill",
-  STORY: "story",
+  ENEMY: "enemy",
+  LOCATION: "location",
+  SCENARIO: "scenario",
+  AGENDA: "agenda",
+  ACT: "act",
   TREACHERY: "treachery",
+  STORY: "story",
+  KEY: "key",
+  ENEMY_LOCATION: "enemyLocation",
+  INVESTIGATOR: "investigator",
 } as const;
-export type TypeCode = typeof TypeCode[keyof typeof TypeCode];
+export type TypeName = typeof TypeName[keyof typeof TypeName];
 
 export const FactionCode = {
   GUARDIAN: "guardian",
@@ -184,7 +189,7 @@ export interface CustomizationOption extends Record<string, unknown> {
 export interface ArkhamCard {
   pack_code: PackCode;
   pack_name: string;
-  type_code: TypeCode;
+  type_code: string;
   type_name: string;
   subtype_code?: SubtypeCode;
   subtype_name?: string;

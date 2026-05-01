@@ -2,25 +2,25 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useGameContext } from "../../context/GameContext";
 import { filterDuplicateOfCode } from "../../services/CardFilter";
-import type { TypeCode } from "../../types";
-import { TypeCode as TypeCodeEnum } from "../../types/arkham";
+import type { TypeName } from "../../types";
+import { TypeName as TypeNameEnum } from "../../types/arkham";
 
 interface TraitGuesserSectionProps {
   minCards: number;
   maxCards: number;
   requirementType: 'All' | 'Percentage' | 'Fixed Number';
   requirementValue: number;
-  typeFilters: Record<TypeCode, boolean>;
+  typeFilters: Record<TypeName, boolean>;
   isOpen: boolean;
   onToggle: () => void;
   onMinCardsChange: (value: number) => void;
   onMaxCardsChange: (value: number) => void;
   onRequirementTypeChange: (value: 'All' | 'Percentage' | 'Fixed Number') => void;
   onRequirementValueChange: (value: number) => void;
-  onTypeFilterChange: (typeCode: TypeCode, include: boolean) => void;
+  onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
 }
 
-const TYPE_DISPLAY_NAMES: Record<TypeCode, string> = {
+const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
   asset: "Asset",
   enemy: "Enemy",
   event: "Event",
@@ -29,6 +29,11 @@ const TYPE_DISPLAY_NAMES: Record<TypeCode, string> = {
   skill: "Skill",
   story: "Story",
   treachery: "Treachery",
+  scenario: "Scenario",
+  agenda: "Agenda",
+  act: "Act",
+  key: "Key",
+  enemyLocation: "Enemy Location",
 };
 
 export default function TraitGuesserSection({
@@ -45,19 +50,14 @@ export default function TraitGuesserSection({
   onRequirementValueChange,
   onTypeFilterChange,
 }: TraitGuesserSectionProps) {
-  const { filteredCards, filteredInvestigators } = useGameContext();
+  const { filteredCards } = useGameContext();
   const [showTopTraits, setShowTopTraits] = useState(false);
 
   const topTraits = useMemo(() => {
     if (!isOpen || !showTopTraits) return [];
     
-    const cards = filterDuplicateOfCode(filteredCards);
-    const investigators = filterDuplicateOfCode(filteredInvestigators);
-    
-    const allOptions = [
-      ...cards.filter(c => typeFilters[c.type_code] ?? true),
-      ...investigators.filter(_ => typeFilters['investigator'] ?? true)
-    ];
+    const uniqueCards = filterDuplicateOfCode(filteredCards);
+    const allOptions = uniqueCards.filter(c => typeFilters[c.typeName] ?? true);
 
     const traitCountMap = new Map<string, Set<string>>();
     allOptions.forEach(item => {
@@ -72,17 +72,22 @@ export default function TraitGuesserSection({
       .sort((a, b) => b.count - a.count)
       .slice(0, 50);
     return sorted;
-  }, [filteredCards, filteredInvestigators, typeFilters, isOpen, showTopTraits]);
+  }, [filteredCards, typeFilters, isOpen, showTopTraits]);
 
-  const typeCodes: TypeCode[] = [
-    TypeCodeEnum.ASSET,
-    TypeCodeEnum.EVENT,
-    TypeCodeEnum.SKILL,
-    TypeCodeEnum.ENEMY,
-    TypeCodeEnum.TREACHERY,
-    TypeCodeEnum.LOCATION,
-    TypeCodeEnum.STORY,
-    TypeCodeEnum.INVESTIGATOR,
+  const typeCodes: TypeName[] = [
+    TypeNameEnum.ASSET,
+    TypeNameEnum.EVENT,
+    TypeNameEnum.SKILL,
+    TypeNameEnum.ENEMY,
+    TypeNameEnum.TREACHERY,
+    TypeNameEnum.LOCATION,
+    TypeNameEnum.STORY,
+    TypeNameEnum.INVESTIGATOR,
+    TypeNameEnum.SCENARIO,
+    TypeNameEnum.AGENDA,
+    TypeNameEnum.ACT,
+    TypeNameEnum.KEY,
+    TypeNameEnum.ENEMY_LOCATION,
   ];
 
   const impossibleValidation = 
@@ -97,10 +102,10 @@ export default function TraitGuesserSection({
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (
-        <div className="settings-section-content" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="settings-section-content settings-column">
           <p className="settings-text">Configure rules for the Trait Guesser mode.</p>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div className="settings-group">
             <label className="settings-text">Min Cards with Trait</label>
             <input
               type="number"
@@ -111,9 +116,9 @@ export default function TraitGuesserSection({
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div className="settings-group">
             <label className="settings-text">Max Cards with Trait (0 for no limit)</label>
-            <p className="settings-text" style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '-4px' }}>under 20 will start getting quite challenging</p>
+            <p className="settings-text small">under 20 will start getting quite challenging</p>
             <input
               type="number"
               min="0"
@@ -123,7 +128,7 @@ export default function TraitGuesserSection({
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div className="settings-group">
             <label className="settings-text">Requirement Type</label>
             <select 
               value={requirementType}
@@ -136,9 +141,9 @@ export default function TraitGuesserSection({
             </select>
           </div>
 
-          <div style={{ marginTop: '5px' }}>
+          <div className="mt-5">
             <label className="settings-text">Type Filters</label>
-            <p className="settings-text" style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '8px' }}>
+            <p className="settings-text small mb-8">
               Select which card types to include.
             </p>
             <div className="type-filter-buttons">
@@ -157,7 +162,7 @@ export default function TraitGuesserSection({
           </div>
 
           {requirementType !== 'All' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div className="settings-group">
               <label className="settings-text">
                 {requirementType === 'Percentage' ? 'Percentage Required (%)' : 'Number Required'}
               </label>
@@ -170,41 +175,40 @@ export default function TraitGuesserSection({
                 className="premium-input"
               />
               {impossibleValidation && (
-                <div style={{ color: '#ff4444', fontSize: '0.9em', marginTop: '4px' }}>
+                <div className="settings-warning">
                   Warning: You require guessing {requirementValue} cards, but the maximum trait size is set to {maxCards}. This makes the game impossible to win.
                 </div>
               )}
             </div>
           )}
 
-          <div style={{ marginTop: '10px' }}>
+          <div className="mt-10">
             <button 
-              className="premium-btn" 
+              className="premium-btn full-width mb-10" 
               onClick={() => setShowTopTraits(!showTopTraits)}
-              style={{ width: '100%', marginBottom: '10px' }}
             >
               {showTopTraits ? "Hide Most Common Traits" : "Show Top 50 Most Common Traits"}
             </button>
             
             {showTopTraits && (
-              <p className="settings-text" style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '8px' }}>
+              <p className="settings-text small mb-8">
                 Note that it is not 100% accurate based on other filters
               </p>
             )}
             {showTopTraits && (
-              <div style={{ maxHeight: '200px', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white', textAlign: 'left' }}>
+              <div className="trait-table-container">
+                <table className="trait-table">
                   <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-                      <th style={{ padding: '4px' }}>Trait</th>
-                      <th style={{ padding: '4px', textAlign: 'right' }}>Count</th>
+                    <tr>
+                      <th>Trait</th>
+                      <th className="text-right">Count</th>
                     </tr>
                   </thead>
                   <tbody>
                     {topTraits.map(({ trait, count }) => (
-                      <tr key={trait} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <td style={{ padding: '4px' }}>{trait}</td>
-                        <td style={{ padding: '4px', textAlign: 'right' }}>{count}</td>
+                      <tr key={trait}>
+                        <td>{trait}</td>
+                        <td className="text-right">{count}</td>
                       </tr>
                     ))}
                   </tbody>

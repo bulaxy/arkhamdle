@@ -28,6 +28,14 @@
     }
   }
 
+  &.win-border {
+    border-color: var(--correct-color);
+  }
+
+  &.lose-border {
+    border-color: var(--wrong-color);
+  }
+
   p {
     font-size: 1.25rem;
     font-weight: 500;

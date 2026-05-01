@@ -59,30 +59,94 @@
   }
 }
 
+.trait-all-answers {
+  h3 {
+    margin-bottom: 15px;
+  }
+}
+
 .trait-card-display {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 15px;
   justify-content: center;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
 
   .trait-card {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    transition: all 0.3s ease;
+
+    &.missed {
+      opacity: 0.6;
+      filter: grayscale(100%);
+    }
+
+    &.guessed {
+      opacity: 1;
+      filter: none;
+    }
 
     img {
-      width: 100px;
-      border-radius: 0.25rem;
+      height: 200px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      
+      &.guessed {
+        border-color: #4ade80;
+      }
     }
 
     .card-name {
       font-size: 0.8rem;
-      margin-top: 0.25rem;
+      text-align: center;
+      margin-top: 5px;
+      max-width: 140px;
+      color: white;
+
+      &.guessed {
+        color: #4ade80;
+      }
+    }
+
+    .missed-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff4444;
+      font-weight: bold;
+      font-size: 1.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), -2px -2px 4px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+    }
+
+    .guessed-checkmark {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: #4ade80;
+      color: black;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid #1a1a2e;
+      z-index: 2;
     }
   }
 }
 
 .trait-guessed-count {
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.2rem;
   color: var(--text-secondary);
 }
 
@@ -131,10 +195,12 @@
 }
 
 .trait-correct-badge {
-  padding: 0.25rem 0.5rem;
-  background: var(--correct-color);
-  color: white;
-  border-radius: 0.25rem;
+  padding: 5px 10px;
+  background: #4ade80;
+  color: black;
+  border-radius: 15px;
+  margin: 5px;
+  display: inline-block;
   font-size: 0.85rem;
 }
 

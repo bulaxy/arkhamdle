@@ -24,7 +24,7 @@ export default function PicGuesser() {
   const gameCards = useMemo(() => {
     const filtered = filterForPicGuesser(filteredCards);
     // Apply type filters from settings
-    const typeFiltered = filtered.filter(c => settings.picGuesserTypeFilters[c.type_code] ?? true);
+    const typeFiltered = filtered.filter(c => settings.picGuesserTypeFilters[c.typeName] ?? true);
     const noDupes = filterDuplicateOfCode(typeFiltered);
     const deduped = deduplicateByEvaluationCriteria(
       noDupes,
@@ -49,13 +49,16 @@ export default function PicGuesser() {
 
   useEffect(() => {
     if (gameCardsWithPic.length > 0 && !answer) {
-      setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
+      const selected = gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)];
+      console.log('[PicGuesser] Answer:', selected);
+      setAnswer(selected);
       setOffsetX(Math.floor(Math.random() * 301) - 150);
       setOffsetY(Math.floor(Math.random() * 301));
     }
   }, [gameCardsWithPic, answer]);
 
   const submitGuess = (card: TransformedCard) => {
+    console.log('[PicGuesser] Guess:', card);
     if (guesses.some(g => g.id === card.id)) return;
     const newGuesses = [card, ...guesses];
     setGuesses(newGuesses);
@@ -87,9 +90,9 @@ export default function PicGuesser() {
     <div className="pic-container">
       <div className="pic-header">
         <h1>Pic Guesser</h1>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <div className="game-header-row">
           <p>Identify the card from a zoomed-in image.</p>
-        <p style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '4px' }}>Note: Some cards (mostly from newer expansions) may not have zoomed images supported yet.</p>
+        <p className="small-note">Note: Some cards (mostly from newer expansions) may not have zoomed images supported yet.</p>
           <GameInfoButton
             gameName="PicGuesser"
             gameRules={{
@@ -97,6 +100,7 @@ export default function PicGuesser() {
               cardTypes: 'Asset, Event, Skill (only)',
               answerEvaluation: 'Must match: Class, Pack, Name, XP',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
+              howToPlay: 'pic guesser - a small portion of the art is shown, each guess will zoom out. Hints available after 3 wrong guesses.'
             }}
           />
         </div>
@@ -105,10 +109,10 @@ export default function PicGuesser() {
       <div className="glass-panel pic-panel">
         {gameCardsWithPic.length < 10 ? (
           <div className="pic-error-panel">
-            <p className="settings-text" style={{ fontSize: '1.1rem', marginBottom: '10px' }}>
+            <p className="settings-text error-title">
               Not enough cards with pictures available ({gameCardsWithPic.length}/10 required).
             </p>
-            <p className="settings-text" style={{ opacity: 0.8 }}>
+            <p className="settings-text error-desc">
               Please increase your card pool in the Settings (e.g., enable more expansion packs or card types) to play this mode.
             </p>
           </div>
@@ -139,6 +143,12 @@ export default function PicGuesser() {
                   </button>
                 </div>
               </ResultPanel>
+            )}
+
+            {settings.enableHints && guesses.length >= 3 && !win && answer && (
+              <div className="pic-hint hint-text">
+                💡 Hint — Pack: {answer.pack_name}
+              </div>
             )}
 
             {!win && !gaveUp && (

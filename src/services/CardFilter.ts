@@ -1,5 +1,5 @@
-import type { TransformedCard, TransformedInvestigator, TypeCode, FactionCode } from '../types';
-import { TypeCode as TypeCodeEnum } from '../types/arkham';
+import type { TransformedCard, TypeName, FactionCode } from '../types';
+import { TypeName as TypeNameEnum } from '../types/arkham';
 
 /**
  * Faction color map for dropdown class color styling.
@@ -18,13 +18,6 @@ export const FACTION_COLORS: Record<FactionCode, string> = {
  */
 export function getCardFactionColors(card: TransformedCard): string[] {
   return card.class.map(fc => FACTION_COLORS[fc] || FACTION_COLORS.neutral);
-}
-
-/**
- * Get faction colors for a TransformedInvestigator.
- */
-export function getInvestigatorFactionColors(inv: TransformedInvestigator): string[] {
-  return inv.faction_code.map(fc => FACTION_COLORS[fc] || FACTION_COLORS.neutral);
 }
 
 /**
@@ -79,7 +72,7 @@ export const GAME_EVALUATION_CRITERIA = {
   picGuesser: { class: true, pack: true, name: true, xp: true },
   traitGuesserInv: { name: true, pack: true, class: true },
   traitGuesserCard: { name: true, pack: true, class: true },
-  storyGuesser: { class: true, pack: true, name: true, xp: true },
+  storyGuesser: { class: true, pack: true, name: true },
   flavourGuesser: { class: true, pack: true, name: true, xp: true },
   investigatordle: { name: true, pack: true, class: true },
 } as const;
@@ -89,7 +82,7 @@ export const GAME_EVALUATION_CRITERIA = {
  * Used for deduplication in dropdown.
  */
 function buildKeyFromCriteria(
-  card: TransformedCard | TransformedInvestigator,
+  card: TransformedCard,
   criteria: DeduplicateCriteria
 ): string {
   const parts: string[] = [];
@@ -108,11 +101,8 @@ function buildKeyFromCriteria(
   }
 
   if (criteria.class) {
-    if ('class' in card) {
-      parts.push(card.class.join(','));
-    } else if ('faction_code' in card) {
-      parts.push(card.faction_code?.join(',') || '');
-    }
+    const classes = 'class' in card ? card.class : [];
+    parts.push(classes.join(','));
   }
 
   if (criteria.xp) {
@@ -128,9 +118,9 @@ function buildKeyFromCriteria(
  * Removes duplicate entries from dropdown while keeping first occurrence.
  */
 export function deduplicateByEvaluationCriteria(
-  cards: (TransformedCard | TransformedInvestigator)[],
+  cards: TransformedCard[],
   criteria: DeduplicateCriteria
-): (TransformedCard | TransformedInvestigator)[] {
+): TransformedCard[] {
   const seen = new Set<string>();
   return cards.filter((card) => {
     const key = buildKeyFromCriteria(card, criteria);
@@ -145,7 +135,8 @@ export function deduplicateByEvaluationCriteria(
  * Includes all cards that passed global filters (packs, weaknesses, signatures).
  */
 export function filterForWordle(cards: TransformedCard[]): TransformedCard[] {
-  return cards;
+  const allowedTypes: TypeName[] = [TypeNameEnum.ASSET, TypeNameEnum.EVENT, TypeNameEnum.SKILL];
+  return cards.filter((card) => allowedTypes.includes(card.typeName));
 }
 
 /**
@@ -153,8 +144,7 @@ export function filterForWordle(cards: TransformedCard[]): TransformedCard[] {
  * Only Asset, Event, and Skill type cards.
  */
 export function filterForPicGuesser(cards: TransformedCard[]): TransformedCard[] {
-  const allowedTypes: TypeCode[] = [TypeCodeEnum.ASSET, TypeCodeEnum.EVENT, TypeCodeEnum.SKILL];
-  return cards.filter((card) => allowedTypes.includes(card.type_code));
+  return cards.filter((card) => card.typeName !== TypeNameEnum.INVESTIGATOR);
 }
 
 /**
@@ -163,9 +153,9 @@ export function filterForPicGuesser(cards: TransformedCard[]): TransformedCard[]
  */
 export function filterForFlavourGuesser(
   cards: TransformedCard[],
-  typeFilters: Record<TypeCode, boolean>
+  typeFilters: Record<TypeName, boolean>
 ): TransformedCard[] {
-  return cards.filter((card) => typeFilters[card.type_code] ?? true);
+  return cards.filter((card) => typeFilters[card.typeName] ?? true);
 }
 
 /**

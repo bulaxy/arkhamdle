@@ -1,30 +1,24 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
-import type { TransformedCard, TransformedInvestigator } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors, getInvestigatorFactionColors } from '../../services/CardFilter';
+import type { TransformedCard } from '../../types';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import './TraitGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
 export default function TraitGuesser() {
-  const { filteredCards, filteredInvestigators, settings } = useGameContext();
+  const { filteredCards, settings } = useGameContext();
   const [trait, setTrait] = useState<string>('');
   const [win, setWin] = useState(false);
-  const [correctGuesses, setCorrectGuesses] = useState<(TransformedCard | TransformedInvestigator)[]>([]);
-  const [wrongGuesses, setWrongGuesses] = useState<(TransformedCard | TransformedInvestigator)[]>([]);
+  const [correctGuesses, setCorrectGuesses] = useState<TransformedCard[]>([]);
+  const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
 
   const allPossibleOptions = useMemo(() => {
-    const cards = filterDuplicateOfCode(filteredCards);
-    const investigators = filterDuplicateOfCode(filteredInvestigators);
-    
-    return [
-      // TODO: Review thess filter
-      ...cards.filter(c => settings.traitGuesserTypeFilters[c.type_code] ?? true),
-      ...investigators.filter(_ => settings.traitGuesserTypeFilters['investigator'] ?? true)
-    ] as (TransformedCard | TransformedInvestigator)[];
-  }, [filteredCards, filteredInvestigators, settings.traitGuesserTypeFilters]);
+    const uniqueCards = filterDuplicateOfCode(filteredCards);
+    return uniqueCards.filter(c => settings.traitGuesserTypeFilters[c.typeName] ?? true);
+  }, [filteredCards, settings.traitGuesserTypeFilters]);
 
   const gameTraits = useMemo(() => {
     const traitCountMap = new Map<string, Set<string>>();
@@ -49,12 +43,12 @@ export default function TraitGuesser() {
     return deduplicateByEvaluationCriteria(
       allPossibleOptions,
       GAME_EVALUATION_CRITERIA.traitGuesserCard // Use consistent criteria
-    ) as (TransformedCard | TransformedInvestigator)[];
+    );
   }, [allPossibleOptions]);
 
   const dupeNames = useMemo(() => findDuplicateNames(gameOptions), [gameOptions]);
 
-  const getDisplayText = (item: TransformedCard | TransformedInvestigator): string => {
+  const getDisplayText = (item: TransformedCard): string => {
     if (!dupeNames.has(item.name)) return item.name;
     return `${item.name} (${item.pack_name})`;
   };
@@ -84,13 +78,16 @@ export default function TraitGuesser() {
     setWrongGuesses([]);
 
     if (gameTraits.length > 0) {
-      setTrait(gameTraits[Math.floor(Math.random() * gameTraits.length)]);
+      const selected = gameTraits[Math.floor(Math.random() * gameTraits.length)];
+      console.log('[TraitGuesser] Trait:', selected, '| Possible answers:', gameOptions.filter(c => c.traits.includes(selected)).map(c => c.fullName));
+      setTrait(selected);
     } else {
       setTrait('');
     }
   };
 
-  const submitGuess = (item: TransformedCard | TransformedInvestigator) => {
+  const submitGuess = (item: TransformedCard) => {
+    console.log('[TraitGuesser] Guess:', item);
     const hasTrait = item.traits.includes(trait);
 
     if (hasTrait) {
@@ -112,7 +109,7 @@ export default function TraitGuesser() {
     <div className="trait-container">
       <div className="trait-header">
         <h1>Trait Guesser</h1>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <div className="game-header-row">
           <p>Guess the cards and investigators by their shared traits!</p>
           <GameInfoButton
             gameName="TraitGuesser"
@@ -121,6 +118,7 @@ export default function TraitGuesser() {
               cardTypes: 'Configurable via Type Filters in Settings',
               answerEvaluation: 'Must match: Name, Pack, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter, Type filters',
+              howToPlay: 'A trait is shown (from any card based on filter) and name the specified number of cards (configurable in setting)'
             }}
           />
         </div>
@@ -134,37 +132,30 @@ export default function TraitGuesser() {
         {win || gaveUp ? (
           <ResultPanel win={win} item={null} onPlayAgain={resetGame} className="trait-result">
             <div className="trait-all-answers">
-              <h3 style={{ marginBottom: '15px' }}>All matches with "{trait}"</h3>
-              <div className="trait-card-display" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'center' }}>
+              <h3>All matches with "{trait}"</h3>
+              <div className="trait-card-display">
                 {possibleAnswers.map(ans => {
                   const isGuessed = correctGuesses.some(g => g.name === ans.name);
                   return (
                     <div 
                       key={ans.id} 
                       className={`trait-card ${isGuessed ? 'guessed' : 'missed'}`}
-                      style={{ 
-                        opacity: isGuessed ? 1 : 0.6, 
-                        filter: isGuessed ? 'none' : 'grayscale(100%)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        position: 'relative',
-                        transition: 'all 0.3s ease'
-                      }}
                     >
                       <img 
                         src={`https://arkhamdb.com${ans.imagesrc}`} 
                         alt={ans.name} 
-                        style={{ height: '200px', objectFit: 'contain', borderRadius: '8px', border: isGuessed ? '2px solid #4ade80' : '2px solid transparent' }}
+                        className={isGuessed ? 'guessed' : ''}
                       />
-                      <div className="card-name" style={{ fontSize: '0.8rem', textAlign: 'center', marginTop: '5px', maxWidth: '140px', color: isGuessed ? '#4ade80' : 'white' }}>
+                      <div className={`card-name ${isGuessed ? 'guessed' : ''}`}>
                         {ans.name}
                       </div>
                       {!isGuessed && (
-                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#ff4444', fontWeight: 'bold', fontSize: '1.5rem', textShadow: '2px 2px 4px rgba(0,0,0,0.8), -2px -2px 4px rgba(0,0,0,0.8)' }}>
+                        <div className="missed-overlay">
                           MISSED
                         </div>
                       )}
                       {isGuessed && (
-                        <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#4ade80', color: 'black', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: '2px solid #1a1a2e' }}>
+                        <div className="guessed-checkmark">
                           ✓
                         </div>
                       )}
@@ -176,7 +167,7 @@ export default function TraitGuesser() {
           </ResultPanel>
         ) : (
           <div>
-            <div className="trait-guessed-count" style={{ marginBottom: '15px', textAlign: 'center', fontSize: '1.2rem' }}>
+            <div className="trait-guessed-count">
               Guessed: {correctGuesses.length} / {requiredGuesses}
             </div>
             
@@ -189,13 +180,13 @@ export default function TraitGuesser() {
               giveUpThreshold={5}
               className="trait-input-wrapper"
               getDisplayText={getDisplayText}
-              getOptionColors={(item) => 'class' in item ? getCardFactionColors(item as TransformedCard) : getInvestigatorFactionColors(item as TransformedInvestigator)}
+              getOptionColors={getCardFactionColors}
             />
 
             {correctGuesses.length > 0 && (
               <div className="trait-correct-guesses">
                 {correctGuesses.map(g => (
-                  <div key={g.id} className="trait-correct-badge" style={{ background: '#4ade80', color: 'black', padding: '5px 10px', borderRadius: '15px', margin: '5px', display: 'inline-block' }}>
+                  <div key={g.id} className="trait-correct-badge">
                     ✓ {g.fullName}
                   </div>
                 ))}

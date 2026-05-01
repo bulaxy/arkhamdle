@@ -1,45 +1,49 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
-import type { TransformedInvestigator } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getInvestigatorFactionColors, filterDuplicateOfCode } from '../../services/CardFilter';
+import type { TransformedCard } from '../../types';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './Investigatordle.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-const ATTRIBUTES = ['faction_code', 'health', 'sanity', 'agility', 'combat', 'intellect', 'willpower', 'traits'] as const;
+const ATTRIBUTES = ['class', 'health', 'sanity', 'agility', 'combat', 'intellect', 'willpower', 'traits'] as const;
 
 export default function Investigatordle() {
-  const { filteredInvestigators } = useGameContext();
+  const { filteredCards } = useGameContext();
 
   const gameInvestigators = useMemo(() => {
-    const noDupes = filterDuplicateOfCode(filteredInvestigators);
+    const investigators = filteredCards.filter(c => c.typeName === 'investigator');
+    const noDupes = filterDuplicateOfCode(investigators);
     return deduplicateByEvaluationCriteria(
       noDupes,
       GAME_EVALUATION_CRITERIA.investigatordle
-    ) as TransformedInvestigator[];
-  }, [filteredInvestigators]);
+    );
+  }, [filteredCards]);
 
   const dupeNames = useMemo(() => findDuplicateNames(gameInvestigators), [gameInvestigators]);
 
-  const getDisplayText = (inv: TransformedInvestigator): string => {
+  const getDisplayText = (inv: TransformedCard): string => {
     if (!dupeNames.has(inv.name)) return inv.name;
     return `${inv.name} (${inv.subname})`;
   };
 
-  const [answer, setAnswer] = useState<TransformedInvestigator | null>(null);
-  const [guesses, setGuesses] = useState<TransformedInvestigator[]>([]);
+  const [answer, setAnswer] = useState<TransformedCard | null>(null);
+  const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
 
   useEffect(() => {
     if (gameInvestigators.length > 0 && !answer) {
-      setAnswer(gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)]);
+      const selected = gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)];
+      console.log('[Investigatordle] Answer:', selected);
+      setAnswer(selected);
     }
   }, [gameInvestigators, answer]);
 
-  const submitGuess = (card: TransformedInvestigator) => {
+  const submitGuess = (card: TransformedCard) => {
+    console.log('[Investigatordle] Guess:', card);
     if (guesses.some(g => g.id === card.id)) return;
     setGuesses([card, ...guesses]);
     if (card.id === answer?.id) {
@@ -54,7 +58,7 @@ export default function Investigatordle() {
     setAnswer(gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)]);
   };
 
-  const getAttributeClass = (guess: TransformedInvestigator, attr: typeof ATTRIBUTES[number]) => {
+  const getAttributeClass = (guess: TransformedCard, attr: typeof ATTRIBUTES[number]) => {
     if (!answer) return '';
     const ansVal = answer[attr];
     const guessVal = guess[attr];
@@ -72,7 +76,7 @@ export default function Investigatordle() {
   };
 
   // This was done this way as it was buggy with some mobile device not displaying the arrow correctly
-  const getArrow = (guess: TransformedInvestigator, attr: typeof ATTRIBUTES[number]) => {
+  const getArrow = (guess: TransformedCard, attr: typeof ATTRIBUTES[number]) => {
     if (!answer) return '';
     if (!['health', 'sanity', 'agility', 'combat', 'intellect', 'willpower'].includes(attr)) return '';
     const ansVal = answer[attr];
@@ -90,7 +94,7 @@ export default function Investigatordle() {
     <div className="investigator-container">
       <div className="investigator-header">
         <h1>Investigatordle</h1>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <div className="game-header-row">
           <p>Guess the Arkham Horror LCG Investigator</p>
           <GameInfoButton
             gameName="Investigatordle"
@@ -99,6 +103,7 @@ export default function Investigatordle() {
               cardTypes: 'Investigator (only)',
               answerEvaluation: 'Must match: Name, Pack, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
+              howToPlay: "Similar to wordle game, but investigator only.\nNote: Cards like TCU's Disappearance at the Twilight Estate's investigators and Yithian Body are all included if other filters allow."
             }}
           />
         </div>
@@ -116,7 +121,7 @@ export default function Investigatordle() {
             onGiveUp={() => setGaveUp(true)}
             giveUpThreshold={5}
             getDisplayText={getDisplayText}
-            getOptionColors={getInvestigatorFactionColors}
+            getOptionColors={getCardFactionColors}
           />
         </div>
       )}
@@ -146,7 +151,7 @@ export default function Investigatordle() {
                     {ATTRIBUTES.map(attr => (
                       <td key={attr} className={`investigator-guess-cell ${getAttributeClass(g, attr)}`}>
                         {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
-                        {getArrow(g, attr) && <span style={{ fontWeight: 'bold' }}>{getArrow(g, attr)}</span>}
+                        {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                       </td>
                     ))}
                   </tr>
@@ -167,7 +172,7 @@ export default function Investigatordle() {
                   <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
                     <span className="label">{attr.replace('_', ' ')}</span>
                     {Array.isArray(g[attr]) && (g[attr] as any[]).length > 1 ? (g[attr] as any[]).join(', ') : g[attr]}
-                    {getArrow(g, attr) && <span style={{ fontWeight: 'bold' }}>{getArrow(g, attr)}</span>}
+                    {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                   </div>
                 ))}
               </div>

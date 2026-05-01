@@ -131,3 +131,27 @@ body {
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+/* Global Utility Classes to replace inline styles */
+.game-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.arrow-bold {
+  font-weight: bold;
+}
+
+.hint-text {
+  text-align: center;
+  margin-top: 10px;
+  color: #ffeb3b; /* Amber/Yellow for hints */
+}
+
+.small-note {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-top: 4px;
+}

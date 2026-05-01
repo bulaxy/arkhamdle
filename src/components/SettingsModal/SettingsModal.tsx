@@ -7,6 +7,7 @@ import "./SettingsModal.scss";
 import StoryGuesserSection from "./StoryGuesserSection";
 import FlavourGuesserTypeFiltersSection from "./FlavourGuesserTypeFiltersSection";
 import TraitGuesserSection from "./TraitGuesserSection";
+import GeneralSettingsSection from "./GeneralSettingsSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings, refreshData } = useGameContext();
@@ -26,6 +27,12 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <div className="modal-body">
+          <GeneralSettingsSection
+            isOpen={openSection === "general"}
+            onToggle={() => toggleSection("general")}
+            onClose={onClose}
+          />
+
           <PackFiltersSection
             packs={packs}
             filteredPacks={settings.filteredPacks}
@@ -134,39 +141,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
               })
             }
           />
-
           <div className="footer-buttons">
-            <button
-              className={`premium-btn ${settings.includeEncounter ? "active" : ""}`}
-              onClick={async () => {
-                const newValue = !settings.includeEncounter;
-                if (newValue) {
-                  const confirmed = window.confirm(
-                    "Campaign cards will add about 8MB to the data download (11MB total). This might be expensive on mobile data. Are you sure you want to continue?"
-                  );
-                  if (confirmed) {
-                    setSettings({ ...settings, includeEncounter: true });
-                    refreshData(true);
-                  }
-                } else {
-                  setSettings({ ...settings, includeEncounter: false });
-                  refreshData(false);
-                }
-              }}
-            >
-              <RefreshCw size={18} className={settings.includeEncounter ? "spin-once" : ""} />
-              {settings.includeEncounter ? "Unload Campaign Cards" : "Load Campaign Cards (11MB)"}
-            </button>
-
-            <button
-              className="premium-btn"
-              onClick={async () => {
-                await refreshData();
-                onClose();
-              }}
-            >
-              <RefreshCw size={18} /> Force Refresh Data
-            </button>
             <button className="premium-btn" onClick={onClose}>
               Close Settings
             </button>

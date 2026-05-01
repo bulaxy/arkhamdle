@@ -19,7 +19,7 @@ export const PACK_STRUCTURE: Record<string, string[]> = {
   parallel: ["aof", "aon", "aon_encounter", "bad", "bad_encounter", "btb", "btb_encounter", "enc", "enc_encounter", "hfa", "ltr", "ltr_encounter", "otr", "pap", "ptr", "rod", "rod_encounter", "rop", "rop_encounter", "rtr", "rtr_encounter"],
   return: ["rtdwl", "rtdwl_encounter", "rtnotz", "rtnotz_encounter", "rtptc", "rtptc_encounter", "rttcu", "rttcu_encounter", "rttfa", "rttfa_encounter"],
   investigator: ["and", "car", "har", "jac", "mar", "mig", "nat", "ste", "tom", "win"],
-  side: ["blbe", "blbe_encounter", "blob_encounter", "coh_encounter", "cotr_encounter", "film_fatale_encounter", "fof_encounter", "guardians_encounter", "hotel_encounter", "lol_encounter", "mtt_encounter", "tmg_encounter", "wog_encounter"],
+  side: ["blbe", "blbe_encounter", "blob", "blob_encounter", "coh", "coh_encounter", "cotr", "cotr_encounter", "film_fatale", "film_fatale_encounter", "fof", "fof_encounter", "guardians", "guardians_encounter", "hotel", "hotel_encounter", "lol", "lol_encounter", "mtt", "mtt_encounter", "tmg", "tmg_encounter", "wog", "wog_encounter"],
   promo: ["bob", "dre", "hoth", "iotv", "promo", "tdg", "tdor", "tftbw"],
 };
 
@@ -31,7 +31,7 @@ export function buildPackCodeToGroupMap(): Map<string, string> {
   const map = new Map<string, string>();
   for (const [groupName, packCodes] of Object.entries(PACK_STRUCTURE)) {
     for (const code of packCodes) {
-      map.set(code, groupName);
+      map.set(code, groupName.toUpperCase());
     }
   }
   return map;
