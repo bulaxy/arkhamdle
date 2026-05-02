@@ -1,5 +1,37 @@
-import type { TransformedCard, TypeName, FactionCode } from '../types';
+import type { TransformedCard, TypeName, FactionCode, AppSettings } from '../types';
 import { TypeName as TypeNameEnum } from '../types/arkham';
+
+/**
+ * Filter cards based on game-specific or global settings.
+ */
+export function filterBySettings(
+  cards: TransformedCard[],
+  settings: AppSettings,
+  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser'
+): TransformedCard[] {
+  const useGlobal = (settings as any)[`${gameId}UseGlobalPackFilter`] ?? true;
+  
+  const packsToFilter = useGlobal 
+    ? settings.filteredPacks 
+    : ((settings as any)[`${gameId}FilteredPacks`] || []);
+    
+  const incWeakness = useGlobal 
+    ? settings.includeWeakness 
+    : ((settings as any)[`${gameId}IncludeWeakness`] ?? false);
+    
+  const incSignatures = useGlobal 
+    ? settings.includeSignatures 
+    : ((settings as any)[`${gameId}IncludeSignatures`] ?? true);
+
+  return cards.filter((card) => {
+    const passPack = packsToFilter.length === 0 || !packsToFilter.includes(card.pack_name);
+    const isWeakness = card.subtype_code === "basicweakness" || card.subtype_code === "weakness";
+    const passWeakness = incWeakness || !isWeakness;
+    const isSignature = !!card.restrictions?.investigator;
+    const passSignature = incSignatures || !isSignature;
+    return passPack && passWeakness && passSignature;
+  });
+}
 
 /**
  * Faction color map for dropdown class color styling.

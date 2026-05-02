@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
 import type { TransformedCard } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode } from '../../services/CardFilter';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './Investigatordle.scss';
@@ -11,16 +11,17 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 const ATTRIBUTES = ['class', 'health', 'sanity', 'agility', 'combat', 'intellect', 'willpower', 'traits'] as const;
 
 export default function Investigatordle() {
-  const { filteredCards } = useGameContext();
+  const { cards, settings } = useGameContext();
 
   const gameInvestigators = useMemo(() => {
-    const investigators = filteredCards.filter(c => c.typeName === 'investigator');
+    const baseFiltered = filterBySettings(cards, settings, 'investigatordle');
+    const investigators = baseFiltered.filter(c => c.typeName === 'investigator');
     const noDupes = filterDuplicateOfCode(investigators);
     return deduplicateByEvaluationCriteria(
       noDupes,
       GAME_EVALUATION_CRITERIA.investigatordle
     );
-  }, [filteredCards]);
+  }, [cards, settings]);
 
   const dupeNames = useMemo(() => findDuplicateNames(gameInvestigators), [gameInvestigators]);
 

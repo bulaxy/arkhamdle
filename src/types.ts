@@ -26,6 +26,43 @@ export interface AppSettings {
   traitGuesserRequirementValue: number;
   includeEncounter: boolean;
   enableHints: boolean;
+  // Global Pack Filter (already have filteredPacks, includeWeakness, includeSignatures)
+  
+  // Wordle / Classic Mode
+  wordleUseGlobalPackFilter: boolean;
+  wordleFilteredPacks: string[];
+  wordleIncludeWeakness: boolean;
+  wordleIncludeSignatures: boolean;
+
+  // Pic Guesser
+  picGuesserUseGlobalPackFilter: boolean;
+  picGuesserFilteredPacks: string[];
+  picGuesserIncludeWeakness: boolean;
+  picGuesserIncludeSignatures: boolean;
+
+  // Investigatordle
+  investigatordleUseGlobalPackFilter: boolean;
+  investigatordleFilteredPacks: string[];
+  investigatordleIncludeWeakness: boolean;
+  investigatordleIncludeSignatures: boolean;
+
+  // Story Guesser
+  storyGuesserUseGlobalPackFilter: boolean;
+  storyGuesserFilteredPacks: string[];
+  storyGuesserIncludeWeakness: boolean;
+  storyGuesserIncludeSignatures: boolean;
+
+  // Trait Guesser
+  traitGuesserUseGlobalPackFilter: boolean;
+  traitGuesserFilteredPacks: string[];
+  traitGuesserIncludeWeakness: boolean;
+  traitGuesserIncludeSignatures: boolean;
+
+  // Flavour Guesser
+  flavourGuesserUseGlobalPackFilter: boolean;
+  flavourGuesserFilteredPacks: string[];
+  flavourGuesserIncludeWeakness: boolean;
+  flavourGuesserIncludeSignatures: boolean;
 }
 
 export interface TransformedCard {

@@ -8,10 +8,12 @@ import StoryGuesserSection from "./StoryGuesserSection";
 import FlavourGuesserTypeFiltersSection from "./FlavourGuesserTypeFiltersSection";
 import TraitGuesserSection from "./TraitGuesserSection";
 import GeneralSettingsSection from "./GeneralSettingsSection";
+import WordleSection from "./WordleSection";
+import InvestigatordleSection from "./InvestigatordleSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings } = useGameContext();
-  const [openSection, setOpenSection] = useState<string>(""); // 'packs', 'picGuesser', 'storyGuesser', 'traitGuesser'
+  const [openSection, setOpenSection] = useState<string>("");
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? "" : section);
@@ -56,91 +58,165 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             }
           />
 
+          <WordleSection
+            isOpen={openSection === "wordle"}
+            onToggle={() => toggleSection("wordle")}
+            packs={packs}
+            useGlobalPackFilter={settings.wordleUseGlobalPackFilter}
+            filteredPacks={settings.wordleFilteredPacks}
+            includeWeakness={settings.wordleIncludeWeakness}
+            includeSignatures={settings.wordleIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, wordleUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.wordleFilteredPacks.includes(pack)
+                ? settings.wordleFilteredPacks.filter(p => p !== pack)
+                : [...settings.wordleFilteredPacks, pack];
+              setSettings({ ...settings, wordleFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, wordleFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, wordleFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, wordleIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, wordleIncludeSignatures: value })}
+          />
+
           <PicGuesserSection
-            difficulty={settings.picGuesserDifficulty}
-            typeFilters={settings.picGuesserTypeFilters}
             isOpen={openSection === "picGuesser"}
             onToggle={() => toggleSection("picGuesser")}
-            onDifficultyChange={(diff) =>
-              setSettings({ ...settings, picGuesserDifficulty: diff })
-            }
-            onTypeFilterChange={(typeCode, include) =>
-              setSettings({
-                ...settings,
-                picGuesserTypeFilters: {
-                  ...settings.picGuesserTypeFilters,
-                  [typeCode]: include,
-                },
-              })
-            }
+            difficulty={settings.picGuesserDifficulty}
+            typeFilters={settings.picGuesserTypeFilters}
+            onDifficultyChange={(diff) => setSettings({ ...settings, picGuesserDifficulty: diff })}
+            onTypeFilterChange={(typeCode, include) => setSettings({
+              ...settings,
+              picGuesserTypeFilters: { ...settings.picGuesserTypeFilters, [typeCode]: include }
+            })}
+            packs={packs}
+            useGlobalPackFilter={settings.picGuesserUseGlobalPackFilter}
+            filteredPacks={settings.picGuesserFilteredPacks}
+            includeWeakness={settings.picGuesserIncludeWeakness}
+            includeSignatures={settings.picGuesserIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, picGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.picGuesserFilteredPacks.includes(pack)
+                ? settings.picGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.picGuesserFilteredPacks, pack];
+              setSettings({ ...settings, picGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, picGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, picGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, picGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, picGuesserIncludeSignatures: value })}
+          />
+
+          <InvestigatordleSection
+            isOpen={openSection === "investigatordle"}
+            onToggle={() => toggleSection("investigatordle")}
+            packs={packs}
+            useGlobalPackFilter={settings.investigatordleUseGlobalPackFilter}
+            filteredPacks={settings.investigatordleFilteredPacks}
+            includeWeakness={settings.investigatordleIncludeWeakness}
+            includeSignatures={settings.investigatordleIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, investigatordleUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.investigatordleFilteredPacks.includes(pack)
+                ? settings.investigatordleFilteredPacks.filter(p => p !== pack)
+                : [...settings.investigatordleFilteredPacks, pack];
+              setSettings({ ...settings, investigatordleFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, investigatordleFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, investigatordleFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, investigatordleIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, investigatordleIncludeSignatures: value })}
           />
 
           <StoryGuesserSection
+            isOpen={openSection === "storyGuesser"}
+            onToggle={() => toggleSection("storyGuesser")}
             scrambleWords={settings.storyGuesserScrambleWords}
             scrambleLetters={settings.storyGuesserScrambleLetters}
             hideName={settings.storyGuesserHideName}
             sliceScale={settings.storyGuesserSliceScale}
-            isOpen={openSection === "storyGuesser"}
-            onToggle={() => toggleSection("storyGuesser")}
-            onScrambleWordsChange={(value) =>
-              setSettings({ ...settings, storyGuesserScrambleWords: value })
-            }
-            onScrambleLettersChange={(value) =>
-              setSettings({ ...settings, storyGuesserScrambleLetters: value })
-            }
-            onHideNameChange={(value) =>
-              setSettings({ ...settings, storyGuesserHideName: value })
-            }
-            onSliceScaleChange={(value) =>
-              setSettings({ ...settings, storyGuesserSliceScale: value })
-            }
-          />
-
-          <FlavourGuesserTypeFiltersSection
-            typeFilters={settings.flavourGuesserTypeFilters}
-            isOpen={openSection === "flavourGuesser"}
-            onToggle={() => toggleSection("flavourGuesser")}
-            onTypeFilterChange={(typeCode, include) =>
-              setSettings({
-                ...settings,
-                flavourGuesserTypeFilters: {
-                  ...settings.flavourGuesserTypeFilters,
-                  [typeCode]: include,
-                },
-              })
-            }
+            onScrambleWordsChange={(value) => setSettings({ ...settings, storyGuesserScrambleWords: value })}
+            onScrambleLettersChange={(value) => setSettings({ ...settings, storyGuesserScrambleLetters: value })}
+            onHideNameChange={(value) => setSettings({ ...settings, storyGuesserHideName: value })}
+            onSliceScaleChange={(value) => setSettings({ ...settings, storyGuesserSliceScale: value })}
+            packs={packs}
+            useGlobalPackFilter={settings.storyGuesserUseGlobalPackFilter}
+            filteredPacks={settings.storyGuesserFilteredPacks}
+            includeWeakness={settings.storyGuesserIncludeWeakness}
+            includeSignatures={settings.storyGuesserIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, storyGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.storyGuesserFilteredPacks.includes(pack)
+                ? settings.storyGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.storyGuesserFilteredPacks, pack];
+              setSettings({ ...settings, storyGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, storyGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, storyGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, storyGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, storyGuesserIncludeSignatures: value })}
           />
 
           <TraitGuesserSection
+            isOpen={openSection === "traitGuesser"}
+            onToggle={() => toggleSection("traitGuesser")}
             minCards={settings.traitGuesserMinCards}
             maxCards={settings.traitGuesserMaxCards}
             requirementType={settings.traitGuesserRequirementType}
             requirementValue={settings.traitGuesserRequirementValue}
             typeFilters={settings.traitGuesserTypeFilters}
-            isOpen={openSection === "traitGuesser"}
-            onToggle={() => toggleSection("traitGuesser")}
-            onMinCardsChange={(value) =>
-              setSettings({ ...settings, traitGuesserMinCards: value })
-            }
-            onMaxCardsChange={(value) =>
-              setSettings({ ...settings, traitGuesserMaxCards: value })
-            }
-            onRequirementTypeChange={(value) =>
-              setSettings({ ...settings, traitGuesserRequirementType: value })
-            }
-            onRequirementValueChange={(value) =>
-              setSettings({ ...settings, traitGuesserRequirementValue: value })
-            }
-            onTypeFilterChange={(typeCode, include) =>
-              setSettings({
-                ...settings,
-                traitGuesserTypeFilters: {
-                  ...settings.traitGuesserTypeFilters,
-                  [typeCode]: include,
-                },
-              })
-            }
+            onMinCardsChange={(value) => setSettings({ ...settings, traitGuesserMinCards: value })}
+            onMaxCardsChange={(value) => setSettings({ ...settings, traitGuesserMaxCards: value })}
+            onRequirementTypeChange={(value) => setSettings({ ...settings, traitGuesserRequirementType: value })}
+            onRequirementValueChange={(value) => setSettings({ ...settings, traitGuesserRequirementValue: value })}
+            onTypeFilterChange={(typeCode, include) => setSettings({
+              ...settings,
+              traitGuesserTypeFilters: { ...settings.traitGuesserTypeFilters, [typeCode]: include }
+            })}
+            packs={packs}
+            useGlobalPackFilter={settings.traitGuesserUseGlobalPackFilter}
+            filteredPacks={settings.traitGuesserFilteredPacks}
+            includeWeakness={settings.traitGuesserIncludeWeakness}
+            includeSignatures={settings.traitGuesserIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, traitGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.traitGuesserFilteredPacks.includes(pack)
+                ? settings.traitGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.traitGuesserFilteredPacks, pack];
+              setSettings({ ...settings, traitGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, traitGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, traitGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, traitGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, traitGuesserIncludeSignatures: value })}
           />
+
+          <FlavourGuesserTypeFiltersSection
+            isOpen={openSection === "flavourGuesser"}
+            onToggle={() => toggleSection("flavourGuesser")}
+            typeFilters={settings.flavourGuesserTypeFilters}
+            onTypeFilterChange={(typeCode, include) => setSettings({
+              ...settings,
+              flavourGuesserTypeFilters: { ...settings.flavourGuesserTypeFilters, [typeCode]: include }
+            })}
+            packs={packs}
+            useGlobalPackFilter={settings.flavourGuesserUseGlobalPackFilter}
+            filteredPacks={settings.flavourGuesserFilteredPacks}
+            includeWeakness={settings.flavourGuesserIncludeWeakness}
+            includeSignatures={settings.flavourGuesserIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, flavourGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.flavourGuesserFilteredPacks.includes(pack)
+                ? settings.flavourGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.flavourGuesserFilteredPacks, pack];
+              setSettings({ ...settings, flavourGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, flavourGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, flavourGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, flavourGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, flavourGuesserIncludeSignatures: value })}
+          />
+
           <div className="footer-buttons">
             <button className="premium-btn" onClick={onClose}>
               Close Settings

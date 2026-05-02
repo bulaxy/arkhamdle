@@ -1,24 +1,28 @@
+# Arkhamdle
 
-- Encounter Card / Story / Location Card guessing related game, got an idea, need to look further (blurred photo + some clue to guess the which pack is it from, with additional challenge )
-- Hint System Review
-- Give Up/Answer Review Section Review
+A modern, "vib-coded" wordle-style game for the Arkham Horror: The Card Game community.
 
-- Review these
-```
-export default function TraitGuesser() {
-  const { filteredCards, filteredInvestigators, settings } = useGameContext();
-  const [trait, setTrait] = useState<string>('');
-  const [win, setWin] = useState(false);
-  const [correctGuesses, setCorrectGuesses] = useState<(TransformedCard | TransformedInvestigator)[]>([]);
-  const [wrongGuesses, setWrongGuesses] = useState<(TransformedCard | TransformedInvestigator)[]>([]);
-  const [gaveUp, setGaveUp] = useState(false);
+## 🌟 About the Project
 
-  const allPossibleOptions = useMemo(() => {
-    const cards = filterDuplicateOfCode(filteredCards);
-    const investigators = filterDuplicateOfCode(filteredInvestigators);
-    
-    return [
-      // TODO: Review thess filter
-      ...cards.filter(c => settings.traitGuesserTypeFilters[c.type_code] ?? true),
-      ...investigators.filter(_ => settings.traitGuesserTypeFilters['investigator'] ?? true)
-      ```
+Arkhamdle is a passion project built with a "vib-coded" philosophy—focusing on smooth interactions, thematic aesthetics, and a premium experience for Arkham Horror fans.
+
+## 📊 Data Source
+
+All card data and information are sourced from the [ArkhamDB API](https://arkhamdb.com/api/doc). We are grateful to the ArkhamDB team for their incredible work in maintaining the community's primary data resource.
+
+> [!NOTE]
+> **Data Accuracy**: It is currently known that some card data may be incorrect or inconsistently formatted due to variations in the source data or processing. We are actively working on refining the data layer.
+
+## 🚀 Future Plans
+
+The project is currently in active development. While it's living here for now, it will be hosted on a **proper, dedicated site** in the very near future. Stay tuned!
+
+## 🐛 Feedback & Contributions
+
+We love feedback! If you encounter any bugs, weird data issues, or have suggestions for new features:
+- Please feel free to **open an issue** or **report a bug**.
+- Community contributions and reports help make the game better for everyone.
+
+---
+
+*Happy investigating!*

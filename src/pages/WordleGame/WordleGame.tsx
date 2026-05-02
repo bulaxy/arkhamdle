@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
 import type { TransformedCard } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle } from '../../services/CardFilter';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './WordleGame.scss';
@@ -11,21 +11,22 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 const ATTRIBUTES = ['typeName', 'class', 'xp', 'traits', 'slot', 'cost', 'agility', 'combat', 'intellect', 'wild', 'willpower'] as const;
 
 export default function WordleGame() {
-  const { filteredCards } = useGameContext();
+  const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
 
   const gameCards = useMemo(() => {
-    const noDupes = filterDuplicateOfCode(filteredCards);
+    const baseFiltered = filterBySettings(cards, settings, 'wordle');
+    const noDupes = filterDuplicateOfCode(baseFiltered);
     const wordleCards = filterForWordle(noDupes);
     const deduped = deduplicateByEvaluationCriteria(
       wordleCards,
       GAME_EVALUATION_CRITERIA.wordle
     );
     return deduped as TransformedCard[];
-  }, [filteredCards]);
+  }, [cards, settings]);
 
   // Pre-compute which names appear more than once for display text logic
   const dupeNames = useMemo(() => findDuplicateNames(gameCards), [gameCards]);

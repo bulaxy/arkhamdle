@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
 import type { TransformedCard } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode } from '../../services/CardFilter';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './StoryGuesser.scss';
@@ -9,17 +9,18 @@ import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
 export default function StoryGuesser() {
-  const { filteredCards, settings } = useGameContext();
+  const { cards, settings } = useGameContext();
 
   const uniqueInvestigators = useMemo(() => {
-    const investigators = filteredCards.filter(c => c.typeName === 'investigator');
+    const baseFiltered = filterBySettings(cards, settings, 'storyGuesser');
+    const investigators = baseFiltered.filter(c => c.typeName === 'investigator');
     const withFlavor = investigators.filter(inv => inv.back_flavor);
     const noDupes = filterDuplicateOfCode(withFlavor);
     return deduplicateByEvaluationCriteria(
       noDupes,
       GAME_EVALUATION_CRITERIA.storyGuesser
     );
-  }, [filteredCards]);
+  }, [cards, settings]);
 
   const dupeNames = useMemo(() => findDuplicateNames(uniqueInvestigators), [uniqueInvestigators]);
 

@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
 import type { TransformedCard } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors } from '../../services/CardFilter';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import './TraitGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
 export default function TraitGuesser() {
-  const { filteredCards, settings } = useGameContext();
+  const { cards, settings } = useGameContext();
   const [trait, setTrait] = useState<string>('');
   const [win, setWin] = useState(false);
   const [correctGuesses, setCorrectGuesses] = useState<TransformedCard[]>([]);
@@ -16,9 +16,10 @@ export default function TraitGuesser() {
   const [gaveUp, setGaveUp] = useState(false);
 
   const allPossibleOptions = useMemo(() => {
-    const uniqueCards = filterDuplicateOfCode(filteredCards);
+    const baseFiltered = filterBySettings(cards, settings, 'traitGuesser');
+    const uniqueCards = filterDuplicateOfCode(baseFiltered);
     return uniqueCards.filter(c => settings.traitGuesserTypeFilters[c.typeName] ?? true);
-  }, [filteredCards, settings.traitGuesserTypeFilters]);
+  }, [cards, settings]);
 
   const gameTraits = useMemo(() => {
     const traitCountMap = new Map<string, Set<string>>();

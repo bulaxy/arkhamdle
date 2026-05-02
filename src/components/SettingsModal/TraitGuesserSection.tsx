@@ -4,6 +4,7 @@ import { useGameContext } from "../../context/GameContext";
 import { filterDuplicateOfCode } from "../../services/CardFilter";
 import type { TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
+import PackFilterControls from "./PackFilterControls";
 
 interface TraitGuesserSectionProps {
   minCards: number;
@@ -18,6 +19,18 @@ interface TraitGuesserSectionProps {
   onRequirementTypeChange: (value: 'All' | 'Percentage' | 'Fixed Number') => void;
   onRequirementValueChange: (value: number) => void;
   onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
+  // Pack Filter Props
+  packs: string[];
+  useGlobalPackFilter: boolean;
+  filteredPacks: string[];
+  includeWeakness: boolean;
+  includeSignatures: boolean;
+  onUseGlobalPackFilterChange: (value: boolean) => void;
+  onPackToggle: (pack: string) => void;
+  onSelectAll: () => void;
+  onFilterAll: () => void;
+  onIncludeWeaknessChange: (value: boolean) => void;
+  onIncludeSignaturesChange: (value: boolean) => void;
 }
 
 const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
@@ -49,6 +62,17 @@ export default function TraitGuesserSection({
   onRequirementTypeChange,
   onRequirementValueChange,
   onTypeFilterChange,
+  packs,
+  useGlobalPackFilter,
+  filteredPacks,
+  includeWeakness,
+  includeSignatures,
+  onUseGlobalPackFilterChange,
+  onPackToggle,
+  onSelectAll,
+  onFilterAll,
+  onIncludeWeaknessChange,
+  onIncludeSignaturesChange,
 }: TraitGuesserSectionProps) {
   const { filteredCards } = useGameContext();
   const [showTopTraits, setShowTopTraits] = useState(false);
@@ -103,46 +127,89 @@ export default function TraitGuesserSection({
       </div>
       {isOpen && (
         <div className="settings-section-content settings-column">
-          <p className="settings-text">Configure rules for the Trait Guesser mode.</p>
-          
-          <div className="settings-group">
-            <label className="settings-text">Min Cards with Trait</label>
-            <input
-              type="number"
-              min="1"
-              value={minCards}
-              onChange={(e) => onMinCardsChange(Math.max(1, parseInt(e.target.value) || 1))}
-              className="premium-input"
-            />
+          <PackFilterControls
+            packs={packs}
+            useGlobalFilter={useGlobalPackFilter}
+            filteredPacks={filteredPacks}
+            includeWeakness={includeWeakness}
+            includeSignatures={includeSignatures}
+            onUseGlobalFilterChange={onUseGlobalPackFilterChange}
+            onPackToggle={onPackToggle}
+            onSelectAll={onSelectAll}
+            onFilterAll={onFilterAll}
+            onIncludeWeaknessChange={onIncludeWeaknessChange}
+            onIncludeSignaturesChange={onIncludeSignaturesChange}
+            title="Card Filters"
+          />
+
+          <hr className="settings-divider" />
+
+          <div>
+            <h4>Game Rules</h4>
+            <p className="settings-text">Configure rules for the Trait Guesser mode.</p>
+            
+            <div className="settings-group">
+              <label className="settings-text">Min Cards with Trait</label>
+              <input
+                type="number"
+                min="1"
+                value={minCards}
+                onChange={(e) => onMinCardsChange(Math.max(1, parseInt(e.target.value) || 1))}
+                className="premium-input"
+              />
+            </div>
+
+            <div className="settings-group">
+              <label className="settings-text">Max Cards with Trait (0 for no limit)</label>
+              <p className="settings-text small">under 20 will start getting quite challenging</p>
+              <input
+                type="number"
+                min="0"
+                value={maxCards}
+                onChange={(e) => onMaxCardsChange(Math.max(0, parseInt(e.target.value) || 0))}
+                className="premium-input"
+              />
+            </div>
+
+            <div className="settings-group">
+              <label className="settings-text">Requirement Type</label>
+              <select 
+                value={requirementType}
+                onChange={(e) => onRequirementTypeChange(e.target.value as 'All' | 'Percentage' | 'Fixed Number')}
+                className="premium-input"
+              >
+                <option value="Fixed Number">Fixed Number</option>
+                <option value="Percentage">Percentage</option>
+                <option value="All">Name All</option>
+              </select>
+            </div>
+
+            {requirementType !== 'All' && (
+              <div className="settings-group">
+                <label className="settings-text">
+                  {requirementType === 'Percentage' ? 'Percentage Required (%)' : 'Number Required'}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={requirementType === 'Percentage' ? "100" : undefined}
+                  value={requirementValue}
+                  onChange={(e) => onRequirementValueChange(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="premium-input"
+                />
+                {impossibleValidation && (
+                  <div className="settings-warning">
+                    Warning: You require guessing {requirementValue} cards, but the maximum trait size is set to {maxCards}. This makes the game impossible to win.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="settings-group">
-            <label className="settings-text">Max Cards with Trait (0 for no limit)</label>
-            <p className="settings-text small">under 20 will start getting quite challenging</p>
-            <input
-              type="number"
-              min="0"
-              value={maxCards}
-              onChange={(e) => onMaxCardsChange(Math.max(0, parseInt(e.target.value) || 0))}
-              className="premium-input"
-            />
-          </div>
+          <hr className="settings-divider" />
 
-          <div className="settings-group">
-            <label className="settings-text">Requirement Type</label>
-            <select 
-              value={requirementType}
-              onChange={(e) => onRequirementTypeChange(e.target.value as 'All' | 'Percentage' | 'Fixed Number')}
-              className="premium-input"
-            >
-              <option value="Fixed Number">Fixed Number</option>
-              <option value="Percentage">Percentage</option>
-              <option value="All">Name All</option>
-            </select>
-          </div>
-
-          <div className="mt-5">
-            <label className="settings-text">Type Filters</label>
+          <div>
+            <h4>Card Types</h4>
             <p className="settings-text small mb-8">
               Select which card types to include.
             </p>
@@ -160,27 +227,6 @@ export default function TraitGuesserSection({
               ))}
             </div>
           </div>
-
-          {requirementType !== 'All' && (
-            <div className="settings-group">
-              <label className="settings-text">
-                {requirementType === 'Percentage' ? 'Percentage Required (%)' : 'Number Required'}
-              </label>
-              <input
-                type="number"
-                min="1"
-                max={requirementType === 'Percentage' ? "100" : undefined}
-                value={requirementValue}
-                onChange={(e) => onRequirementValueChange(Math.max(1, parseInt(e.target.value) || 1))}
-                className="premium-input"
-              />
-              {impossibleValidation && (
-                <div className="settings-warning">
-                  Warning: You require guessing {requirementValue} cards, but the maximum trait size is set to {maxCards}. This makes the game impossible to win.
-                </div>
-              )}
-            </div>
-          )}
 
           <div className="mt-10">
             <button 
@@ -216,7 +262,6 @@ export default function TraitGuesserSection({
               </div>
             )}
           </div>
-
         </div>
       )}
     </div>

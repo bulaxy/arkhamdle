@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
+import PackFilterControls from "./PackFilterControls";
 
 type Difficulty = "Hard" | "Normal" | "Easy";
 
@@ -11,6 +12,18 @@ interface PicGuesserSectionProps {
   onToggle: () => void;
   onDifficultyChange: (diff: Difficulty) => void;
   onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
+  // Pack Filter Props
+  packs: string[];
+  useGlobalPackFilter: boolean;
+  filteredPacks: string[];
+  includeWeakness: boolean;
+  includeSignatures: boolean;
+  onUseGlobalPackFilterChange: (value: boolean) => void;
+  onPackToggle: (pack: string) => void;
+  onSelectAll: () => void;
+  onFilterAll: () => void;
+  onIncludeWeaknessChange: (value: boolean) => void;
+  onIncludeSignaturesChange: (value: boolean) => void;
 }
 
 const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
@@ -36,6 +49,17 @@ export default function PicGuesserSection({
   onToggle,
   onDifficultyChange,
   onTypeFilterChange,
+  packs,
+  useGlobalPackFilter,
+  filteredPacks,
+  includeWeakness,
+  includeSignatures,
+  onUseGlobalPackFilterChange,
+  onPackToggle,
+  onSelectAll,
+  onFilterAll,
+  onIncludeWeaknessChange,
+  onIncludeSignaturesChange,
 }: PicGuesserSectionProps) {
   const typeCodes: TypeName[] = [
     TypeNameEnum.ASSET,
@@ -56,7 +80,25 @@ export default function PicGuesserSection({
       </div>
       {isOpen && (
         <div className="settings-section-content settings-column">
+          <PackFilterControls
+            packs={packs}
+            useGlobalFilter={useGlobalPackFilter}
+            filteredPacks={filteredPacks}
+            includeWeakness={includeWeakness}
+            includeSignatures={includeSignatures}
+            onUseGlobalFilterChange={onUseGlobalPackFilterChange}
+            onPackToggle={onPackToggle}
+            onSelectAll={onSelectAll}
+            onFilterAll={onFilterAll}
+            onIncludeWeaknessChange={onIncludeWeaknessChange}
+            onIncludeSignaturesChange={onIncludeSignaturesChange}
+            title="Card Filters"
+          />
+
+          <hr className="settings-divider" />
+
           <div>
+            <h4>Difficulty</h4>
             <p className="settings-text mb-8">
               How much it zooms out each time you guess incorrectly.
             </p>
@@ -74,6 +116,7 @@ export default function PicGuesserSection({
           </div>
 
           <div>
+            <h4>Card Types</h4>
             <p className="settings-text mb-8">
               Select which card types to include.
             </p>

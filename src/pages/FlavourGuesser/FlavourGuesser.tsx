@@ -4,27 +4,32 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { useGameContext } from '../../context/GameContext';
 import type { TransformedCard } from '../../types';
-import { filterForFlavourGuesser, filterDuplicateOfCode, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors } from '../../services/CardFilter';
+import { filterForFlavourGuesser, filterDuplicateOfCode, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import './FlavourGuesser.scss';
 
 export default function FlavourGuesser() {
-  const { filteredCards, settings } = useGameContext();
-  
-  const flavourCards = useMemo(() => {
+  const { cards, settings } = useGameContext();
+
+  const { guessableCards, answerPool } = useMemo(() => {
+    const baseFiltered = filterBySettings(cards, settings, 'flavourGuesser');
     // Apply type filters from settings
-    const typeFiltered = filterForFlavourGuesser(filteredCards, settings.flavourGuesserTypeFilters);
+    const typeFiltered = filterForFlavourGuesser(baseFiltered, settings.flavourGuesserTypeFilters);
     // Remove duplicate_of_code cards
     const noDupes = filterDuplicateOfCode(typeFiltered);
-    // Only keep cards with flavour text
-    const withFlavor = noDupes.filter(c => c.flavor && c.flavor.trim().length > 0);
-    // Deduplicate by evaluation criteria
-    return deduplicateByEvaluationCriteria(
-      withFlavor,
+    
+    // Deduplicate by evaluation criteria for the dropdown
+    const guessable = deduplicateByEvaluationCriteria(
+      noDupes,
       GAME_EVALUATION_CRITERIA.flavourGuesser
     ) as TransformedCard[];
-  }, [filteredCards, settings.flavourGuesserTypeFilters]);
 
-  const dupeNames = useMemo(() => findDuplicateNames(flavourCards), [flavourCards]);
+    // Only keep cards with flavour text for picking the answer
+    const answers = guessable.filter(c => c.flavor && c.flavor.trim().length > 0);
+
+    return { guessableCards: guessable, answerPool: answers };
+  }, [cards, settings]);
+
+  const dupeNames = useMemo(() => findDuplicateNames(guessableCards), [guessableCards]);
 
   const getDisplayText = (card: TransformedCard): string => {
     if (!dupeNames.has(card.name)) return card.name;
@@ -38,14 +43,14 @@ export default function FlavourGuesser() {
 
   useEffect(() => {
     resetGame();
-  }, [flavourCards]);
+  }, [answerPool]);
 
   const resetGame = () => {
     setWin(false);
     setGaveUp(false);
     setWrongGuesses([]);
-    if (flavourCards.length > 0) {
-      const selected = flavourCards[Math.floor(Math.random() * flavourCards.length)];
+    if (answerPool.length > 0) {
+      const selected = answerPool[Math.floor(Math.random() * answerPool.length)];
       console.log('[FlavourGuesser] Answer:', selected);
       setAnswer(selected);
     }
@@ -96,7 +101,7 @@ export default function FlavourGuesser() {
         ) : (
           <div>
             <GuessInput
-              options={flavourCards}
+              options={guessableCards}
               guesses={wrongGuesses}
               onGuess={submitGuess}
               placeholder="Type card name..."

@@ -90,6 +90,36 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     traitGuesserRequirementValue: 3,
     includeEncounter: false,
     enableHints: true,
+
+    wordleUseGlobalPackFilter: true,
+    wordleFilteredPacks: [],
+    wordleIncludeWeakness: false,
+    wordleIncludeSignatures: true,
+
+    picGuesserUseGlobalPackFilter: true,
+    picGuesserFilteredPacks: [],
+    picGuesserIncludeWeakness: false,
+    picGuesserIncludeSignatures: true,
+
+    investigatordleUseGlobalPackFilter: true,
+    investigatordleFilteredPacks: [],
+    investigatordleIncludeWeakness: false,
+    investigatordleIncludeSignatures: true,
+
+    storyGuesserUseGlobalPackFilter: true,
+    storyGuesserFilteredPacks: [],
+    storyGuesserIncludeWeakness: false,
+    storyGuesserIncludeSignatures: true,
+
+    traitGuesserUseGlobalPackFilter: true,
+    traitGuesserFilteredPacks: [],
+    traitGuesserIncludeWeakness: false,
+    traitGuesserIncludeSignatures: true,
+
+    flavourGuesserUseGlobalPackFilter: true,
+    flavourGuesserFilteredPacks: [],
+    flavourGuesserIncludeWeakness: false,
+    flavourGuesserIncludeSignatures: true,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -196,6 +226,36 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           traitGuesserRequirementValue: savedSettings.traitGuesserRequirementValue ?? 3,
           includeEncounter: savedSettings.includeEncounter ?? false,
           enableHints: savedSettings.enableHints ?? true,
+
+          wordleUseGlobalPackFilter: savedSettings.wordleUseGlobalPackFilter ?? true,
+          wordleFilteredPacks: savedSettings.wordleFilteredPacks || [],
+          wordleIncludeWeakness: savedSettings.wordleIncludeWeakness ?? false,
+          wordleIncludeSignatures: savedSettings.wordleIncludeSignatures ?? true,
+
+          picGuesserUseGlobalPackFilter: savedSettings.picGuesserUseGlobalPackFilter ?? true,
+          picGuesserFilteredPacks: savedSettings.picGuesserFilteredPacks || [],
+          picGuesserIncludeWeakness: savedSettings.picGuesserIncludeWeakness ?? false,
+          picGuesserIncludeSignatures: savedSettings.picGuesserIncludeSignatures ?? true,
+
+          investigatordleUseGlobalPackFilter: savedSettings.investigatordleUseGlobalPackFilter ?? true,
+          investigatordleFilteredPacks: savedSettings.investigatordleFilteredPacks || [],
+          investigatordleIncludeWeakness: savedSettings.investigatordleIncludeWeakness ?? false,
+          investigatordleIncludeSignatures: savedSettings.investigatordleIncludeSignatures ?? true,
+
+          storyGuesserUseGlobalPackFilter: savedSettings.storyGuesserUseGlobalPackFilter ?? true,
+          storyGuesserFilteredPacks: savedSettings.storyGuesserFilteredPacks || [],
+          storyGuesserIncludeWeakness: savedSettings.storyGuesserIncludeWeakness ?? false,
+          storyGuesserIncludeSignatures: savedSettings.storyGuesserIncludeSignatures ?? true,
+
+          traitGuesserUseGlobalPackFilter: savedSettings.traitGuesserUseGlobalPackFilter ?? true,
+          traitGuesserFilteredPacks: savedSettings.traitGuesserFilteredPacks || [],
+          traitGuesserIncludeWeakness: savedSettings.traitGuesserIncludeWeakness ?? false,
+          traitGuesserIncludeSignatures: savedSettings.traitGuesserIncludeSignatures ?? true,
+
+          flavourGuesserUseGlobalPackFilter: savedSettings.flavourGuesserUseGlobalPackFilter ?? true,
+          flavourGuesserFilteredPacks: savedSettings.flavourGuesserFilteredPacks || [],
+          flavourGuesserIncludeWeakness: savedSettings.flavourGuesserIncludeWeakness ?? false,
+          flavourGuesserIncludeSignatures: savedSettings.flavourGuesserIncludeSignatures ?? true,
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {

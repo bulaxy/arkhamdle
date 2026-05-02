@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../context/GameContext';
 import type { TransformedCard } from '../../types';
-import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode } from '../../services/CardFilter';
+import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { Eye, EyeOff } from 'lucide-react';
 import './PicGuesser.scss';
@@ -9,7 +9,7 @@ import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
 export default function PicGuesser() {
-  const { filteredCards, settings } = useGameContext();
+  const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
@@ -22,7 +22,8 @@ export default function PicGuesser() {
 
   // PicGuesser does NOT filter duplicate_of_code — exception per task spec
   const gameCards = useMemo(() => {
-    const filtered = filterForPicGuesser(filteredCards);
+    const baseFiltered = filterBySettings(cards, settings, 'picGuesser');
+    const filtered = filterForPicGuesser(baseFiltered);
     // Apply type filters from settings
     const typeFiltered = filtered.filter(c => settings.picGuesserTypeFilters[c.typeName] ?? true);
     const noDupes = filterDuplicateOfCode(typeFiltered);
@@ -31,7 +32,7 @@ export default function PicGuesser() {
       GAME_EVALUATION_CRITERIA.picGuesser
     );
     return deduped as TransformedCard[];
-  }, [filteredCards, settings.picGuesserTypeFilters]);
+  }, [cards, settings]);
 
   const gameCardsWithPic = useMemo(()=>{
     return gameCards.filter(c => c.imagesrc && c.imagesrc.trim().length > 0)
