@@ -49,14 +49,20 @@ export default function PicGuesser() {
   if (settings.picGuesserDifficulty === 'Easy') zoomOutRate = 2.5;
 
   useEffect(() => {
-    if (gameCardsWithPic.length > 0 && !answer) {
-      const selected = gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)];
-      console.log('[PicGuesser] Answer:', selected);
-      setAnswer(selected);
-      setOffsetX(Math.floor(Math.random() * 301) - 150);
-      setOffsetY(Math.floor(Math.random() * 301));
-    }
-  }, [gameCardsWithPic, answer]);
+    resetGame();
+  }, [
+    settings.picGuesserDifficulty,
+    settings.picGuesserTypeFilters,
+    settings.picGuesserUseGlobalPackFilter,
+    settings.picGuesserFilteredPacks,
+    settings.picGuesserIncludeWeakness,
+    settings.picGuesserIncludeSignatures,
+    settings.filteredPacks,
+    settings.includeWeakness,
+    settings.includeSignatures,
+    settings.includeEncounter,
+    cards
+  ]);
 
   const submitGuess = (card: TransformedCard) => {
     console.log('[PicGuesser] Guess:', card);

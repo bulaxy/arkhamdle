@@ -43,7 +43,18 @@ export default function FlavourGuesser() {
 
   useEffect(() => {
     resetGame();
-  }, [answerPool]);
+  }, [
+    settings.flavourGuesserTypeFilters,
+    settings.flavourGuesserUseGlobalPackFilter,
+    settings.flavourGuesserFilteredPacks,
+    settings.flavourGuesserIncludeWeakness,
+    settings.flavourGuesserIncludeSignatures,
+    settings.filteredPacks,
+    settings.includeWeakness,
+    settings.includeSignatures,
+    settings.includeEncounter,
+    cards
+  ]);
 
   const resetGame = () => {
     setWin(false);

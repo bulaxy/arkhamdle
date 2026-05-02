@@ -36,12 +36,18 @@ export default function Investigatordle() {
   const [gaveUp, setGaveUp] = useState(false);
 
   useEffect(() => {
-    if (gameInvestigators.length > 0 && !answer) {
-      const selected = gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)];
-      console.log('[Investigatordle] Answer:', selected);
-      setAnswer(selected);
-    }
-  }, [gameInvestigators, answer]);
+    resetGame();
+  }, [
+    settings.investigatordleUseGlobalPackFilter,
+    settings.investigatordleFilteredPacks,
+    settings.investigatordleIncludeWeakness,
+    settings.investigatordleIncludeSignatures,
+    settings.filteredPacks,
+    settings.includeWeakness,
+    settings.includeSignatures,
+    settings.includeEncounter,
+    cards
+  ]);
 
   const submitGuess = (card: TransformedCard) => {
     console.log('[Investigatordle] Guess:', card);

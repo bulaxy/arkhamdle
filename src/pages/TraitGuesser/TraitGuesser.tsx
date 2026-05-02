@@ -70,7 +70,22 @@ export default function TraitGuesser() {
 
   useEffect(() => {
     resetGame();
-  }, [allPossibleOptions, settings.traitGuesserMinCards, settings.traitGuesserMaxCards]);
+  }, [
+    settings.traitGuesserMinCards,
+    settings.traitGuesserMaxCards,
+    settings.traitGuesserRequirementType,
+    settings.traitGuesserRequirementValue,
+    settings.traitGuesserTypeFilters,
+    settings.traitGuesserUseGlobalPackFilter,
+    settings.traitGuesserFilteredPacks,
+    settings.traitGuesserIncludeWeakness,
+    settings.traitGuesserIncludeSignatures,
+    settings.filteredPacks,
+    settings.includeWeakness,
+    settings.includeSignatures,
+    settings.includeEncounter,
+    cards
+  ]);
 
   const resetGame = () => {
     setWin(false);

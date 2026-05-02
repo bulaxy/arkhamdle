@@ -17,6 +17,12 @@ All card data and information are sourced from the [ArkhamDB API](https://arkham
 
 The project is currently in active development. While it's living here for now, it will be hosted on a **proper, dedicated site** in the very near future. Stay tuned!
 
+## Other game mode ideas
+
+- Scenario/Enemies/Treachery/Location specific guessing games, show a blur photo and some info, guess which pack/set it is in. 
+- Requirement Guessing Game, shows the deck restriction and get player to guess which investigator(s) have that restriction
+- Requirement Guessing Game v2, show a card, name who can build it (this will likely be very complex logic, esp with Carlyn, customisable card etc etc, might very hard to maintain this game moving forward as well)
+
 ## 🐛 Feedback & Contributions
 
 We love feedback! If you encounter any bugs, weird data issues, or have suggestions for new features:

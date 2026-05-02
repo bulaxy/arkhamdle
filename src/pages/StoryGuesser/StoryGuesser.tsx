@@ -37,12 +37,22 @@ export default function StoryGuesser() {
   const [gaveUp, setGaveUp] = useState(false);
 
   useEffect(() => {
-    if (uniqueInvestigators.length > 0 && !answer) {
-      const selected = uniqueInvestigators[Math.floor(Math.random() * uniqueInvestigators.length)];
-      console.log('[StoryGuesser] Answer:', selected);
-      setAnswer(selected);
-    }
-  }, [uniqueInvestigators, answer]);
+    resetGame();
+  }, [
+    settings.storyGuesserScrambleWords,
+    settings.storyGuesserScrambleLetters,
+    settings.storyGuesserSliceScale,
+    settings.storyGuesserHideName,
+    settings.storyGuesserUseGlobalPackFilter,
+    settings.storyGuesserFilteredPacks,
+    settings.storyGuesserIncludeWeakness,
+    settings.storyGuesserIncludeSignatures,
+    settings.filteredPacks,
+    settings.includeWeakness,
+    settings.includeSignatures,
+    settings.includeEncounter,
+    cards
+  ]);
 
   useEffect(() => {
     if (!answer || !answer.back_flavor) {

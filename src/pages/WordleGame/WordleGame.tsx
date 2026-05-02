@@ -43,12 +43,18 @@ export default function WordleGame() {
   };
 
   useEffect(() => {
-    if (gameCards.length > 0 && !answer) {
-      const selected = gameCards[Math.floor(Math.random() * gameCards.length)];
-      console.log('[WordleGame] Answer:', selected);
-      setAnswer(selected);
-    }
-  }, [gameCards, answer]);
+    resetGame();
+  }, [
+    settings.wordleUseGlobalPackFilter,
+    settings.wordleFilteredPacks,
+    settings.wordleIncludeWeakness,
+    settings.wordleIncludeSignatures,
+    settings.filteredPacks,
+    settings.includeWeakness,
+    settings.includeSignatures,
+    settings.includeEncounter,
+    cards
+  ]);
 
   const submitGuess = (card: TransformedCard) => {
     console.log('[WordleGame] Guess:', card);
