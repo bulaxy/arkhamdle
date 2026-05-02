@@ -1,5 +1,3 @@
-import React from "react";
-
 interface PackFilterControlsProps {
   packs: string[];
   filteredPacks: string[];
