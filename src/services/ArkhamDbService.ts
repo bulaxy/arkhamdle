@@ -43,12 +43,12 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
       const subname = o.subname || '';
       const xp = o.xp ?? 0;
       const rawTypeName = toLowerCamelCase(o.type_code);
-      const typeName = VALID_TYPES.has(rawTypeName as TypeName) ? (rawTypeName as TypeName) : "other" as any;
+      const typeName = VALID_TYPES.has(rawTypeName as TypeName) ? (rawTypeName as TypeName) : TypeName.OTHER;
       if (typeName === "other") {
         console.log(`[ArkhamDbService] Found unknown typeName: ${o.type_code} (normalized to ${rawTypeName})`);
       }
 
-      let pack_name = (packGroupMap.get(o.pack_code) || 'OTHER').toUpperCase();
+      const pack_name = (packGroupMap.get(o.pack_code) || 'OTHER').toUpperCase();
       const fullName = typeName === TypeName.INVESTIGATOR ? `${name} (${pack_name})` : `${name}${subname ? ' ' + subname : ''}${xp > 0 ? ' (' + xp + ')' : ''}`;
       
       return {

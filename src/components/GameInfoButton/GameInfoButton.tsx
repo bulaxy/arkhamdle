@@ -3,7 +3,6 @@ import { useState } from "react";
 import "./GameInfoButton.scss";
 
 interface GameInfoButtonProps {
-  gameName: string;
   gameRules: {
     title: string;
     cardTypes: string;
@@ -14,7 +13,6 @@ interface GameInfoButtonProps {
 }
 
 export default function GameInfoButton({
-  gameName: _gameName,
   gameRules,
 }: GameInfoButtonProps) {
   const [showInfo, setShowInfo] = useState(false);

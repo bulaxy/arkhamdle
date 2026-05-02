@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useGameContext } from '../../context/GameContext';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -32,7 +32,7 @@ export default function TraitGuesser() {
     
     // Filter based on settings min and max cards
     return Array.from(traitCountMap.entries())
-      .filter(([_, names]) => {
+      .filter(([, names]) => {
         const count = names.size;
         return count >= settings.traitGuesserMinCards && 
                (settings.traitGuesserMaxCards === 0 || count <= settings.traitGuesserMaxCards);
@@ -68,8 +68,26 @@ export default function TraitGuesser() {
     return Math.min(total, settings.traitGuesserRequirementValue);
   }, [possibleAnswers.length, settings]);
 
+  const resetGame = useCallback(() => {
+    setWin(false);
+    setGaveUp(false);
+    setCorrectGuesses([]);
+    setWrongGuesses([]);
+
+    if (gameTraits.length > 0) {
+      const selected = gameTraits[Math.floor(Math.random() * gameTraits.length)];
+      console.log('[TraitGuesser] Trait:', selected, '| Possible answers:', gameOptions.filter(c => c.traits.includes(selected)).map(c => c.fullName));
+      setTrait(selected);
+    } else {
+      setTrait('');
+    }
+  }, [gameTraits, gameOptions]);
+
   useEffect(() => {
-    resetGame();
+    const timer = setTimeout(() => {
+      resetGame();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     settings.traitGuesserMinCards,
     settings.traitGuesserMaxCards,
@@ -84,23 +102,9 @@ export default function TraitGuesser() {
     settings.includeWeakness,
     settings.includeSignatures,
     settings.includeEncounter,
-    cards
+    cards,
+    resetGame
   ]);
-
-  const resetGame = () => {
-    setWin(false);
-    setGaveUp(false);
-    setCorrectGuesses([]);
-    setWrongGuesses([]);
-
-    if (gameTraits.length > 0) {
-      const selected = gameTraits[Math.floor(Math.random() * gameTraits.length)];
-      console.log('[TraitGuesser] Trait:', selected, '| Possible answers:', gameOptions.filter(c => c.traits.includes(selected)).map(c => c.fullName));
-      setTrait(selected);
-    } else {
-      setTrait('');
-    }
-  };
 
   const submitGuess = (item: TransformedCard) => {
     console.log('[TraitGuesser] Guess:', item);
@@ -128,7 +132,6 @@ export default function TraitGuesser() {
         <div className="game-header-row">
           <p>Guess the cards and investigators by their shared traits!</p>
           <GameInfoButton
-            gameName="TraitGuesser"
             gameRules={{
               title: 'Trait Guesser',
               cardTypes: 'Configurable via Type Filters in Settings',

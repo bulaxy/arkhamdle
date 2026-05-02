@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useGameContext } from '../../context/GameContext';
+import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -42,8 +42,18 @@ export default function WordleGame() {
     return text;
   };
 
+  const resetGame = useCallback(() => {
+    setWin(false);
+    setGaveUp(false);
+    setGuesses([]);
+    setAnswer(gameCards[Math.floor(Math.random() * gameCards.length)]);
+  }, [gameCards]);
+
   useEffect(() => {
-    resetGame();
+    const timer = setTimeout(() => {
+      resetGame();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     settings.wordleUseGlobalPackFilter,
     settings.wordleFilteredPacks,
@@ -53,7 +63,8 @@ export default function WordleGame() {
     settings.includeWeakness,
     settings.includeSignatures,
     settings.includeEncounter,
-    cards
+    cards,
+    resetGame
   ]);
 
   const submitGuess = (card: TransformedCard) => {
@@ -65,12 +76,7 @@ export default function WordleGame() {
     }
   };
 
-  const resetGame = () => {
-    setWin(false);
-    setGaveUp(false);
-    setGuesses([]);
-    setAnswer(gameCards[Math.floor(Math.random() * gameCards.length)]);
-  };
+
 
   const getAttributeClass = (guess: TransformedCard, attr: typeof ATTRIBUTES[number]) => {
     if (!answer) return '';
@@ -111,7 +117,6 @@ export default function WordleGame() {
         <div className="game-header-row">
           <p>Guess the Arkham Horror LCG Card</p>
           <GameInfoButton
-            gameName="Wordle"
             gameRules={{
               title: 'Classic Mode',
               cardTypes: 'Skill, Asset, Event, Weakness',
@@ -187,7 +192,7 @@ export default function WordleGame() {
                 {ATTRIBUTES.map(attr => (
                   <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
                     <span className="label">{attr === 'typeName' ? 'Type' : attr}</span>
-                    {Array.isArray(g[attr]) && (g[attr] as any[]).length > 1 ? (g[attr] as any[]).join(', ') : g[attr]}
+                    {Array.isArray(g[attr]) && (g[attr] as (string | number)[]).length > 1 ? (g[attr] as (string | number)[]).join(', ') : (g[attr] as string | number)}
                     {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                   </div>
                 ))}

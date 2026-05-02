@@ -1,6 +1,6 @@
 import { ExternalLink, X } from "lucide-react";
 import { useState } from "react";
-import { useGameContext } from "../../context/GameContext";
+import { useGameContext } from "../../hooks/useGameContext";
 import PackFiltersSection from "./PackFiltersSection";
 import PicGuesserSection from "./PicGuesserSection";
 import "./SettingsModal.scss";

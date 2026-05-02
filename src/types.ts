@@ -3,7 +3,8 @@ import type {
   PackCode,
   Slot,
   SubtypeCode,
-  TypeName
+  TypeName,
+  Restrictions
 } from './types/arkham';
 
 export * from './types/arkham';
@@ -87,7 +88,7 @@ export interface TransformedCard {
   intellect: number;
   wild: number;
   willpower: number;
-  restrictions?: any;
+  restrictions?: Restrictions;
   duplicate_of_code?: string;
   health?: number;
   sanity?: number;

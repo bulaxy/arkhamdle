@@ -40,6 +40,7 @@ const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
   act: "Act",
   key: "Key",
   enemyLocation: "Enemy Location",
+  other: "Other",
 };
 
 export default function PicGuesserSection({
@@ -70,6 +71,7 @@ export default function PicGuesserSection({
     TypeNameEnum.LOCATION,
     TypeNameEnum.STORY,
     TypeNameEnum.ENEMY_LOCATION,
+    TypeNameEnum.OTHER,
   ];
 
   return (

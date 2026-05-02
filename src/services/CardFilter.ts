@@ -9,19 +9,19 @@ export function filterBySettings(
   settings: AppSettings,
   gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser'
 ): TransformedCard[] {
-  const useGlobal = (settings as any)[`${gameId}UseGlobalPackFilter`] ?? true;
+  const useGlobal = (settings[(`${gameId}UseGlobalPackFilter`) as keyof AppSettings] as boolean) ?? true;
   
   const packsToFilter = useGlobal 
     ? settings.filteredPacks 
-    : ((settings as any)[`${gameId}FilteredPacks`] || []);
+    : ((settings[(`${gameId}FilteredPacks`) as keyof AppSettings] as string[]) || []);
     
   const incWeakness = useGlobal 
     ? settings.includeWeakness 
-    : ((settings as any)[`${gameId}IncludeWeakness`] ?? false);
+    : ((settings[(`${gameId}IncludeWeakness`) as keyof AppSettings] as boolean) ?? false);
     
   const incSignatures = useGlobal 
     ? settings.includeSignatures 
-    : ((settings as any)[`${gameId}IncludeSignatures`] ?? true);
+    : ((settings[(`${gameId}IncludeSignatures`) as keyof AppSettings] as boolean) ?? true);
 
   return cards.filter((card) => {
     const passPack = packsToFilter.length === 0 || !packsToFilter.includes(card.pack_name);

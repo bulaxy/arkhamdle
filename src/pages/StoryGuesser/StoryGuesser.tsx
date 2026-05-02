@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useGameContext } from '../../context/GameContext';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -32,12 +32,20 @@ export default function StoryGuesser() {
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [win, setWin] = useState(false);
   const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
-  const [scrambledFlavor, setScrambledFlavor] = useState('');
-  const [sliceIdx, setSliceIdx] = useState<number | null>(null);
   const [gaveUp, setGaveUp] = useState(false);
 
+  const resetGame = useCallback(() => {
+    setWin(false);
+    setGaveUp(false);
+    setWrongGuesses([]);
+    setAnswer(uniqueInvestigators[Math.floor(Math.random() * uniqueInvestigators.length)]);
+  }, [uniqueInvestigators]);
+
   useEffect(() => {
-    resetGame();
+    const timer = setTimeout(() => {
+      resetGame();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     settings.storyGuesserScrambleWords,
     settings.storyGuesserScrambleLetters,
@@ -51,17 +59,16 @@ export default function StoryGuesser() {
     settings.includeWeakness,
     settings.includeSignatures,
     settings.includeEncounter,
-    cards
+    cards,
+    resetGame
   ]);
 
-  useEffect(() => {
+  const { scrambledFlavor, sliceIdx } = useMemo(() => {
     if (!answer || !answer.back_flavor) {
-      setScrambledFlavor('');
-      setSliceIdx(null);
-      return;
+      return { scrambledFlavor: '', sliceIdx: null };
     }
     
-    let text = answer.back_flavor.replace(/<\/?[^>]+(\>|$)/g, ""); // strip HTML
+    let text = answer.back_flavor.replace(/<\/?[^>]+(>|$)/g, ""); // strip HTML
     let currentSliceIdx: number | null = null;
     
     const scrambleWord = (word: string) => {
@@ -72,6 +79,7 @@ export default function StoryGuesser() {
       if (letters.length <= 1) return word;
       
       for (let i = letters.length - 1; i > 0; i--) {
+        // eslint-disable-next-line react-hooks/purity
         const j = Math.floor(Math.random() * (i + 1));
         [letters[i], letters[j]] = [letters[j], letters[i]];
       }
@@ -91,6 +99,7 @@ export default function StoryGuesser() {
       const justWords = wordsAndSpaces.filter(w => !/\s+/.test(w) && w.trim().length > 0);
       
       for (let i = justWords.length - 1; i > 0; i--) {
+        // eslint-disable-next-line react-hooks/purity
         const j = Math.floor(Math.random() * (i + 1));
         [justWords[i], justWords[j]] = [justWords[j], justWords[i]];
       }
@@ -122,6 +131,7 @@ export default function StoryGuesser() {
       
       // Shuffle words (Fisher-Yates)
       for (let i = words.length - 1; i > 0; i--) {
+        // eslint-disable-next-line react-hooks/purity
         const j = Math.floor(Math.random() * (i + 1));
         [words[i], words[j]] = [words[j], words[i]];
       }
@@ -132,8 +142,7 @@ export default function StoryGuesser() {
       currentSliceIdx = null; 
     }
 
-    setScrambledFlavor(text);
-    setSliceIdx(currentSliceIdx);
+    return { scrambledFlavor: text, sliceIdx: currentSliceIdx };
   }, [answer, settings.storyGuesserScrambleLetters, settings.storyGuesserScrambleWords, settings.storyGuesserHideName, settings.storyGuesserSliceScale]);
 
   const submitGuess = (card: TransformedCard) => {
@@ -147,16 +156,11 @@ export default function StoryGuesser() {
     }
   };
 
-  const resetGame = () => {
-    setWin(false);
-    setGaveUp(false);
-    setWrongGuesses([]);
-    setAnswer(uniqueInvestigators[Math.floor(Math.random() * uniqueInvestigators.length)]);
-  };
+
 
   const getFullTextHighlighted = () => {
     if (!answer?.back_flavor) return '';
-    const full = answer.back_flavor.replace(/<\/?[^>]+(\>|$)/g, "");
+    const full = answer.back_flavor.replace(/<\/?[^>]+(>|$)/g, "");
     if (sliceIdx === null) return full;
     
     return (
@@ -174,7 +178,6 @@ export default function StoryGuesser() {
         <div className="game-header-row">
           <p>Guess the Investigator by their scrambled story!</p>
           <GameInfoButton
-            gameName="StoryGuesser"
             gameRules={{
               title: 'Story Guesser',
               cardTypes: 'Investigator (only, back flavor text)',

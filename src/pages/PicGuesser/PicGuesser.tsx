@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useGameContext } from '../../context/GameContext';
+import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard } from '../../types';
 import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -48,8 +48,22 @@ export default function PicGuesser() {
   if (settings.picGuesserDifficulty === 'Normal') zoomOutRate = 1.8;
   if (settings.picGuesserDifficulty === 'Easy') zoomOutRate = 2.5;
 
+  const resetGame = useCallback(() => {
+    setWin(false);
+    setGaveUp(false);
+    setGuesses([]);
+    setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
+    setOffsetX(Math.floor(Math.random() * 301) - 150);
+    setOffsetY(Math.floor(Math.random() * 251)+50);
+    setSizeMultiplier(8);
+    setShowFull(false);
+  }, [gameCardsWithPic]);
+
   useEffect(() => {
-    resetGame();
+    const timer = setTimeout(() => {
+      resetGame();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     settings.picGuesserDifficulty,
     settings.picGuesserTypeFilters,
@@ -61,7 +75,8 @@ export default function PicGuesser() {
     settings.includeWeakness,
     settings.includeSignatures,
     settings.includeEncounter,
-    cards
+    cards,
+    resetGame
   ]);
 
   const submitGuess = (card: TransformedCard) => {
@@ -82,16 +97,7 @@ export default function PicGuesser() {
     }
   };
 
-  const resetGame = () => {
-    setWin(false);
-    setGaveUp(false);
-    setGuesses([]);
-    setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
-    setOffsetX(Math.floor(Math.random() * 301) - 150);
-    setOffsetY(Math.floor(Math.random() * 251)+50);
-    setSizeMultiplier(8);
-    setShowFull(false);
-  };
+
 
   return (
     <div className="pic-container">
@@ -101,7 +107,6 @@ export default function PicGuesser() {
           <p>Identify the card from a zoomed-in image.</p>
         <p className="small-note">Note: Some cards (mostly from newer expansions) may not have zoomed images supported yet.</p>
           <GameInfoButton
-            gameName="PicGuesser"
             gameRules={{
               title: 'Pic Guesser',
               cardTypes: 'Asset, Event, Skill (only)',

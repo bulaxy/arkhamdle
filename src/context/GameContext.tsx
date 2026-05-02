@@ -1,5 +1,5 @@
 import localforage from "localforage";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PACK_STRUCTURE } from "../data/packStructure";
 import {
   fetchCards,
@@ -11,18 +11,7 @@ import type {
 } from "../types";
 import { TypeName as TypeNameEnum } from "../types/arkham";
 
-interface GameContextType {
-  cards: TransformedCard[];
-  packs: string[];
-  settings: AppSettings;
-  setSettings: (settings: AppSettings) => void;
-  isLoading: boolean;
-  loadingMessage: string;
-  refreshData: (includeEncounter?: boolean) => Promise<void>;
-  filteredCards: TransformedCard[];
-}
-
-const GameContext = createContext<GameContextType | undefined>(undefined);
+import { GameContext } from './GameContextDefinition';
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -53,6 +42,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       [TypeNameEnum.ACT]: true,
       [TypeNameEnum.KEY]: true,
       [TypeNameEnum.ENEMY_LOCATION]: true,
+      [TypeNameEnum.OTHER]: true,
     },
     traitGuesserTypeFilters: {
       [TypeNameEnum.ASSET]: true,
@@ -68,6 +58,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       [TypeNameEnum.ACT]: false,
       [TypeNameEnum.KEY]: false,
       [TypeNameEnum.ENEMY_LOCATION]: false,
+      [TypeNameEnum.OTHER]: false,
     },
     picGuesserTypeFilters: {
       [TypeNameEnum.ASSET]: true,
@@ -83,6 +74,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       [TypeNameEnum.KEY]: false,
       [TypeNameEnum.ENEMY_LOCATION]: false,
       [TypeNameEnum.INVESTIGATOR]: false,
+      [TypeNameEnum.OTHER]: false,
     },
     traitGuesserMinCards: 3,
     traitGuesserMaxCards: 0,
@@ -129,7 +121,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     localforage.setItem("arkhamdle_settings", newSettings);
   };
 
-  const loadData = async (forceRefresh = false, includeEncounter = settings.includeEncounter) => {
+  const loadData = React.useCallback(async (forceRefresh = false, includeEncounter = settings.includeEncounter) => {
     setIsLoading(true);
     try {
       setLoadingMessage(
@@ -157,7 +149,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [settings.includeEncounter]);
 
   useEffect(() => {
     const init = async () => {
@@ -189,6 +181,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
             [TypeNameEnum.ACT]: true,
             [TypeNameEnum.KEY]: true,
             [TypeNameEnum.ENEMY_LOCATION]: true,
+            [TypeNameEnum.OTHER]: true,
           },
           traitGuesserTypeFilters: savedSettings.traitGuesserTypeFilters || {
             [TypeNameEnum.ASSET]: true,
@@ -204,6 +197,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
             [TypeNameEnum.ACT]: false,
             [TypeNameEnum.KEY]: false,
             [TypeNameEnum.ENEMY_LOCATION]: false,
+            [TypeNameEnum.OTHER]: false,
           },
           picGuesserTypeFilters: savedSettings.picGuesserTypeFilters || {
             [TypeNameEnum.ASSET]: true,
@@ -219,6 +213,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
             [TypeNameEnum.KEY]: false,
             [TypeNameEnum.ENEMY_LOCATION]: false,
             [TypeNameEnum.INVESTIGATOR]: false,
+            [TypeNameEnum.OTHER]: false,
           },
           traitGuesserMinCards: savedSettings.traitGuesserMinCards ?? 3,
           traitGuesserMaxCards: savedSettings.traitGuesserMaxCards ?? 0,
@@ -263,7 +258,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
     init();
-  }, []);
+  }, [loadData]);
 
   // Compute filtered cards based on settings — filtering by pack group name, weakness, and signatures
   const filteredCards = cards.filter((card) => {
@@ -298,10 +293,4 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export const useGameContext = () => {
-  const context = useContext(GameContext);
-  if (context === undefined) {
-    throw new Error("useGameContext must be used within a GameProvider");
-  }
-  return context;
-};
+

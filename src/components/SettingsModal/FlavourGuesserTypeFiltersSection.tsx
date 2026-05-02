@@ -36,6 +36,7 @@ const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
   act: "Act",
   key: "Key",
   enemyLocation: "Enemy Location",
+  other: "Other",
 };
 
 export default function FlavourGuesserTypeFiltersSection({
@@ -69,6 +70,7 @@ export default function FlavourGuesserTypeFiltersSection({
     TypeNameEnum.ACT,
     TypeNameEnum.KEY,
     TypeNameEnum.ENEMY_LOCATION,
+    TypeNameEnum.OTHER,
   ];
 
   return (

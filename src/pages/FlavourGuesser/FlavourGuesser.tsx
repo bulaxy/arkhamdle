@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
-import { useGameContext } from '../../context/GameContext';
+import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard } from '../../types';
 import { filterForFlavourGuesser, filterDuplicateOfCode, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import './FlavourGuesser.scss';
@@ -41,8 +41,22 @@ export default function FlavourGuesser() {
   const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
 
+  const resetGame = useCallback(() => {
+    setWin(false);
+    setGaveUp(false);
+    setWrongGuesses([]);
+    if (answerPool.length > 0) {
+      const selected = answerPool[Math.floor(Math.random() * answerPool.length)];
+      console.log('[FlavourGuesser] Answer:', selected);
+      setAnswer(selected);
+    }
+  }, [answerPool]);
+
   useEffect(() => {
-    resetGame();
+    const timer = setTimeout(() => {
+      resetGame();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     settings.flavourGuesserTypeFilters,
     settings.flavourGuesserUseGlobalPackFilter,
@@ -53,19 +67,9 @@ export default function FlavourGuesser() {
     settings.includeWeakness,
     settings.includeSignatures,
     settings.includeEncounter,
-    cards
+    cards,
+    resetGame
   ]);
-
-  const resetGame = () => {
-    setWin(false);
-    setGaveUp(false);
-    setWrongGuesses([]);
-    if (answerPool.length > 0) {
-      const selected = answerPool[Math.floor(Math.random() * answerPool.length)];
-      console.log('[FlavourGuesser] Answer:', selected);
-      setAnswer(selected);
-    }
-  };
 
   const submitGuess = (card: TransformedCard) => {
     console.log('[FlavourGuesser] Guess:', card);
@@ -83,7 +87,6 @@ export default function FlavourGuesser() {
         <div className="game-header-row">
           <p>Guess the card by its flavour text!</p>
           <GameInfoButton
-            gameName="FlavourGuesser"
             gameRules={{
               title: 'Flavour Text Guesser',
               cardTypes: 'Asset, Event, Skill, Enemy, Treachery, Location, Story (Configurable via Type Filters in Settings)',

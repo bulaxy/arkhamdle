@@ -101,6 +101,7 @@ export const TypeName = {
   KEY: "key",
   ENEMY_LOCATION: "enemyLocation",
   INVESTIGATOR: "investigator",
+  OTHER: "other",
 } as const;
 export type TypeName = typeof TypeName[keyof typeof TypeName];
 

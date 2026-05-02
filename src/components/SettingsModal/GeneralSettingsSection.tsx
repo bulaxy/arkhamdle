@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
-import { useGameContext } from "../../context/GameContext";
+import { useGameContext } from "../../hooks/useGameContext";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;

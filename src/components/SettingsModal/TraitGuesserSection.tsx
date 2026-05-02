@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useMemo } from "react";
-import { useGameContext } from "../../context/GameContext";
+import { useGameContext } from "../../hooks/useGameContext";
 import { filterDuplicateOfCode } from "../../services/CardFilter";
 import type { TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
@@ -47,6 +47,7 @@ const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
   act: "Act",
   key: "Key",
   enemyLocation: "Enemy Location",
+  other: "Other",
 };
 
 export default function TraitGuesserSection({
@@ -112,6 +113,7 @@ export default function TraitGuesserSection({
     TypeNameEnum.ACT,
     TypeNameEnum.KEY,
     TypeNameEnum.ENEMY_LOCATION,
+    TypeNameEnum.OTHER,
   ];
 
   const impossibleValidation = 

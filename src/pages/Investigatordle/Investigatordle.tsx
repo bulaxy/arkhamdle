@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useGameContext } from '../../context/GameContext';
+import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -35,8 +35,18 @@ export default function Investigatordle() {
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
 
+  const resetGame = useCallback(() => {
+    setWin(false);
+    setGaveUp(false);
+    setGuesses([]);
+    setAnswer(gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)]);
+  }, [gameInvestigators]);
+
   useEffect(() => {
-    resetGame();
+    const timer = setTimeout(() => {
+      resetGame();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     settings.investigatordleUseGlobalPackFilter,
     settings.investigatordleFilteredPacks,
@@ -46,7 +56,8 @@ export default function Investigatordle() {
     settings.includeWeakness,
     settings.includeSignatures,
     settings.includeEncounter,
-    cards
+    cards,
+    resetGame
   ]);
 
   const submitGuess = (card: TransformedCard) => {
@@ -56,13 +67,6 @@ export default function Investigatordle() {
     if (card.id === answer?.id) {
       setWin(true);
     }
-  };
-
-  const resetGame = () => {
-    setWin(false);
-    setGaveUp(false);
-    setGuesses([]);
-    setAnswer(gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)]);
   };
 
   const getAttributeClass = (guess: TransformedCard, attr: typeof ATTRIBUTES[number]) => {
@@ -104,7 +108,6 @@ export default function Investigatordle() {
         <div className="game-header-row">
           <p>Guess the Arkham Horror LCG Investigator</p>
           <GameInfoButton
-            gameName="Investigatordle"
             gameRules={{
               title: 'Investigatordle',
               cardTypes: 'Investigator (only)',
@@ -157,7 +160,7 @@ export default function Investigatordle() {
                     <td className="investigator-guess-cell investigator-name-cell">{g.fullName}</td>
                     {ATTRIBUTES.map(attr => (
                       <td key={attr} className={`investigator-guess-cell ${getAttributeClass(g, attr)}`}>
-                        {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
+                        {Array.isArray(g[attr]) && (g[attr] as (string | number)[]).length > 1 ? (g[attr] as (string | number)[]).join(', ') : (g[attr] as string | number)}
                         {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                       </td>
                     ))}
@@ -178,7 +181,7 @@ export default function Investigatordle() {
                 {ATTRIBUTES.map(attr => (
                   <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
                     <span className="label">{attr.replace('_', ' ')}</span>
-                    {Array.isArray(g[attr]) && (g[attr] as any[]).length > 1 ? (g[attr] as any[]).join(', ') : g[attr]}
+                    {Array.isArray(g[attr]) && (g[attr] as (string | number)[]).length > 1 ? (g[attr] as (string | number)[]).join(', ') : (g[attr] as string | number)}
                     {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                   </div>
                 ))}
