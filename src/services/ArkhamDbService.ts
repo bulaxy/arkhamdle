@@ -1,7 +1,7 @@
 import localforage from 'localforage';
 import { buildPackCodeToGroupMap } from '../data/packStructure';
 import type { ArkhamCard, TransformedCard } from '../types';
-import { SubtypeCode, TypeName, Slot, FactionCode } from '../types';
+import { TypeName, Slot, FactionCode } from '../types';
 
 localforage.config({
   name: 'arkhamdle',

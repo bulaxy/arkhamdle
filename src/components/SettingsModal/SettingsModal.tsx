@@ -1,4 +1,4 @@
-import { ExternalLink, RefreshCw, X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { useState } from "react";
 import { useGameContext } from "../../context/GameContext";
 import PackFiltersSection from "./PackFiltersSection";
@@ -10,7 +10,7 @@ import TraitGuesserSection from "./TraitGuesserSection";
 import GeneralSettingsSection from "./GeneralSettingsSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
-  const { packs, settings, setSettings, refreshData } = useGameContext();
+  const { packs, settings, setSettings } = useGameContext();
   const [openSection, setOpenSection] = useState<string>(""); // 'packs', 'picGuesser', 'storyGuesser', 'traitGuesser'
 
   const toggleSection = (section: string) => {
