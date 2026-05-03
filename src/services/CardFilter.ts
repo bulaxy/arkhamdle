@@ -43,6 +43,7 @@ export const FACTION_COLORS: Record<FactionCode, string> = {
   seeker: 'rgba(200, 160, 40, 0.6)',
   survivor: 'rgba(180, 40, 40, 0.6)',
   neutral: 'rgba(120, 120, 120, 0.5)',
+  mythos: 'rgba(120, 120, 120, 0.5)',
 };
 
 /**
