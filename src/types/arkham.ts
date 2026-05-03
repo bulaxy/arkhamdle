@@ -290,6 +290,7 @@ export interface ArkhamCard {
   customization_options?: CustomizationOption[];
   customization_text?: string;
   encounter_code?: string;
+  encounter_name?: string;
   encounter_position?: number;
   exile?: boolean;
   hidden?: boolean;

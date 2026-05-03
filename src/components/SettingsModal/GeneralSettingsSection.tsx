@@ -49,7 +49,7 @@ export default function GeneralSettingsSection({
                   const newValue = !settings.includeEncounter;
                   if (newValue) {
                     const confirmed = window.confirm(
-                      "Campaign cards will add about 8MB to the data download (11MB total). This might be expensive on mobile data. Are you sure you want to continue?"
+                      "Campaign cards will need to download 11MB of data. This might be expensive on mobile data. Are you sure you want to continue?"
                     );
                     if (confirmed) {
                       setSettings({ ...settings, includeEncounter: true });

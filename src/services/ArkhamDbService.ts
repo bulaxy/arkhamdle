@@ -88,6 +88,8 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
         vengeance: o.vengeance,
         health_per_investigator: o.health_per_investigator,
         back_flavor: o.back_flavor,
+        encounter_name: o.encounter_name,
+        permanent: o.permanent,
       };
     })
     .filter((card, _, array) => {

@@ -103,5 +103,7 @@ export interface TransformedCard {
   vengeance?: number;
   health_per_investigator?: boolean;
   back_flavor?: string;
+  encounter_name?: string;
+  permanent?: boolean;
 }
 

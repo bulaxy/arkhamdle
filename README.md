@@ -23,6 +23,9 @@ The project is currently in active development. While it's living here for now, 
 - Requirement Guessing Game, shows the deck restriction and get player to guess which investigator(s) have that restriction
 - Requirement Guessing Game v2, show a card, name who can build it (this will likely be very complex logic, esp with Carlyn, customisable card etc etc, might very hard to maintain this game moving forward as well)
 
+## Other TODO
+- Add a filter to allow both encounter set included or not. So both card set will be loaded, allow user to choose. When re-fetch card, refetch both
+
 ## 🐛 Feedback & Contributions
 
 We love feedback! If you encounter any bugs, weird data issues, or have suggestions for new features:
