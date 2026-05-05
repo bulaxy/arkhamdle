@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Fuse from 'fuse.js';
 import './GuessInput.scss';
 
 export interface GuessInputProps<T> {
@@ -54,6 +55,20 @@ export default function GuessInput<T extends { id: string; fullName: string }>({
 
   const displayText = (item: T) => getDisplayText ? getDisplayText(item) : item.fullName;
 
+  const fuse = useMemo(() => {
+    return new Fuse(options, {
+      keys: [
+        { name: 'fullName', weight: 1.0 },
+        { name: 'name', weight: 0.7 },
+        { name: 'subname', weight: 0.5 },
+      ],
+      threshold: 0.4,
+      location: 0,
+      distance: 100,
+      minMatchCharLength: 1,
+    });
+  }, [options]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearchValue(val);
@@ -61,10 +76,11 @@ export default function GuessInput<T extends { id: string; fullName: string }>({
     if (val.trim() === '') {
       setSuggestions([]);
     } else {
-      const filtered = options.filter(c => 
-        c.fullName.toLowerCase().includes(val.toLowerCase()) && 
-        !guesses.some(g => g.id === c.id)
-      ).slice(0, 5);
+      const results = fuse.search(val);
+      const filtered = results
+        .map(r => r.item)
+        .filter(c => !guesses.some(g => g.id === c.id))
+        .slice(0, 8);
       setSuggestions(filtered);
     }
   };
@@ -115,6 +131,11 @@ export default function GuessInput<T extends { id: string; fullName: string }>({
         onKeyDown={handleKeyDown}
         disabled={disabled}
       />
+      {searchValue.trim() !== '' && suggestions.length === 0 && (
+        <div className="guess-suggestions no-results">
+          <div className="guess-suggestion-item no-match">No results found</div>
+        </div>
+      )}
       {suggestions.length > 0 && (
         <div className="guess-suggestions">
           {suggestions.map((s, idx) => {
