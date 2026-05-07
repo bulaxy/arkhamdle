@@ -1,0 +1,210 @@
+.encounter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.encounter-header {
+  text-align: center;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+.encounter-panel {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  overflow: visible;
+}
+
+.encounter-error-panel {
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .error-title {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+
+  .error-desc {
+    opacity: 0.8;
+  }
+}
+
+.encounter-image-container {
+  width: 300px;
+  height: 420px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 0.5rem;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.encounter-image-full {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  margin: 0;
+  transition: filter 0.5s ease-out;
+}
+
+.encounter-image-blurred {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.5s ease-out;
+}
+
+.encounter-image-unavailable {
+  color: var(--text-secondary);
+}
+
+.encounter-result {
+  width: 100%;
+  text-align: center;
+
+  h2 {
+    margin-bottom: 0.5rem;
+
+    &.win {
+      color: var(--correct-color);
+    }
+
+    &.lose {
+      color: var(--wrong-color);
+    }
+  }
+}
+
+.encounter-answer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.encounter-inputs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  &.shakeAnimation {
+    animation: shake 0.3s;
+  }
+}
+
+.encounter-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-color);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+  cursor: pointer;
+
+  &:focus {
+    border-color: var(--primary-color);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  option {
+    background: var(--bg-color);
+    color: var(--text-color);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.encounter-gameplay {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.encounter-guesses-container {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.encounter-guess-item {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &.correct {
+    border-color: var(--correct-color);
+
+    .result-text {
+      color: var(--correct-color);
+    }
+  }
+
+  &.incorrect {
+    border-color: var(--wrong-color);
+
+    .result-text {
+      color: var(--wrong-color);
+    }
+  }
+}
+
+.guess-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.give-up-btn {
+  background: var(--wrong-color);
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.result-text {
+  font-weight: bold;
+}

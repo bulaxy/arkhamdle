@@ -10,6 +10,7 @@ import TraitGuesserSection from "./TraitGuesserSection";
 import GeneralSettingsSection from "./GeneralSettingsSection";
 import WordleSection from "./WordleSection";
 import InvestigatordleSection from "./InvestigatordleSection";
+import EncounterGuesserSection from "./EncounterGuesserSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings } = useGameContext();
@@ -215,6 +216,29 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, flavourGuesserFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, flavourGuesserIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, flavourGuesserIncludeSignatures: value })}
+          />
+
+          <EncounterGuesserSection
+            isOpen={openSection === "encounterGuesser"}
+            onToggle={() => toggleSection("encounterGuesser")}
+            blurAmount={settings.encounterGuesserBlurAmount}
+            onBlurAmountChange={(value) => setSettings({ ...settings, encounterGuesserBlurAmount: value })}
+            packs={packs}
+            useGlobalPackFilter={settings.encounterGuesserUseGlobalPackFilter}
+            filteredPacks={settings.encounterGuesserFilteredPacks}
+            includeWeakness={settings.encounterGuesserIncludeWeakness}
+            includeSignatures={settings.encounterGuesserIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, encounterGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.encounterGuesserFilteredPacks.includes(pack)
+                ? settings.encounterGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.encounterGuesserFilteredPacks, pack];
+              setSettings({ ...settings, encounterGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, encounterGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, encounterGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, encounterGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, encounterGuesserIncludeSignatures: value })}
           />
 
           <div className="footer-buttons">

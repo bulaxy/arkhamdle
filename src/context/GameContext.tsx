@@ -112,6 +112,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     flavourGuesserFilteredPacks: [],
     flavourGuesserIncludeWeakness: false,
     flavourGuesserIncludeSignatures: true,
+
+    encounterGuesserUseGlobalPackFilter: true,
+    encounterGuesserFilteredPacks: [],
+    encounterGuesserIncludeWeakness: false,
+    encounterGuesserIncludeSignatures: true,
+    encounterGuesserBlurAmount: 20,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -251,6 +257,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           flavourGuesserFilteredPacks: savedSettings.flavourGuesserFilteredPacks || [],
           flavourGuesserIncludeWeakness: savedSettings.flavourGuesserIncludeWeakness ?? false,
           flavourGuesserIncludeSignatures: savedSettings.flavourGuesserIncludeSignatures ?? true,
+
+          encounterGuesserUseGlobalPackFilter: savedSettings.encounterGuesserUseGlobalPackFilter ?? true,
+          encounterGuesserFilteredPacks: savedSettings.encounterGuesserFilteredPacks || [],
+          encounterGuesserIncludeWeakness: savedSettings.encounterGuesserIncludeWeakness ?? false,
+          encounterGuesserIncludeSignatures: savedSettings.encounterGuesserIncludeSignatures ?? true,
+          encounterGuesserBlurAmount: savedSettings.encounterGuesserBlurAmount ?? 20,
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {

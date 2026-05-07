@@ -64,6 +64,13 @@ export interface AppSettings {
   flavourGuesserFilteredPacks: string[];
   flavourGuesserIncludeWeakness: boolean;
   flavourGuesserIncludeSignatures: boolean;
+
+  // Encounter Guesser
+  encounterGuesserUseGlobalPackFilter: boolean;
+  encounterGuesserFilteredPacks: string[];
+  encounterGuesserIncludeWeakness: boolean;
+  encounterGuesserIncludeSignatures: boolean;
+  encounterGuesserBlurAmount: number;
 }
 
 export interface TransformedCard {
