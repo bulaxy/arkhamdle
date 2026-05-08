@@ -1,4 +1,4 @@
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink, Mail, X } from "lucide-react";
 import { useState } from "react";
 import { useGameContext } from "../../hooks/useGameContext";
 import PackFiltersSection from "./PackFiltersSection";
@@ -23,7 +23,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Settings</h2>
+          <h2>Settings <small className="version-tag">v1.0</small></h2>
           <button className="close-btn" onClick={onClose}>
             <X size={24} />
           </button>
@@ -221,14 +221,22 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             <button className="premium-btn" onClick={onClose}>
               Close Settings
             </button>
-            <a
-              href="https://github.com/bulaxy/arkhamdle"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="external-link"
-            >
-              <ExternalLink size={18} /> Issues & Feedback
-            </a>
+            <div className="footer-links">
+              <a
+                href="https://github.com/bulaxy/arkhamdle"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="external-link"
+              >
+                <ExternalLink size={18} /> GitHub
+              </a>
+              <a
+                href="mailto:feedback@arkhamdle.com"
+                className="external-link"
+              >
+                <Mail size={18} /> Feedback
+              </a>
+            </div>
           </div>
         </div>
       </div>

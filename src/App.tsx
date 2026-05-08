@@ -9,12 +9,22 @@ import StoryGuesser from './pages/StoryGuesser/StoryGuesser';
 import TraitGuesser from './pages/TraitGuesser/TraitGuesser';
 import FlavourGuesser from './pages/FlavourGuesser/FlavourGuesser';
 import SettingsModal from './components/SettingsModal/SettingsModal';
-import { useState } from 'react';
+import WelcomeModal from './components/WelcomeModal/WelcomeModal';
+import { useState, useEffect } from 'react';
 
 function App() {
   const { isLoading, loadingMessage } = useGameContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => {
+    return !localStorage.getItem('arkhamdle_visited');
+  });
+
+  useEffect(() => {
+    if (isWelcomeOpen) {
+      localStorage.setItem('arkhamdle_visited', 'true');
+    }
+  }, [isWelcomeOpen]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -68,6 +78,13 @@ function App() {
 
       {isSettingsOpen && (
         <SettingsModal onClose={() => setIsSettingsOpen(false)} />
+      )}
+
+      {isWelcomeOpen && (
+        <WelcomeModal 
+          onClose={() => setIsWelcomeOpen(false)} 
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
       )}
     </div>
   );
