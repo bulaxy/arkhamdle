@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { filterBySettings, filterForIconGuesser } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { Eye, EyeOff } from 'lucide-react';
@@ -18,7 +18,7 @@ const SKILL_LABELS: Record<SkillKey, string> = {
   wild: '⭐ Wild',
 };
 
-export default function IconGuesser() {
+export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [win, setWin] = useState(false);
@@ -157,7 +157,7 @@ export default function IconGuesser() {
             </div>
 
             {(win || lose) && (
-              <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="icon-result" showImage={false}>
+              <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="icon-result" showImage={false}>
                 {lose && answer && (
                   <div className="icon-guess-comparison">
                     <table className="icon-comparison-table">

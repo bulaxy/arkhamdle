@@ -13,6 +13,10 @@ declare global {
   const APP_VERSION: string;
 }
 
+export interface GameProps {
+  onPlayAgainOverride?: () => void;
+}
+
 export interface BaseGameSettings {
   useGlobalPackFilter: boolean;
   filteredPacks: string[];
@@ -55,6 +59,10 @@ export interface TriviaGuesserSettings extends BaseGameSettings {
   poolFilter: 'Player Cards Only' | 'All Cards';
 }
 
+export interface RandomTriviaSettings {
+  enabledModes: Record<string, boolean>;
+}
+
 export interface AppSettings {
   // Global Pack Filter Settings
   filteredPacks: string[];
@@ -77,6 +85,7 @@ export interface AppSettings {
   encounterGuesser: EncounterGuesserSettings;
   triviaGuesser: TriviaGuesserSettings;
   iconGuesser: BaseGameSettings;
+  randomTrivia: RandomTriviaSettings;
 }
 
 export interface TransformedCard {

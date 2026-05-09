@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { Eye, EyeOff } from 'lucide-react';
@@ -8,7 +8,7 @@ import './PicGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function PicGuesser() {
+export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
@@ -154,7 +154,7 @@ export default function PicGuesser() {
             </div>
 
             {(win || gaveUp) && (
-              <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="pic-result" showImage={false}>
+              <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="pic-result" showImage={false}>
                 <div className="pic-result-buttons">
                   <button className="premium-btn pic-result-button" onClick={() => setShowFull(!showFull)}>
                     {showFull ? <><EyeOff size={18} /> Hide Full Picture</> : <><Eye size={18} /> Show Full Picture</>}

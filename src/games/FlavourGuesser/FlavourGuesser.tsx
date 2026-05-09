@@ -3,11 +3,12 @@ import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { filterForFlavourGuesser, filterDuplicateOfCode, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import './FlavourGuesser.scss';
 
-export default function FlavourGuesser() {
+
+export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
 
   const { guessableCards, answerPool } = useMemo(() => {
@@ -107,7 +108,7 @@ export default function FlavourGuesser() {
         )}
 
         {win || gaveUp ? (
-          <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="flavour-result" />
+          <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="flavour-result" />
         ) : (
           <div>
             <GuessInput

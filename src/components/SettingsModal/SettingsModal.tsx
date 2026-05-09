@@ -13,6 +13,7 @@ import InvestigatordleSection from "./InvestigatordleSection";
 import TriviaGuesserTypeFiltersSection from "./TriviaGuesserTypeFiltersSection";
 import EncounterGuesserSection from "./EncounterGuesserSection";
 import IconGuesserSection from "./IconGuesserSection";
+import RandomTriviaSection from "./RandomTriviaSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings } = useGameContext();
@@ -176,6 +177,13 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             packs={packs}
             settings={settings.triviaGuesser}
             onChange={(newSettings) => setSettings({ ...settings, triviaGuesser: newSettings })}
+          />
+
+          <RandomTriviaSection
+            isOpen={openSection === "randomTrivia"}
+            onToggle={() => toggleSection("randomTrivia")}
+            settings={settings.randomTrivia}
+            onChange={(newSettings) => setSettings({ ...settings, randomTrivia: newSettings })}
           />
 
           <div className="footer-buttons">

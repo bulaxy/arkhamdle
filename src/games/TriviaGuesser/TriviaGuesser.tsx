@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { filterBySettings, filterDuplicateOfCode, getCardFactionColors } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import GuessInput from '../../components/GuessInput/GuessInput';
@@ -8,7 +8,7 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import { generateTriviaQuestion, type TriviaQuestion } from './triviaLogic';
 import './TriviaGuesser.scss';
 
-export default function TriviaGuesser() {
+export default function TriviaGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
 
   const [question, setQuestion] = useState<TriviaQuestion | null>(null);
@@ -223,7 +223,7 @@ export default function TriviaGuesser() {
         <ResultPanel
           win={win}
           item={{ fullName: question.mode === 'Which Card' ? question.correctCardDisplay || '' : question.correctAnswer?.toString() || '' }}
-          onPlayAgain={resetGame}
+          onPlayAgain={onPlayAgainOverride || resetGame}
           className="trivia-result-panel"
           showImage={false}
         >

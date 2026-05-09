@@ -111,6 +111,19 @@ const defaultSettings: AppSettings = {
     poolFilter: 'Player Cards Only',
   },
   iconGuesser: { ...defaultBaseGameSettings },
+  randomTrivia: {
+    enabledModes: {
+      WordleGame: false,
+      PicGuesser: false,
+      Investigatordle: false,
+      StoryGuesser: true,
+      TraitGuesser: true,
+      FlavourGuesser: true,
+      EncounterGuesser: true,
+      TriviaGuesser: true,
+      IconGuesser: true,
+    }
+  },
 };
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({

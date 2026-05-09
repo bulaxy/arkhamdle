@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import './TraitGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function TraitGuesser() {
+export default function TraitGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [trait, setTrait] = useState<string>('');
   const [win, setWin] = useState(false);
@@ -141,7 +141,7 @@ export default function TraitGuesser() {
         </div>
 
         {win || gaveUp ? (
-          <ResultPanel win={win} item={null} onPlayAgain={resetGame} className="trait-result">
+          <ResultPanel win={win} item={null} onPlayAgain={onPlayAgainOverride || resetGame} className="trait-result">
             <div className="trait-all-answers">
               <h3>All matches with "{trait}"</h3>
               <div className="trait-card-display">

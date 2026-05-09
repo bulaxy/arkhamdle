@@ -2,15 +2,16 @@ import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { Settings, Menu, X as CloseIcon, ChevronDown } from 'lucide-react';
 import './App.scss';
 import { useGameContext } from './hooks/useGameContext';
-import WordleGame from './pages/WordleGame/WordleGame';
-import PicGuesser from './pages/PicGuesser/PicGuesser';
-import Investigatordle from './pages/Investigatordle/Investigatordle';
-import StoryGuesser from './pages/StoryGuesser/StoryGuesser';
-import TraitGuesser from './pages/TraitGuesser/TraitGuesser';
-import FlavourGuesser from './pages/FlavourGuesser/FlavourGuesser';
-import TriviaGuesser from './pages/TriviaGuesser/TriviaGuesser';
-import EncounterGuesser from './pages/EncounterGuesser/EncounterGuesser';
-import IconGuesser from './pages/IconGuesser/IconGuesser';
+import WordleGame from './games/WordleGame/WordleGame';
+import PicGuesser from './games/PicGuesser/PicGuesser';
+import Investigatordle from './games/Investigatordle/Investigatordle';
+import StoryGuesser from './games/StoryGuesser/StoryGuesser';
+import TraitGuesser from './games/TraitGuesser/TraitGuesser';
+import FlavourGuesser from './games/FlavourGuesser/FlavourGuesser';
+import TriviaGuesser from './games/TriviaGuesser/TriviaGuesser';
+import EncounterGuesser from './games/EncounterGuesser/EncounterGuesser';
+import IconGuesser from './games/IconGuesser/IconGuesser';
+import RandomTrivia from './games/RandomTrivia/RandomTrivia';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import WelcomeModal from './components/WelcomeModal/WelcomeModal';
 import { useState, useEffect, useRef } from 'react';
@@ -65,6 +66,7 @@ function App() {
           <NavLink to="/" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu} end>Classic Mode</NavLink>
           <NavLink to="/pic-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Pic Guesser</NavLink>
           <NavLink to="/investigatordle" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Investigatordle</NavLink>
+          <NavLink to="/random-trivia" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Random Trivia</NavLink>
           
           {/* Desktop dropdown */}
           <div className={`nav-dropdown desktop-only ${isMoreOpen ? 'open' : ''}`} ref={dropdownRef}>
@@ -85,6 +87,7 @@ function App() {
           </div>
 
           {/* Mobile flat links */}
+          <NavLink to="/random-trivia" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Random Trivia</NavLink>
           <NavLink to="/story-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Story Guesser</NavLink>
           <NavLink to="/trait-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trait Guesser</NavLink>
           <NavLink to="/flavour-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Flavour Guesser</NavLink>
@@ -114,6 +117,7 @@ function App() {
             <Route path="/" element={<WordleGame />} />
             <Route path="/pic-guesser" element={<PicGuesser />} />
             <Route path="/investigatordle" element={<Investigatordle />} />
+            <Route path="/random-trivia" element={<RandomTrivia />} />
             <Route path="/story-guesser" element={<StoryGuesser />} />
             <Route path="/trait-guesser" element={<TraitGuesser />} />
             <Route path="/flavour-guesser" element={<FlavourGuesser />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
@@ -8,7 +8,7 @@ import './StoryGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function StoryGuesser() {
+export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
 
   const uniqueInvestigators = useMemo(() => {
@@ -184,7 +184,7 @@ export default function StoryGuesser() {
 
       <div className="glass-panel story-panel">
         {win || gaveUp ? (
-          <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="story-result">
+          <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="story-result">
             <div className="story-result-details">
               <div className="story-guess-text">
                 <h4>Text used for guessing:</h4>

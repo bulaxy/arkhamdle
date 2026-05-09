@@ -1,13 +1,13 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { filterForEncounterGuesser, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import './EncounterGuesser.scss';
 
-export default function EncounterGuesser() {
+export default function EncounterGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<string[]>([]);
@@ -166,7 +166,7 @@ export default function EncounterGuesser() {
             </div>
 
             {(win || gaveUp) && (
-              <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="encounter-result" showImage={false}>
+              <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="encounter-result" showImage={false}>
                 <div className="encounter-answer-details">
                   <p><strong>Encounter Set:</strong> {answer?.encounter_name}</p>
                   <p><strong>Pack:</strong> {answer?.pack_name}</p>
