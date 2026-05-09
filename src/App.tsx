@@ -9,7 +9,7 @@ import StoryGuesser from './games/StoryGuesser/StoryGuesser';
 import TraitGuesser from './games/TraitGuesser/TraitGuesser';
 import FlavourGuesser from './games/FlavourGuesser/FlavourGuesser';
 import TriviaGuesser from './games/TriviaGuesser/TriviaGuesser';
-import EncounterGuesser from './games/EncounterGuesser/EncounterGuesser';
+import CampaignPackGuesser from './games/CampaignPackGuesser/CampaignPackGuesser';
 import IconGuesser from './games/IconGuesser/IconGuesser';
 import RandomTrivia from './games/RandomTrivia/RandomTrivia';
 import SettingsModal from './components/SettingsModal/SettingsModal';
@@ -49,7 +49,7 @@ function App() {
   }, [isMoreOpen]);
 
   const location = useLocation();
-  const moreGamePaths = ['/story-guesser', '/trait-guesser', '/flavour-guesser', '/encounter-guesser', '/icon-guesser', '/trivia-guesser'];
+  const moreGamePaths = ['/story-guesser', '/trait-guesser', '/flavour-guesser', '/campaign-pack-guesser', '/icon-guesser', '/trivia-guesser'];
   const isMoreActive = moreGamePaths.includes(location.pathname);
 
   return (
@@ -74,13 +74,13 @@ function App() {
               className={`nav-link nav-dropdown-trigger ${isMoreActive ? 'active' : ''}`}
               onClick={() => setIsMoreOpen(!isMoreOpen)}
             >
-              More Games <ChevronDown size={16} className={`dropdown-chevron ${isMoreOpen ? 'rotated' : ''}`} />
+              Individual Trivia Games <ChevronDown size={16} className={`dropdown-chevron ${isMoreOpen ? 'rotated' : ''}`} />
             </button>
             <div className="nav-dropdown-menu">
               <NavLink to="/story-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Story Guesser</NavLink>
               <NavLink to="/trait-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trait Guesser</NavLink>
               <NavLink to="/flavour-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Flavour Guesser</NavLink>
-              <NavLink to="/encounter-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Encounter Guesser</NavLink>
+              <NavLink to="/campaign-pack-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Campaign Pack Guesser</NavLink>
               <NavLink to="/icon-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Icon Guesser</NavLink>
               <NavLink to="/trivia-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trivia Questions</NavLink>
             </div>
@@ -91,7 +91,7 @@ function App() {
           <NavLink to="/story-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Story Guesser</NavLink>
           <NavLink to="/trait-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trait Guesser</NavLink>
           <NavLink to="/flavour-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Flavour Guesser</NavLink>
-          <NavLink to="/encounter-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Encounter Guesser</NavLink>
+          <NavLink to="/campaign-pack-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Campaign Pack Guesser</NavLink>
           <NavLink to="/icon-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Icon Guesser</NavLink>
           <NavLink to="/trivia-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trivia Questions</NavLink>
         </div>
@@ -122,7 +122,7 @@ function App() {
             <Route path="/trait-guesser" element={<TraitGuesser />} />
             <Route path="/flavour-guesser" element={<FlavourGuesser />} />
             <Route path="/trivia-guesser" element={<TriviaGuesser />} />
-            <Route path="/encounter-guesser" element={<EncounterGuesser />} />
+            <Route path="/campaign-pack-guesser" element={<CampaignPackGuesser />} />
             <Route path="/icon-guesser" element={<IconGuesser />} />
           </Routes>
         )}

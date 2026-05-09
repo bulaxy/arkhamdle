@@ -100,7 +100,7 @@ const defaultSettings: AppSettings = {
       [TypeNameEnum.OTHER]: true,
     },
   },
-  encounterGuesser: {
+  campaignPackGuesser: {
     ...defaultBaseGameSettings,
     blurAmount: 10,
   },
@@ -119,7 +119,7 @@ const defaultSettings: AppSettings = {
       StoryGuesser: true,
       TraitGuesser: true,
       FlavourGuesser: true,
-      EncounterGuesser: true,
+      CampaignPackGuesser: true,
       TriviaGuesser: true,
       IconGuesser: true,
     }

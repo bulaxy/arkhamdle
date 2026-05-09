@@ -49,7 +49,7 @@ export interface FlavourGuesserSettings extends BaseGameSettings {
   typeFilters: Record<TypeName, boolean>;
 }
 
-export interface EncounterGuesserSettings extends BaseGameSettings {
+export interface CampaignPackGuesserSettings extends BaseGameSettings {
   blurAmount: number;
 }
 
@@ -82,7 +82,7 @@ export interface AppSettings {
   storyGuesser: StoryGuesserSettings;
   traitGuesser: TraitGuesserSettings;
   flavourGuesser: FlavourGuesserSettings;
-  encounterGuesser: EncounterGuesserSettings;
+  campaignPackGuesser: CampaignPackGuesserSettings;
   triviaGuesser: TriviaGuesserSettings;
   iconGuesser: BaseGameSettings;
   randomTrivia: RandomTriviaSettings;

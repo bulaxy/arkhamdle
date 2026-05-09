@@ -7,7 +7,7 @@ import { TypeName as TypeNameEnum } from '../types/arkham';
 export function filterBySettings(
   cards: TransformedCard[],
   settings: AppSettings,
-  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'encounterGuesser' | 'triviaGuesser' | 'iconGuesser'
+  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'campaignPackGuesser' | 'triviaGuesser' | 'iconGuesser'
 ): TransformedCard[] {
   const gameSettings = settings[gameId];
   const useGlobal = gameSettings.useGlobalPackFilter ?? true;
@@ -119,7 +119,7 @@ export const GAME_EVALUATION_CRITERIA = {
   storyGuesser: { class: true, pack: true, name: true },
   flavourGuesser: { class: true, pack: true, name: true, xp: true },
   investigatordle: { name: true, pack: true, class: true },
-  encounterGuesser: { name: true, pack: true, class: true },
+  campaignPackGuesser: { name: true, pack: true, class: true },
 } as const;
 
 /**
@@ -212,10 +212,10 @@ export function filterDuplicateOfCode<T extends { duplicate_of_code?: string }>(
 }
 
 /**
- * Filter cards for EncounterGuesser game.
+ * Filter cards for CampaignPackGuesser game.
  * Requires cards to have encounter_code and encounter_name.
  */
-export function filterForEncounterGuesser(cards: TransformedCard[]): TransformedCard[] {
+export function filterForCampaignPackGuesser(cards: TransformedCard[]): TransformedCard[] {
   return cards.filter((card) => !!card.encounter_name);
 }
 

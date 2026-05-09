@@ -1,19 +1,19 @@
 import React from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import PackFilterControls from './PackFilterControls';
-import type { EncounterGuesserSettings } from '../../types';
+import type { CampaignPackGuesserSettings } from '../../types';
 
-interface EncounterGuesserSectionProps {
+interface CampaignPackGuesserSectionProps {
   isOpen: boolean;
   onToggle: () => void;
   blurAmount: number;
   onBlurAmountChange: (value: number) => void;
   packs: string[];
-  settings: EncounterGuesserSettings;
-  onChange: (settings: EncounterGuesserSettings) => void;
+  settings: CampaignPackGuesserSettings;
+  onChange: (settings: CampaignPackGuesserSettings) => void;
 }
 
-const EncounterGuesserSection: React.FC<EncounterGuesserSectionProps> = ({
+const CampaignPackGuesserSection: React.FC<CampaignPackGuesserSectionProps> = ({
   isOpen,
   onToggle,
   blurAmount,
@@ -25,7 +25,7 @@ const EncounterGuesserSection: React.FC<EncounterGuesserSectionProps> = ({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Encounter Guesser</h3>
+        <h3>Game: Campaign Pack Guesser</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       
@@ -74,4 +74,4 @@ const EncounterGuesserSection: React.FC<EncounterGuesserSectionProps> = ({
   );
 };
 
-export default EncounterGuesserSection;
+export default CampaignPackGuesserSection;

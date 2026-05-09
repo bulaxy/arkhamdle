@@ -11,7 +11,7 @@ import GeneralSettingsSection from "./GeneralSettingsSection";
 import WordleSection from "./WordleSection";
 import InvestigatordleSection from "./InvestigatordleSection";
 import TriviaGuesserTypeFiltersSection from "./TriviaGuesserTypeFiltersSection";
-import EncounterGuesserSection from "./EncounterGuesserSection";
+import CampaignPackGuesserSection from "./CampaignPackGuesserSection";
 import IconGuesserSection from "./IconGuesserSection";
 import RandomTriviaSection from "./RandomTriviaSection";
 
@@ -147,14 +147,14 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onChange={(newSettings) => setSettings({ ...settings, flavourGuesser: newSettings })}
           />
 
-          <EncounterGuesserSection
-            isOpen={openSection === "encounterGuesser"}
-            onToggle={() => toggleSection("encounterGuesser")}
-            blurAmount={settings.encounterGuesser.blurAmount}
-            onBlurAmountChange={(value) => setSettings({ ...settings, encounterGuesser: { ...settings.encounterGuesser, blurAmount: value } })}
+          <CampaignPackGuesserSection
+            isOpen={openSection === "campaignPackGuesser"}
+            onToggle={() => toggleSection("campaignPackGuesser")}
+            blurAmount={settings.campaignPackGuesser.blurAmount}
+            onBlurAmountChange={(value) => setSettings({ ...settings, campaignPackGuesser: { ...settings.campaignPackGuesser, blurAmount: value } })}
             packs={packs}
-            settings={settings.encounterGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, encounterGuesser: newSettings })}
+            settings={settings.campaignPackGuesser}
+            onChange={(newSettings) => setSettings({ ...settings, campaignPackGuesser: newSettings })}
           />
 
           <IconGuesserSection

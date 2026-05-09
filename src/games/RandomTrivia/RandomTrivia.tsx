@@ -3,7 +3,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import StoryGuesser from '../StoryGuesser/StoryGuesser';
 import TraitGuesser from '../TraitGuesser/TraitGuesser';
 import FlavourGuesser from '../FlavourGuesser/FlavourGuesser';
-import EncounterGuesser from '../EncounterGuesser/EncounterGuesser';
+import CampaignPackGuesser from '../CampaignPackGuesser/CampaignPackGuesser';
 import TriviaGuesser from '../TriviaGuesser/TriviaGuesser';
 import IconGuesser from '../IconGuesser/IconGuesser';
 import WordleGame from '../WordleGame/WordleGame';
@@ -15,7 +15,7 @@ const ALL_GAMES = {
   StoryGuesser,
   TraitGuesser,
   FlavourGuesser,
-  EncounterGuesser,
+  CampaignPackGuesser,
   TriviaGuesser,
   IconGuesser,
   WordleGame,
@@ -37,8 +37,8 @@ export default function RandomTrivia() {
       if (key === 'WordleGame' || key === 'PicGuesser' || key === 'Investigatordle') {
         continue; 
       }
-      // "If Campaign cards are not loaded, automatically exclude EncounterGuesser"
-      if (key === 'EncounterGuesser' && !settings.includeEncounter) {
+      // "If Campaign cards are not loaded, automatically exclude CampaignPackGuesser"
+      if (key === 'CampaignPackGuesser' && !settings.includeEncounter) {
         continue;
       }
       

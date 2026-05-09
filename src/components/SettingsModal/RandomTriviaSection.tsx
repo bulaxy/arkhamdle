@@ -30,7 +30,7 @@ export default function RandomTriviaSection({
     { key: 'StoryGuesser', label: 'Story Guesser' },
     { key: 'TraitGuesser', label: 'Trait Guesser' },
     { key: 'FlavourGuesser', label: 'Flavour Guesser' },
-    { key: 'EncounterGuesser', label: 'Encounter Guesser' },
+    { key: 'CampaignPackGuesser', label: 'Campaign Pack Guesser' },
     { key: 'TriviaGuesser', label: 'Trivia Guesser' },
     { key: 'IconGuesser', label: 'Icon Guesser' },
     { key: 'WordleGame', label: 'Classic Mode (Wordle)' },

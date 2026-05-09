@@ -1,11 +1,11 @@
-.encounter-container {
+.campaign-pack-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   align-items: center;
 }
 
-.encounter-header {
+.campaign-pack-header {
   text-align: center;
 
   h1 {
@@ -17,7 +17,7 @@
   }
 }
 
-.encounter-panel {
+.campaign-pack-panel {
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -27,7 +27,7 @@
   overflow: visible;
 }
 
-.encounter-error-panel {
+.campaign-pack-error-panel {
   padding: 2rem;
   text-align: center;
   display: flex;
@@ -44,7 +44,7 @@
   }
 }
 
-.encounter-image-container {
+.campaign-pack-image-container {
   width: 300px;
   height: 420px;
   overflow: hidden;
@@ -56,7 +56,7 @@
   align-items: center;
 }
 
-.encounter-image-full {
+.campaign-pack-image-full {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -64,18 +64,18 @@
   transition: filter 0.5s ease-out;
 }
 
-.encounter-image-blurred {
+.campaign-pack-image-blurred {
   width: 100%;
   height: 100%;
   object-fit: contain;
   transition: filter 0.5s ease-out;
 }
 
-.encounter-image-unavailable {
+.campaign-pack-image-unavailable {
   color: var(--text-secondary);
 }
 
-.encounter-image-loading {
+.campaign-pack-image-loading {
   position: absolute;
   inset: 0;
   display: flex;
@@ -84,7 +84,7 @@
   z-index: 1;
 }
 
-.encounter-result {
+.campaign-pack-result {
   width: 100%;
   text-align: center;
 
@@ -101,7 +101,7 @@
   }
 }
 
-.encounter-answer-details {
+.campaign-pack-answer-details {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -113,7 +113,7 @@
   }
 }
 
-.encounter-inputs {
+.campaign-pack-inputs {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -124,7 +124,7 @@
   }
 }
 
-.encounter-select {
+.campaign-pack-select {
   width: 100%;
   padding: 0.75rem 1rem;
   background: var(--glass-bg);
@@ -162,7 +162,7 @@
   }
 }
 
-.encounter-gameplay {
+.campaign-pack-gameplay {
   position: relative;
   z-index: 2;
   width: 100%;
@@ -172,7 +172,7 @@
   gap: 1rem;
 }
 
-.encounter-guesses-container {
+.campaign-pack-guesses-container {
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -180,7 +180,7 @@
   gap: 0.5rem;
 }
 
-.encounter-guess-item {
+.campaign-pack-guess-item {
   padding: 1rem;
   display: flex;
   justify-content: space-between;
