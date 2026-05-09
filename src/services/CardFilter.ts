@@ -9,19 +9,20 @@ export function filterBySettings(
   settings: AppSettings,
   gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'encounterGuesser' | 'triviaGuesser' | 'iconGuesser'
 ): TransformedCard[] {
-  const useGlobal = (settings[(`${gameId}UseGlobalPackFilter`) as keyof AppSettings] as boolean) ?? true;
+  const gameSettings = settings[gameId];
+  const useGlobal = gameSettings.useGlobalPackFilter ?? true;
   
   const packsToFilter = useGlobal 
     ? settings.filteredPacks 
-    : ((settings[(`${gameId}FilteredPacks`) as keyof AppSettings] as string[]) || []);
+    : (gameSettings.filteredPacks || []);
     
   const incWeakness = useGlobal 
     ? settings.includeWeakness 
-    : ((settings[(`${gameId}IncludeWeakness`) as keyof AppSettings] as boolean) ?? false);
+    : (gameSettings.includeWeakness ?? false);
     
   const incSignatures = useGlobal 
     ? settings.includeSignatures 
-    : ((settings[(`${gameId}IncludeSignatures`) as keyof AppSettings] as boolean) ?? true);
+    : (gameSettings.includeSignatures ?? true);
 
   return cards.filter((card) => {
     const passPack = packsToFilter.length === 0 || !packsToFilter.includes(card.pack_name);
@@ -32,7 +33,7 @@ export function filterBySettings(
 
     const incBonded = useGlobal
       ? settings.includeBondedCard
-      : ((settings[`${gameId}IncludeBondedCard` as keyof AppSettings] as boolean) ?? false);
+      : (gameSettings.includeBondedCard ?? false);
     const isBonded = !!card.bonded_to;
     const passBonded = incBonded || !isBonded;
 

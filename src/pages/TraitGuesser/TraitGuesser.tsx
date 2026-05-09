@@ -18,7 +18,7 @@ export default function TraitGuesser() {
   const allPossibleOptions = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'traitGuesser');
     const uniqueCards = filterDuplicateOfCode(baseFiltered);
-    return uniqueCards.filter(c => settings.traitGuesserTypeFilters[c.typeName] ?? true);
+    return uniqueCards.filter(c => settings.traitGuesser.typeFilters[c.typeName] ?? true);
   }, [cards, settings]);
 
   const gameTraits = useMemo(() => {
@@ -34,11 +34,11 @@ export default function TraitGuesser() {
     return Array.from(traitCountMap.entries())
       .filter(([, names]) => {
         const count = names.size;
-        return count >= settings.traitGuesserMinCards && 
-               (settings.traitGuesserMaxCards === 0 || count <= settings.traitGuesserMaxCards);
+        return count >= settings.traitGuesser.minCards && 
+               (settings.traitGuesser.maxCards === 0 || count <= settings.traitGuesser.maxCards);
       })
       .map(([trait]) => trait);
-  }, [allPossibleOptions, settings.traitGuesserMinCards, settings.traitGuesserMaxCards]);
+  }, [allPossibleOptions, settings.traitGuesser.minCards, settings.traitGuesser.maxCards]);
 
   const gameOptions = useMemo(() => {
     return deduplicateByEvaluationCriteria(
@@ -61,11 +61,11 @@ export default function TraitGuesser() {
 
   const requiredGuesses = useMemo(() => {
     const total = possibleAnswers.length;
-    if (settings.traitGuesserRequirementType === 'All') return total;
-    if (settings.traitGuesserRequirementType === 'Percentage') {
-      return Math.max(1, Math.ceil(total * (settings.traitGuesserRequirementValue / 100)));
+    if (settings.traitGuesser.requirementType === 'All') return total;
+    if (settings.traitGuesser.requirementType === 'Percentage') {
+      return Math.max(1, Math.ceil(total * (settings.traitGuesser.requirementValue / 100)));
     }
-    return Math.min(total, settings.traitGuesserRequirementValue);
+    return Math.min(total, settings.traitGuesser.requirementValue);
   }, [possibleAnswers.length, settings]);
 
   const resetGame = useCallback(() => {
@@ -89,15 +89,7 @@ export default function TraitGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.traitGuesserMinCards,
-    settings.traitGuesserMaxCards,
-    settings.traitGuesserRequirementType,
-    settings.traitGuesserRequirementValue,
-    settings.traitGuesserTypeFilters,
-    settings.traitGuesserUseGlobalPackFilter,
-    settings.traitGuesserFilteredPacks,
-    settings.traitGuesserIncludeWeakness,
-    settings.traitGuesserIncludeSignatures,
+    settings.traitGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,

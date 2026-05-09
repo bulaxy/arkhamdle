@@ -20,7 +20,7 @@ export default function TriviaGuesser() {
   const pool = useMemo(() => {
     let filtered = filterBySettings(cards, settings, 'triviaGuesser');
     filtered = filterDuplicateOfCode(filtered);
-    if (settings.triviaGuesserPoolFilter === 'Player Cards Only') {
+    if (settings.triviaGuesser.poolFilter === 'Player Cards Only') {
       filtered = filtered.filter(c => ['asset', 'event', 'skill', 'investigator'].includes(c.typeName));
     }
     return filtered;
@@ -45,9 +45,9 @@ export default function TriviaGuesser() {
     let packNameForQuestion = "All Packs";
 
     if (useAllPacks) {
-      if (settings.triviaGuesserFilteredPacks && settings.triviaGuesserFilteredPacks.length > 0) {
-        packNameForQuestion = settings.triviaGuesserFilteredPacks.length === 1 ? settings.triviaGuesserFilteredPacks[0] : "Selected Packs";
-      } else if (settings.triviaGuesserUseGlobalPackFilter && settings.filteredPacks.length > 0) {
+      if (settings.triviaGuesser.filteredPacks && settings.triviaGuesser.filteredPacks.length > 0) {
+        packNameForQuestion = settings.triviaGuesser.filteredPacks.length === 1 ? settings.triviaGuesser.filteredPacks[0] : "Selected Packs";
+      } else if (settings.triviaGuesser.useGlobalPackFilter && settings.filteredPacks.length > 0) {
         packNameForQuestion = settings.filteredPacks.length === 1 ? settings.filteredPacks[0] : "Selected Packs";
       }
     } else {
@@ -57,14 +57,14 @@ export default function TriviaGuesser() {
       packNameForQuestion = randomPack;
     }
 
-    const q = generateTriviaQuestion(finalPool, finalAllCards, packNameForQuestion, settings.triviaGuesserQuestionType);
+    const q = generateTriviaQuestion(finalPool, finalAllCards, packNameForQuestion, settings.triviaGuesser.questionType);
     setQuestion(q);
   }, [
     pool, 
     allFilteredCards, 
-    settings.triviaGuesserQuestionType, 
-    settings.triviaGuesserFilteredPacks, 
-    settings.triviaGuesserUseGlobalPackFilter, 
+    settings.triviaGuesser.questionType, 
+    settings.triviaGuesser.filteredPacks, 
+    settings.triviaGuesser.useGlobalPackFilter, 
     settings.filteredPacks
   ]);
 
@@ -86,16 +86,13 @@ export default function TriviaGuesser() {
       resetGame();
     }
   }, [
-    settings.triviaGuesserUseGlobalPackFilter,
-    settings.triviaGuesserFilteredPacks,
-    settings.triviaGuesserIncludeWeakness,
-    settings.triviaGuesserIncludeSignatures,
+    settings.triviaGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
     settings.includeEncounter,
-    settings.triviaGuesserPoolFilter,
-    settings.triviaGuesserQuestionType,
+    settings.triviaGuesser.poolFilter,
+    settings.triviaGuesser.questionType,
     resetGame,
     win,
     gaveUp,
@@ -157,7 +154,7 @@ export default function TriviaGuesser() {
           <GameInfoButton
             gameRules={{
               title: 'Trivia Guesser',
-              cardTypes: settings.triviaGuesserPoolFilter,
+              cardTypes: settings.triviaGuesser.poolFilter,
               answerEvaluation: 'Multiple Choice or Direct Input',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
               howToPlay: "Answer trivia questions about the Arkham Horror LCG card pool. You get one try per question!"
@@ -169,7 +166,7 @@ export default function TriviaGuesser() {
       <div className="trivia-question-section">
         <h2>{question.questionText}</h2>
 
-        {!isGameOver && settings.triviaGuesserInputMode === 'Multiple Choice' && (
+        {!isGameOver && settings.triviaGuesser.inputMode === 'Multiple Choice' && (
           <div className="multiple-choice-grid">
             {question.options.map((opt, i) => (
               <button 
@@ -185,7 +182,7 @@ export default function TriviaGuesser() {
           </div>
         )}
 
-        {!isGameOver && settings.triviaGuesserInputMode === 'Direct Input' && (
+        {!isGameOver && settings.triviaGuesser.inputMode === 'Direct Input' && (
           <>
             {question.mode === 'How Many' ? (
               <div className="direct-input-section">
@@ -215,7 +212,7 @@ export default function TriviaGuesser() {
           </>
         )}
 
-        {!isGameOver && settings.triviaGuesserInputMode !== 'Direct Input' && (
+        {!isGameOver && settings.triviaGuesser.inputMode !== 'Direct Input' && (
           <div className="trivia-actions">
             <button className="give-up-btn" onClick={() => setGaveUp(true)}>Give Up</button>
           </div>

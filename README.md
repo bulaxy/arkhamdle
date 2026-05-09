@@ -35,7 +35,7 @@ All card data and information are sourced from the [ArkhamDB API](https://arkham
 ## 🚀 Current Development Roadmap
 - [ ] Refine Trivia game mechanics and question quality
 - [ ] Random question mode
-- [x] Enhanced header/navigation
+- [~] Enhanced header/navigation
 - [x] Add Card icon display game ("What icon are on this card")
 
 ## 🛠️ Tech Stack

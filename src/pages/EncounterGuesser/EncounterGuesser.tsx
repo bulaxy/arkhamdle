@@ -81,10 +81,7 @@ export default function EncounterGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.encounterGuesserUseGlobalPackFilter,
-    settings.encounterGuesserFilteredPacks,
-    settings.encounterGuesserIncludeWeakness,
-    settings.encounterGuesserIncludeSignatures,
+    settings.encounterGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -156,7 +153,7 @@ export default function EncounterGuesser() {
                     alt="Guess this encounter card"
                     className={win || gaveUp ? 'encounter-image-full' : 'encounter-image-blurred'}
                     style={{
-                      filter: (!win && !gaveUp) ? `blur(${settings.encounterGuesserBlurAmount}px)` : 'none',
+                      filter: (!win && !gaveUp) ? `blur(${settings.encounterGuesser.blurAmount}px)` : 'none',
                       transition: 'filter 0.5s ease-out',
                       opacity: imageLoaded ? 1 : 0,
                     }}

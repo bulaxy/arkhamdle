@@ -1,30 +1,19 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import PackFilterControls from "./PackFilterControls";
+import type { TriviaGuesserSettings } from "../../types";
 
 interface TriviaGuesserTypeFiltersSectionProps {
   isOpen: boolean;
   onToggle: () => void;
-  // Game Modes
   questionType: 'Mixed' | 'Only How Many' | 'Only Which Card';
   onQuestionTypeChange: (type: 'Mixed' | 'Only How Many' | 'Only Which Card') => void;
   inputMode: 'Multiple Choice' | 'Direct Input';
   onInputModeChange: (mode: 'Multiple Choice' | 'Direct Input') => void;
   poolFilter: 'Player Cards Only' | 'All Cards';
   onPoolFilterChange: (filter: 'Player Cards Only' | 'All Cards') => void;
-  // Pack Filter Props
   packs: string[];
-  useGlobalPackFilter: boolean;
-  filteredPacks: string[];
-  includeWeakness: boolean;
-  includeSignatures: boolean;
-  includeBondedCard: boolean;
-  onUseGlobalPackFilterChange: (value: boolean) => void;
-  onPackToggle: (pack: string) => void;
-  onSelectAll: () => void;
-  onFilterAll: () => void;
-  onIncludeWeaknessChange: (value: boolean) => void;
-  onIncludeSignaturesChange: (value: boolean) => void;
-  onIncludeBondedCardChange: (value: boolean) => void;
+  settings: TriviaGuesserSettings;
+  onChange: (settings: TriviaGuesserSettings) => void;
 }
 
 export default function TriviaGuesserTypeFiltersSection({
@@ -37,18 +26,8 @@ export default function TriviaGuesserTypeFiltersSection({
   poolFilter,
   onPoolFilterChange,
   packs,
-  useGlobalPackFilter,
-  filteredPacks,
-  includeWeakness,
-  includeSignatures,
-  includeBondedCard,
-  onUseGlobalPackFilterChange,
-  onPackToggle,
-  onSelectAll,
-  onFilterAll,
-  onIncludeWeaknessChange,
-  onIncludeSignaturesChange,
-  onIncludeBondedCardChange,
+  settings,
+  onChange,
 }: TriviaGuesserTypeFiltersSectionProps) {
   return (
     <div className="settings-section">
@@ -60,18 +39,23 @@ export default function TriviaGuesserTypeFiltersSection({
         <div className="settings-section-content settings-column">
           <PackFilterControls
             packs={packs}
-            useGlobalFilter={useGlobalPackFilter}
-            filteredPacks={filteredPacks}
-            includeWeakness={includeWeakness}
-            includeSignatures={includeSignatures}
-            includeBondedCard={includeBondedCard}
-            onUseGlobalFilterChange={onUseGlobalPackFilterChange}
-            onPackToggle={onPackToggle}
-            onSelectAll={onSelectAll}
-            onFilterAll={onFilterAll}
-            onIncludeWeaknessChange={onIncludeWeaknessChange}
-            onIncludeSignaturesChange={onIncludeSignaturesChange}
-            onIncludeBondedCardChange={onIncludeBondedCardChange}
+            useGlobalFilter={settings.useGlobalPackFilter}
+            filteredPacks={settings.filteredPacks}
+            includeWeakness={settings.includeWeakness}
+            includeSignatures={settings.includeSignatures}
+            includeBondedCard={settings.includeBondedCard}
+            onUseGlobalFilterChange={(val) => onChange({...settings, useGlobalPackFilter: val})}
+            onPackToggle={(pack) => {
+              const newPacks = settings.filteredPacks.includes(pack)
+                ? settings.filteredPacks.filter(p => p !== pack)
+                : [...settings.filteredPacks, pack];
+              onChange({ ...settings, filteredPacks: newPacks });
+            }}
+            onSelectAll={() => onChange({ ...settings, filteredPacks: [] })}
+            onFilterAll={() => onChange({ ...settings, filteredPacks: packs })}
+            onIncludeWeaknessChange={(val) => onChange({ ...settings, includeWeakness: val })}
+            onIncludeSignaturesChange={(val) => onChange({ ...settings, includeSignatures: val })}
+            onIncludeBondedCardChange={(val) => onChange({ ...settings, includeBondedCard: val })}
             title="Card Filters"
           />
 

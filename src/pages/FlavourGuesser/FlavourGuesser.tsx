@@ -13,7 +13,7 @@ export default function FlavourGuesser() {
   const { guessableCards, answerPool } = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'flavourGuesser');
     // Apply type filters from settings
-    const typeFiltered = filterForFlavourGuesser(baseFiltered, settings.flavourGuesserTypeFilters);
+    const typeFiltered = filterForFlavourGuesser(baseFiltered, settings.flavourGuesser.typeFilters);
     // Remove duplicate_of_code cards
     const noDupes = filterDuplicateOfCode(typeFiltered);
     
@@ -58,11 +58,7 @@ export default function FlavourGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.flavourGuesserTypeFilters,
-    settings.flavourGuesserUseGlobalPackFilter,
-    settings.flavourGuesserFilteredPacks,
-    settings.flavourGuesserIncludeWeakness,
-    settings.flavourGuesserIncludeSignatures,
+    settings.flavourGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,

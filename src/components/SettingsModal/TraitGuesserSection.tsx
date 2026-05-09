@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useGameContext } from "../../hooks/useGameContext";
 import { filterDuplicateOfCode } from "../../services/CardFilter";
-import type { TypeName } from "../../types";
+import type { TraitGuesserSettings, TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
 import PackFilterControls from "./PackFilterControls";
 
@@ -19,20 +19,9 @@ interface TraitGuesserSectionProps {
   onRequirementTypeChange: (value: 'All' | 'Percentage' | 'Fixed Number') => void;
   onRequirementValueChange: (value: number) => void;
   onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
-  // Pack Filter Props
   packs: string[];
-  useGlobalPackFilter: boolean;
-  filteredPacks: string[];
-  includeWeakness: boolean;
-  includeSignatures: boolean;
-  onUseGlobalPackFilterChange: (value: boolean) => void;
-  onPackToggle: (pack: string) => void;
-  onSelectAll: () => void;
-  onFilterAll: () => void;
-  onIncludeWeaknessChange: (value: boolean) => void;
-  onIncludeSignaturesChange: (value: boolean) => void;
-  includeBondedCard: boolean;
-  onIncludeBondedCardChange: (value: boolean) => void;
+  settings: TraitGuesserSettings;
+  onChange: (settings: TraitGuesserSettings) => void;
 }
 
 const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
@@ -66,18 +55,8 @@ export default function TraitGuesserSection({
   onRequirementValueChange,
   onTypeFilterChange,
   packs,
-  useGlobalPackFilter,
-  filteredPacks,
-  includeWeakness,
-  includeSignatures,
-  onUseGlobalPackFilterChange,
-  onPackToggle,
-  onSelectAll,
-  onFilterAll,
-  onIncludeWeaknessChange,
-  onIncludeSignaturesChange,
-  includeBondedCard,
-  onIncludeBondedCardChange,
+  settings,
+  onChange,
 }: TraitGuesserSectionProps) {
   const { filteredCards } = useGameContext();
   const [showTopTraits, setShowTopTraits] = useState(false);
@@ -135,18 +114,23 @@ export default function TraitGuesserSection({
         <div className="settings-section-content settings-column">
           <PackFilterControls
             packs={packs}
-            useGlobalFilter={useGlobalPackFilter}
-            filteredPacks={filteredPacks}
-            includeWeakness={includeWeakness}
-            includeSignatures={includeSignatures}
-            onUseGlobalFilterChange={onUseGlobalPackFilterChange}
-            onPackToggle={onPackToggle}
-            onSelectAll={onSelectAll}
-            onFilterAll={onFilterAll}
-            onIncludeWeaknessChange={onIncludeWeaknessChange}
-            onIncludeSignaturesChange={onIncludeSignaturesChange}
-            includeBondedCard={includeBondedCard}
-            onIncludeBondedCardChange={onIncludeBondedCardChange}
+            useGlobalFilter={settings.useGlobalPackFilter}
+            filteredPacks={settings.filteredPacks}
+            includeWeakness={settings.includeWeakness}
+            includeSignatures={settings.includeSignatures}
+            onUseGlobalFilterChange={(val) => onChange({...settings, useGlobalPackFilter: val})}
+            onPackToggle={(pack) => {
+              const newPacks = settings.filteredPacks.includes(pack)
+                ? settings.filteredPacks.filter(p => p !== pack)
+                : [...settings.filteredPacks, pack];
+              onChange({ ...settings, filteredPacks: newPacks });
+            }}
+            onSelectAll={() => onChange({ ...settings, filteredPacks: [] })}
+            onFilterAll={() => onChange({ ...settings, filteredPacks: packs })}
+            onIncludeWeaknessChange={(val) => onChange({ ...settings, includeWeakness: val })}
+            onIncludeSignaturesChange={(val) => onChange({ ...settings, includeSignatures: val })}
+            includeBondedCard={settings.includeBondedCard}
+            onIncludeBondedCardChange={(val) => onChange({ ...settings, includeBondedCard: val })}
             title="Card Filters"
           />
 

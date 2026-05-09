@@ -48,10 +48,7 @@ export default function Investigatordle() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.investigatordleUseGlobalPackFilter,
-    settings.investigatordleFilteredPacks,
-    settings.investigatordleIncludeWeakness,
-    settings.investigatordleIncludeSignatures,
+    settings.investigatordle,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,

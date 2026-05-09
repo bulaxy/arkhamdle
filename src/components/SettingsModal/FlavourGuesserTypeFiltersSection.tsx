@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import type { TypeName } from "../../types";
+import type { FlavourGuesserSettings, TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
 import PackFilterControls from "./PackFilterControls";
 
@@ -8,20 +8,9 @@ interface FlavourGuesserTypeFiltersSectionProps {
   isOpen: boolean;
   onToggle: () => void;
   onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
-  // Pack Filter Props
   packs: string[];
-  useGlobalPackFilter: boolean;
-  filteredPacks: string[];
-  includeWeakness: boolean;
-  includeSignatures: boolean;
-  onUseGlobalPackFilterChange: (value: boolean) => void;
-  onPackToggle: (pack: string) => void;
-  onSelectAll: () => void;
-  onFilterAll: () => void;
-  onIncludeWeaknessChange: (value: boolean) => void;
-  onIncludeSignaturesChange: (value: boolean) => void;
-  includeBondedCard: boolean;
-  onIncludeBondedCardChange: (value: boolean) => void;
+  settings: FlavourGuesserSettings;
+  onChange: (settings: FlavourGuesserSettings) => void;
 }
 
 const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
@@ -47,18 +36,8 @@ export default function FlavourGuesserTypeFiltersSection({
   onToggle,
   onTypeFilterChange,
   packs,
-  useGlobalPackFilter,
-  filteredPacks,
-  includeWeakness,
-  includeSignatures,
-  onUseGlobalPackFilterChange,
-  onPackToggle,
-  onSelectAll,
-  onFilterAll,
-  onIncludeWeaknessChange,
-  onIncludeSignaturesChange,
-  includeBondedCard,
-  onIncludeBondedCardChange,
+  settings,
+  onChange,
 }: FlavourGuesserTypeFiltersSectionProps) {
   const typeNames: TypeName[] = [
     TypeNameEnum.ASSET,
@@ -87,18 +66,23 @@ export default function FlavourGuesserTypeFiltersSection({
         <div className="settings-section-content settings-column">
           <PackFilterControls
             packs={packs}
-            useGlobalFilter={useGlobalPackFilter}
-            filteredPacks={filteredPacks}
-            includeWeakness={includeWeakness}
-            includeSignatures={includeSignatures}
-            onUseGlobalFilterChange={onUseGlobalPackFilterChange}
-            onPackToggle={onPackToggle}
-            onSelectAll={onSelectAll}
-            onFilterAll={onFilterAll}
-            onIncludeWeaknessChange={onIncludeWeaknessChange}
-            onIncludeSignaturesChange={onIncludeSignaturesChange}
-            includeBondedCard={includeBondedCard}
-            onIncludeBondedCardChange={onIncludeBondedCardChange}
+            useGlobalFilter={settings.useGlobalPackFilter}
+            filteredPacks={settings.filteredPacks}
+            includeWeakness={settings.includeWeakness}
+            includeSignatures={settings.includeSignatures}
+            onUseGlobalFilterChange={(val) => onChange({...settings, useGlobalPackFilter: val})}
+            onPackToggle={(pack) => {
+              const newPacks = settings.filteredPacks.includes(pack)
+                ? settings.filteredPacks.filter(p => p !== pack)
+                : [...settings.filteredPacks, pack];
+              onChange({ ...settings, filteredPacks: newPacks });
+            }}
+            onSelectAll={() => onChange({ ...settings, filteredPacks: [] })}
+            onFilterAll={() => onChange({ ...settings, filteredPacks: packs })}
+            onIncludeWeaknessChange={(val) => onChange({ ...settings, includeWeakness: val })}
+            onIncludeSignaturesChange={(val) => onChange({ ...settings, includeSignatures: val })}
+            includeBondedCard={settings.includeBondedCard}
+            onIncludeBondedCardChange={(val) => onChange({ ...settings, includeBondedCard: val })}
             title="Card Filters"
           />
 

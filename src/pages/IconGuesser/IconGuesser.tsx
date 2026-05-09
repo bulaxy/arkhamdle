@@ -67,10 +67,7 @@ export default function IconGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.iconGuesserUseGlobalPackFilter,
-    settings.iconGuesserFilteredPacks,
-    settings.iconGuesserIncludeWeakness,
-    settings.iconGuesserIncludeSignatures,
+    settings.iconGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,

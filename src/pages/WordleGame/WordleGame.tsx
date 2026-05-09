@@ -55,10 +55,7 @@ export default function WordleGame() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.wordleUseGlobalPackFilter,
-    settings.wordleFilteredPacks,
-    settings.wordleIncludeWeakness,
-    settings.wordleIncludeSignatures,
+    settings.wordle,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,

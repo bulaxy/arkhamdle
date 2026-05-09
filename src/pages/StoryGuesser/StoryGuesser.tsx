@@ -47,14 +47,7 @@ export default function StoryGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.storyGuesserScrambleWords,
-    settings.storyGuesserScrambleLetters,
-    settings.storyGuesserSliceScale,
-    settings.storyGuesserHideName,
-    settings.storyGuesserUseGlobalPackFilter,
-    settings.storyGuesserFilteredPacks,
-    settings.storyGuesserIncludeWeakness,
-    settings.storyGuesserIncludeSignatures,
+    settings.storyGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -87,14 +80,14 @@ export default function StoryGuesser() {
       return word.replace(/[a-zA-ZÀ-ÿ]+/, letters.join(''));
     };
 
-    if (settings.storyGuesserScrambleLetters) {
+    if (settings.storyGuesser.scrambleLetters) {
       text = text.split(/(\s+)/).map(part => {
         if (/\s+/.test(part)) return part;
         return scrambleWord(part);
       }).join('');
     }
 
-    if (settings.storyGuesserScrambleWords) {
+    if (settings.storyGuesser.scrambleWords) {
       const wordsAndSpaces = text.split(/(\s+)/);
       const justWords = wordsAndSpaces.filter(w => !/\s+/.test(w) && w.trim().length > 0);
       
@@ -113,7 +106,7 @@ export default function StoryGuesser() {
       }).join('');
     }
 
-    if (settings.storyGuesserHideName) {
+    if (settings.storyGuesser.hideName) {
       // Split name by spaces and match each part, including possessives
       const nameParts = answer.name.split(' ');
       nameParts.forEach(part => {
@@ -124,7 +117,7 @@ export default function StoryGuesser() {
       });
     }
 
-    if (settings.storyGuesserSliceScale < 1) {
+    if (settings.storyGuesser.sliceScale < 1) {
       // Smarter slice: shuffle all words and take a percentage of them
       const words = text.split(/\s+/).filter(w => w.trim().length > 0);
       const totalWords = words.length;
@@ -136,14 +129,14 @@ export default function StoryGuesser() {
         [words[i], words[j]] = [words[j], words[i]];
       }
       
-      const sliceCount = Math.max(1, Math.floor(totalWords * settings.storyGuesserSliceScale));
+      const sliceCount = Math.max(1, Math.floor(totalWords * settings.storyGuesser.sliceScale));
       text = words.slice(0, sliceCount).join(' ') + '...';
       
       currentSliceIdx = null; 
     }
 
     return { scrambledFlavor: text, sliceIdx: currentSliceIdx };
-  }, [answer, settings.storyGuesserScrambleLetters, settings.storyGuesserScrambleWords, settings.storyGuesserHideName, settings.storyGuesserSliceScale]);
+  }, [answer, settings.storyGuesser.scrambleLetters, settings.storyGuesser.scrambleWords, settings.storyGuesser.hideName, settings.storyGuesser.sliceScale]);
 
   const submitGuess = (card: TransformedCard) => {
     console.log('[StoryGuesser] Guess:', card);

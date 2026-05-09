@@ -26,7 +26,7 @@ export default function PicGuesser() {
     const baseFiltered = filterBySettings(cards, settings, 'picGuesser');
     const filtered = filterForPicGuesser(baseFiltered);
     // Apply type filters from settings
-    const typeFiltered = filtered.filter(c => settings.picGuesserTypeFilters[c.typeName] ?? true);
+    const typeFiltered = filtered.filter(c => settings.picGuesser.typeFilters[c.typeName] ?? true);
     const noDupes = filterDuplicateOfCode(typeFiltered);
     const deduped = deduplicateByEvaluationCriteria(
       noDupes,
@@ -46,8 +46,8 @@ export default function PicGuesser() {
   };
 
   let zoomOutRate = 1;
-  if (settings.picGuesserDifficulty === 'Normal') zoomOutRate = 1.8;
-  if (settings.picGuesserDifficulty === 'Easy') zoomOutRate = 2.5;
+  if (settings.picGuesser.difficulty === 'Normal') zoomOutRate = 1.8;
+  if (settings.picGuesser.difficulty === 'Easy') zoomOutRate = 2.5;
 
   const resetGame = useCallback(() => {
     setWin(false);
@@ -67,12 +67,7 @@ export default function PicGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.picGuesserDifficulty,
-    settings.picGuesserTypeFilters,
-    settings.picGuesserUseGlobalPackFilter,
-    settings.picGuesserFilteredPacks,
-    settings.picGuesserIncludeWeakness,
-    settings.picGuesserIncludeSignatures,
+    settings.picGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
