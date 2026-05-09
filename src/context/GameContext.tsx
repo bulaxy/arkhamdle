@@ -81,6 +81,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     traitGuesserRequirementType: "Fixed Number",
     traitGuesserRequirementValue: 3,
     includeEncounter: false,
+    showCampaignCards: true,
     enableHints: true,
     includeBondedCard: false,
 
@@ -234,6 +235,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           traitGuesserRequirementType: savedSettings.traitGuesserRequirementType || "Fixed Number",
           traitGuesserRequirementValue: savedSettings.traitGuesserRequirementValue ?? 3,
           includeEncounter: savedSettings.includeEncounter ?? false,
+          showCampaignCards: savedSettings.showCampaignCards ?? true,
           enableHints: savedSettings.enableHints ?? true,
           includeBondedCard: savedSettings.includeBondedCard ?? false,
 
@@ -300,7 +302,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     const passSignature = settings.includeSignatures || !isSignature;
     const isBonded = !!card.bonded_to;
     const passBonded = settings.includeBondedCard || !isBonded;
-    return passPack && passWeakness && passSignature && passBonded;
+    const isCampaign = !!(card.encounter_code || card.encounter_name);
+    const passCampaign = settings.showCampaignCards || !isCampaign;
+    return passPack && passWeakness && passSignature && passBonded && passCampaign;
   });
 
 

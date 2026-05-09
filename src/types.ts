@@ -9,6 +9,10 @@ import type {
 
 export * from './types/arkham';
 
+declare global {
+  const APP_VERSION: string;
+}
+
 export interface AppSettings {
   filteredPacks: string[];
   picGuesserDifficulty: 'Hard' | 'Normal' | 'Easy';
@@ -26,6 +30,7 @@ export interface AppSettings {
   traitGuesserRequirementType: 'All' | 'Percentage' | 'Fixed Number';
   traitGuesserRequirementValue: number;
   includeEncounter: boolean;
+  showCampaignCards: boolean;
   enableHints: boolean;
   includeBondedCard: boolean;
   // Global Pack Filter (already have filteredPacks, includeWeakness, includeSignatures)
@@ -118,6 +123,7 @@ export interface TransformedCard {
   vengeance?: number;
   health_per_investigator?: boolean;
   back_flavor?: string;
+  encounter_code?: string;
   encounter_name?: string;
   permanent?: boolean;
   bonded_to?: string;

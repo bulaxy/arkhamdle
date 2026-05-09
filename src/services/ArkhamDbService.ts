@@ -88,6 +88,7 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
         vengeance: o.vengeance,
         health_per_investigator: o.health_per_investigator,
         back_flavor: o.back_flavor,
+        encounter_code: o.encounter_code,
         encounter_name: o.encounter_name,
         permanent: o.permanent,
         bonded_to: o.bonded_to,

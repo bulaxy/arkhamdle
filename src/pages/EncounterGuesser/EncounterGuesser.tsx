@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
+import Fuse from 'fuse.js';
 import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard } from '../../types';
 import { filterForEncounterGuesser, filterBySettings } from '../../services/CardFilter';
@@ -16,11 +17,17 @@ export default function EncounterGuesser() {
   
   const [selectedPack, setSelectedPack] = useState<string>('');
   const [selectedEncounter, setSelectedEncounter] = useState<string>('');
+  const [encounterSearch, setEncounterSearch] = useState<string>('');
+  const [showEncounterDropdown, setShowEncounterDropdown] = useState(false);
 
   const gameCards = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'encounterGuesser');
     return filterForEncounterGuesser(baseFiltered);
   }, [cards, settings]);
+
+  const gameCardsWithPic = useMemo(() => {
+    return gameCards.filter(c => c.imagesrc && c.imagesrc.trim().length > 0);
+  }, [gameCards]);
 
   const availablePacks = useMemo(() => {
     const packs = new Set<string>();
@@ -41,6 +48,16 @@ export default function EncounterGuesser() {
     return Array.from(encounters).sort();
   }, [gameCards, selectedPack]);
 
+  const fuse = useMemo(() => {
+    return new Fuse(availableEncountersForPack, {
+      threshold: 0.4,
+    });
+  }, [availableEncountersForPack]);
+
+  const encounterSuggestions = useMemo(() => {
+    if (!encounterSearch.trim()) return availableEncountersForPack;
+    return fuse.search(encounterSearch.trim()).map(res => res.item);
+  }, [fuse, encounterSearch, availableEncountersForPack]);
 
   const resetGame = useCallback(() => {
     setWin(false);
@@ -48,12 +65,13 @@ export default function EncounterGuesser() {
     setGuesses([]);
     setSelectedPack('');
     setSelectedEncounter('');
-    if (gameCards.length > 0) {
-      setAnswer(gameCards[Math.floor(Math.random() * gameCards.length)]);
+    setEncounterSearch('');
+    if (gameCardsWithPic.length > 0) {
+      setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
     } else {
       setAnswer(null);
     }
-  }, [gameCards]);
+  }, [gameCardsWithPic]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -86,10 +104,11 @@ export default function EncounterGuesser() {
       setAnimation('shakeAnimation');
       setTimeout(() => setAnimation(''), 300);
       setSelectedEncounter('');
+      setEncounterSearch('');
     }
   };
 
-  const hasNoCardsError = !settings.includeEncounter || gameCards.length === 0;
+  const hasNoCardsError = !settings.includeEncounter || gameCardsWithPic.length === 0;
 
   return (
     <div className="encounter-container">
@@ -157,11 +176,13 @@ export default function EncounterGuesser() {
             {!win && !gaveUp && (
               <div className="encounter-gameplay">
                 <div className={`encounter-inputs ${animation}`}>
+
                   <select
                     value={selectedPack}
                     onChange={(e) => {
                       setSelectedPack(e.target.value);
                       setSelectedEncounter('');
+                      setEncounterSearch('');
                     }}
                     className="encounter-select"
                   >
@@ -171,17 +192,43 @@ export default function EncounterGuesser() {
                     ))}
                   </select>
 
-                  <select
-                    value={selectedEncounter}
-                    onChange={(e) => setSelectedEncounter(e.target.value)}
-                    className="encounter-select"
-                    disabled={!selectedPack}
-                  >
-                    <option value="">-- Select Encounter Set --</option>
-                    {availableEncountersForPack.map(enc => (
-                      <option key={enc} value={enc}>{enc}</option>
-                    ))}
-                  </select>
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <input
+                      type="text"
+                      className="encounter-select"
+                      style={{ boxSizing: 'border-box' }}
+                      placeholder={selectedPack ? "-- Search Encounter Set --" : "-- Select Pack First --"}
+                      value={encounterSearch}
+                      onChange={(e) => {
+                        setEncounterSearch(e.target.value);
+                        setSelectedEncounter('');
+                        setShowEncounterDropdown(true);
+                      }}
+                      onFocus={() => setShowEncounterDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowEncounterDropdown(false), 200)}
+                      disabled={!selectedPack}
+                    />
+                    {showEncounterDropdown && selectedPack && (
+                      <div className="guess-suggestions" style={{ marginTop: '0.2rem' }}>
+                        {encounterSuggestions.map(enc => (
+                          <div
+                            key={enc}
+                            className="guess-suggestion-item"
+                            onClick={() => {
+                              setSelectedEncounter(enc);
+                              setEncounterSearch(enc);
+                              setShowEncounterDropdown(false);
+                            }}
+                          >
+                            {enc}
+                          </div>
+                        ))}
+                        {encounterSuggestions.length === 0 && (
+                          <div className="guess-suggestion-item no-match">No results found</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   <button
                     className="premium-btn guess-btn"
@@ -200,15 +247,17 @@ export default function EncounterGuesser() {
                     </button>
                   )}
                 </div>
-                
-                <div className="encounter-guesses-container">
-                  {guesses.map((g, i) => (
-                    <div key={`${g}-${i}`} className="glass-panel encounter-guess-item fade-in incorrect">
-                      <span>{g}</span>
-                      <span className="result-text">Incorrect</span>
-                    </div>
-                  ))}
-                </div>
+              </div>
+            )}
+            
+            {guesses.length > 0 && (
+              <div className="encounter-guesses-container">
+                {guesses.map((g, i) => (
+                  <div key={`${g}-${i}`} className="glass-panel encounter-guess-item fade-in incorrect">
+                    <span>{g}</span>
+                    <span className="result-text">Incorrect</span>
+                  </div>
+                ))}
               </div>
             )}
           </>

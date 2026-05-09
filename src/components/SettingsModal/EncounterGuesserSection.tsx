@@ -18,6 +18,8 @@ interface EncounterGuesserSectionProps {
   onFilterAll: () => void;
   onIncludeWeaknessChange: (value: boolean) => void;
   onIncludeSignaturesChange: (value: boolean) => void;
+  includeBondedCard: boolean;
+  onIncludeBondedCardChange: (value: boolean) => void;
 }
 
 const EncounterGuesserSection: React.FC<EncounterGuesserSectionProps> = ({
@@ -36,6 +38,8 @@ const EncounterGuesserSection: React.FC<EncounterGuesserSectionProps> = ({
   onFilterAll,
   onIncludeWeaknessChange,
   onIncludeSignaturesChange,
+  includeBondedCard,
+  onIncludeBondedCardChange,
 }) => {
   return (
     <div className="settings-section">
@@ -74,6 +78,8 @@ const EncounterGuesserSection: React.FC<EncounterGuesserSectionProps> = ({
             onFilterAll={onFilterAll}
             onIncludeWeaknessChange={onIncludeWeaknessChange}
             onIncludeSignaturesChange={onIncludeSignaturesChange}
+            includeBondedCard={includeBondedCard}
+            onIncludeBondedCardChange={onIncludeBondedCardChange}
             title="Card Filters"
           />
         </div>

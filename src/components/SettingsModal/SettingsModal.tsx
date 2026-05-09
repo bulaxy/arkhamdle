@@ -24,7 +24,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Settings <small className="version-tag">v1.1.0</small></h2>
+          <h2>Settings <small className="version-tag">v{APP_VERSION}</small></h2>
           <button className="close-btn" onClick={onClose}>
             <X size={24} />
           </button>
@@ -255,6 +255,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, encounterGuesserFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, encounterGuesserIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, encounterGuesserIncludeSignatures: value })}
+            includeBondedCard={settings.encounterGuesserIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, encounterGuesserIncludeBondedCard: value })}
           />
 
           <div className="footer-buttons">

@@ -36,7 +36,10 @@ export function filterBySettings(
     const isBonded = !!card.bonded_to;
     const passBonded = incBonded || !isBonded;
 
-    return passPack && passWeakness && passSignature && passBonded;
+    const isCampaign = !!(card.encounter_code || card.encounter_name);
+    const passCampaign = settings.showCampaignCards || !isCampaign;
+
+    return passPack && passWeakness && passSignature && passBonded && passCampaign;
   });
 }
 
