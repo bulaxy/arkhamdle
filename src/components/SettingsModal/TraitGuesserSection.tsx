@@ -31,6 +31,8 @@ interface TraitGuesserSectionProps {
   onFilterAll: () => void;
   onIncludeWeaknessChange: (value: boolean) => void;
   onIncludeSignaturesChange: (value: boolean) => void;
+  includeBondedCard: boolean;
+  onIncludeBondedCardChange: (value: boolean) => void;
 }
 
 const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
@@ -74,6 +76,8 @@ export default function TraitGuesserSection({
   onFilterAll,
   onIncludeWeaknessChange,
   onIncludeSignaturesChange,
+  includeBondedCard,
+  onIncludeBondedCardChange,
 }: TraitGuesserSectionProps) {
   const { filteredCards } = useGameContext();
   const [showTopTraits, setShowTopTraits] = useState(false);
@@ -141,6 +145,8 @@ export default function TraitGuesserSection({
             onFilterAll={onFilterAll}
             onIncludeWeaknessChange={onIncludeWeaknessChange}
             onIncludeSignaturesChange={onIncludeSignaturesChange}
+            includeBondedCard={includeBondedCard}
+            onIncludeBondedCardChange={onIncludeBondedCardChange}
             title="Card Filters"
           />
 

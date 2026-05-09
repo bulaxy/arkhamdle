@@ -20,6 +20,8 @@ interface FlavourGuesserTypeFiltersSectionProps {
   onFilterAll: () => void;
   onIncludeWeaknessChange: (value: boolean) => void;
   onIncludeSignaturesChange: (value: boolean) => void;
+  includeBondedCard: boolean;
+  onIncludeBondedCardChange: (value: boolean) => void;
 }
 
 const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
@@ -55,6 +57,8 @@ export default function FlavourGuesserTypeFiltersSection({
   onFilterAll,
   onIncludeWeaknessChange,
   onIncludeSignaturesChange,
+  includeBondedCard,
+  onIncludeBondedCardChange,
 }: FlavourGuesserTypeFiltersSectionProps) {
   const typeNames: TypeName[] = [
     TypeNameEnum.ASSET,
@@ -93,6 +97,8 @@ export default function FlavourGuesserTypeFiltersSection({
             onFilterAll={onFilterAll}
             onIncludeWeaknessChange={onIncludeWeaknessChange}
             onIncludeSignaturesChange={onIncludeSignaturesChange}
+            includeBondedCard={includeBondedCard}
+            onIncludeBondedCardChange={onIncludeBondedCardChange}
             title="Card Filters"
           />
 

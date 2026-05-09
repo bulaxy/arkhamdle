@@ -13,7 +13,7 @@ export default function WelcomeModal({ onClose, onOpenSettings }: WelcomeModalPr
         <div className="modal-header">
           <div className="title-with-icon">
             <Sparkles className="icon-sparkle" size={24} />
-            <h2>Welcome to Arkhamdle! <small className="version-tag">v1.0</small></h2>
+            <h2>Welcome to Arkhamdle! <small className="version-tag">v1.1.0</small></h2>
           </div>
           <button className="close-btn" onClick={onClose}>
             <X size={24} />
@@ -38,7 +38,8 @@ export default function WelcomeModal({ onClose, onOpenSettings }: WelcomeModalPr
             <p>
               Please note: excessive play might lead to temporary madness, seeing tentacles in your breakfast, 
               or an uncontrollable urge to buy even more card sleeves. Don't get <em>too</em> addicted — 
-              we're not responsible for any trauma caused by failing to guess a 0-cost event from 2017.
+              we're not responsible for any trauma caused by failing to guess a 0-cost event from 2017. 
+              Also, watch out for "attached" cards like <strong>Lost Homunculus</strong> — they're in the mix and can be quite tricky!
             </p>
           </div>
 

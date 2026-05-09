@@ -24,6 +24,8 @@ interface PicGuesserSectionProps {
   onFilterAll: () => void;
   onIncludeWeaknessChange: (value: boolean) => void;
   onIncludeSignaturesChange: (value: boolean) => void;
+  includeBondedCard: boolean;
+  onIncludeBondedCardChange: (value: boolean) => void;
 }
 
 const TYPE_DISPLAY_NAMES: Record<TypeName, string> = {
@@ -61,6 +63,8 @@ export default function PicGuesserSection({
   onFilterAll,
   onIncludeWeaknessChange,
   onIncludeSignaturesChange,
+  includeBondedCard,
+  onIncludeBondedCardChange,
 }: PicGuesserSectionProps) {
   const typeCodes: TypeName[] = [
     TypeNameEnum.ASSET,
@@ -94,6 +98,8 @@ export default function PicGuesserSection({
             onFilterAll={onFilterAll}
             onIncludeWeaknessChange={onIncludeWeaknessChange}
             onIncludeSignaturesChange={onIncludeSignaturesChange}
+            includeBondedCard={includeBondedCard}
+            onIncludeBondedCardChange={onIncludeBondedCardChange}
             title="Card Filters"
           />
 

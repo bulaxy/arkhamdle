@@ -8,6 +8,8 @@ interface PackFilterControlsProps {
   onFilterAll: () => void;
   onIncludeWeaknessChange: (include: boolean) => void;
   onIncludeSignaturesChange: (include: boolean) => void;
+  includeBondedCard: boolean;
+  onIncludeBondedCardChange: (include: boolean) => void;
   title?: string;
   description?: string;
   useGlobalFilter?: boolean;
@@ -24,6 +26,8 @@ export default function PackFilterControls({
   onFilterAll,
   onIncludeWeaknessChange,
   onIncludeSignaturesChange,
+  includeBondedCard,
+  onIncludeBondedCardChange,
   title,
   description,
   useGlobalFilter,
@@ -74,6 +78,14 @@ export default function PackFilterControls({
                 onChange={(e) => onIncludeSignaturesChange(e.target.checked)}
               />
               <span className="bold">Include Signatures</span>
+            </label>
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={includeBondedCard}
+                onChange={(e) => onIncludeBondedCardChange(e.target.checked)}
+              />
+              <span className="bold">Include Bonded Cards</span>
             </label>
           </div>
 

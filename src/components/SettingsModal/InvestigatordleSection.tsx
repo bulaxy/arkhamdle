@@ -15,6 +15,8 @@ interface InvestigatordleSectionProps {
   onFilterAll: () => void;
   onIncludeWeaknessChange: (value: boolean) => void;
   onIncludeSignaturesChange: (value: boolean) => void;
+  includeBondedCard: boolean;
+  onIncludeBondedCardChange: (value: boolean) => void;
 }
 
 export default function InvestigatordleSection({
@@ -31,6 +33,8 @@ export default function InvestigatordleSection({
   onFilterAll,
   onIncludeWeaknessChange,
   onIncludeSignaturesChange,
+  includeBondedCard,
+  onIncludeBondedCardChange,
 }: InvestigatordleSectionProps) {
   return (
     <div className="settings-section">
@@ -52,6 +56,8 @@ export default function InvestigatordleSection({
             onFilterAll={onFilterAll}
             onIncludeWeaknessChange={onIncludeWeaknessChange}
             onIncludeSignaturesChange={onIncludeSignaturesChange}
+            includeBondedCard={includeBondedCard}
+            onIncludeBondedCardChange={onIncludeBondedCardChange}
             title="Card Filters"
           />
         </div>

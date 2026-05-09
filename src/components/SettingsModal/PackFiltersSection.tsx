@@ -13,6 +13,8 @@ interface PackFiltersSectionProps {
   onFilterAll: () => void;
   onIncludeWeaknessChange: (include: boolean) => void;
   onIncludeSignaturesChange: (include: boolean) => void;
+  includeBondedCard: boolean;
+  onIncludeBondedCardChange: (include: boolean) => void;
 }
 
 export default function PackFiltersSection({
@@ -27,6 +29,8 @@ export default function PackFiltersSection({
   onFilterAll,
   onIncludeWeaknessChange,
   onIncludeSignaturesChange,
+  includeBondedCard,
+  onIncludeBondedCardChange,
 }: PackFiltersSectionProps) {
   return (
     <div className="settings-section">
@@ -46,6 +50,8 @@ export default function PackFiltersSection({
             onFilterAll={onFilterAll}
             onIncludeWeaknessChange={onIncludeWeaknessChange}
             onIncludeSignaturesChange={onIncludeSignaturesChange}
+            includeBondedCard={includeBondedCard}
+            onIncludeBondedCardChange={onIncludeBondedCardChange}
             description="Filter which pack groups to include in the games by default. All games will use this unless overridden in their specific settings."
           />
         </div>

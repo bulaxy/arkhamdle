@@ -29,7 +29,14 @@ export function filterBySettings(
     const passWeakness = incWeakness || !isWeakness;
     const isSignature = !!card.restrictions?.investigator;
     const passSignature = incSignatures || !isSignature;
-    return passPack && passWeakness && passSignature;
+
+    const incBonded = useGlobal
+      ? settings.includeBondedCard
+      : ((settings[`${gameId}IncludeBondedCard` as keyof AppSettings] as boolean) ?? false);
+    const isBonded = !!card.bonded_to;
+    const passBonded = incBonded || !isBonded;
+
+    return passPack && passWeakness && passSignature && passBonded;
   });
 }
 
