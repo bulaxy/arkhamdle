@@ -235,6 +235,12 @@
     width: 100%;
     background: var(--accent-color);
   }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
 }
 
 // External link

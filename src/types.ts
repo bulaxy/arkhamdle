@@ -27,6 +27,7 @@ export interface AppSettings {
   traitGuesserRequirementValue: number;
   includeEncounter: boolean;
   enableHints: boolean;
+  includeBondedCard: boolean;
   // Global Pack Filter (already have filteredPacks, includeWeakness, includeSignatures)
   
   // Wordle / Classic Mode
@@ -34,36 +35,42 @@ export interface AppSettings {
   wordleFilteredPacks: string[];
   wordleIncludeWeakness: boolean;
   wordleIncludeSignatures: boolean;
+  wordleIncludeBondedCard: boolean;
 
   // Pic Guesser
   picGuesserUseGlobalPackFilter: boolean;
   picGuesserFilteredPacks: string[];
   picGuesserIncludeWeakness: boolean;
   picGuesserIncludeSignatures: boolean;
+  picGuesserIncludeBondedCard: boolean;
 
   // Investigatordle
   investigatordleUseGlobalPackFilter: boolean;
   investigatordleFilteredPacks: string[];
   investigatordleIncludeWeakness: boolean;
   investigatordleIncludeSignatures: boolean;
+  investigatordleIncludeBondedCard: boolean;
 
   // Story Guesser
   storyGuesserUseGlobalPackFilter: boolean;
   storyGuesserFilteredPacks: string[];
   storyGuesserIncludeWeakness: boolean;
   storyGuesserIncludeSignatures: boolean;
+  storyGuesserIncludeBondedCard: boolean;
 
   // Trait Guesser
   traitGuesserUseGlobalPackFilter: boolean;
   traitGuesserFilteredPacks: string[];
   traitGuesserIncludeWeakness: boolean;
   traitGuesserIncludeSignatures: boolean;
+  traitGuesserIncludeBondedCard: boolean;
 
   // Flavour Guesser
   flavourGuesserUseGlobalPackFilter: boolean;
   flavourGuesserFilteredPacks: string[];
   flavourGuesserIncludeWeakness: boolean;
   flavourGuesserIncludeSignatures: boolean;
+  flavourGuesserIncludeBondedCard: boolean;
 
   // Encounter Guesser
   encounterGuesserUseGlobalPackFilter: boolean;
@@ -71,6 +78,7 @@ export interface AppSettings {
   encounterGuesserIncludeWeakness: boolean;
   encounterGuesserIncludeSignatures: boolean;
   encounterGuesserBlurAmount: number;
+  encounterGuesserIncludeBondedCard: boolean;
 }
 
 export interface TransformedCard {
@@ -112,5 +120,6 @@ export interface TransformedCard {
   back_flavor?: string;
   encounter_name?: string;
   permanent?: boolean;
+  bonded_to?: string;
 }
 

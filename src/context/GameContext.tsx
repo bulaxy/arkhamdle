@@ -82,42 +82,50 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     traitGuesserRequirementValue: 3,
     includeEncounter: false,
     enableHints: true,
+    includeBondedCard: false,
 
     wordleUseGlobalPackFilter: true,
     wordleFilteredPacks: [],
     wordleIncludeWeakness: false,
     wordleIncludeSignatures: true,
+    wordleIncludeBondedCard: false,
 
     picGuesserUseGlobalPackFilter: true,
     picGuesserFilteredPacks: [],
     picGuesserIncludeWeakness: false,
     picGuesserIncludeSignatures: true,
+    picGuesserIncludeBondedCard: false,
 
     investigatordleUseGlobalPackFilter: true,
     investigatordleFilteredPacks: [],
     investigatordleIncludeWeakness: false,
     investigatordleIncludeSignatures: true,
+    investigatordleIncludeBondedCard: false,
 
     storyGuesserUseGlobalPackFilter: true,
     storyGuesserFilteredPacks: [],
     storyGuesserIncludeWeakness: false,
     storyGuesserIncludeSignatures: true,
+    storyGuesserIncludeBondedCard: false,
 
     traitGuesserUseGlobalPackFilter: true,
     traitGuesserFilteredPacks: [],
     traitGuesserIncludeWeakness: false,
     traitGuesserIncludeSignatures: true,
+    traitGuesserIncludeBondedCard: false,
 
     flavourGuesserUseGlobalPackFilter: true,
     flavourGuesserFilteredPacks: [],
     flavourGuesserIncludeWeakness: false,
     flavourGuesserIncludeSignatures: true,
+    flavourGuesserIncludeBondedCard: false,
 
     encounterGuesserUseGlobalPackFilter: true,
     encounterGuesserFilteredPacks: [],
     encounterGuesserIncludeWeakness: false,
     encounterGuesserIncludeSignatures: true,
-    encounterGuesserBlurAmount: 20,
+    encounterGuesserBlurAmount: 4,
+	encounterGuesserIncludeBondedCard: false
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -227,42 +235,50 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           traitGuesserRequirementValue: savedSettings.traitGuesserRequirementValue ?? 3,
           includeEncounter: savedSettings.includeEncounter ?? false,
           enableHints: savedSettings.enableHints ?? true,
+          includeBondedCard: savedSettings.includeBondedCard ?? false,
 
           wordleUseGlobalPackFilter: savedSettings.wordleUseGlobalPackFilter ?? true,
           wordleFilteredPacks: savedSettings.wordleFilteredPacks || [],
           wordleIncludeWeakness: savedSettings.wordleIncludeWeakness ?? false,
           wordleIncludeSignatures: savedSettings.wordleIncludeSignatures ?? true,
+          wordleIncludeBondedCard: savedSettings.wordleIncludeBondedCard ?? false,
 
           picGuesserUseGlobalPackFilter: savedSettings.picGuesserUseGlobalPackFilter ?? true,
           picGuesserFilteredPacks: savedSettings.picGuesserFilteredPacks || [],
           picGuesserIncludeWeakness: savedSettings.picGuesserIncludeWeakness ?? false,
           picGuesserIncludeSignatures: savedSettings.picGuesserIncludeSignatures ?? true,
+          picGuesserIncludeBondedCard: savedSettings.picGuesserIncludeBondedCard ?? false,
 
           investigatordleUseGlobalPackFilter: savedSettings.investigatordleUseGlobalPackFilter ?? true,
           investigatordleFilteredPacks: savedSettings.investigatordleFilteredPacks || [],
           investigatordleIncludeWeakness: savedSettings.investigatordleIncludeWeakness ?? false,
           investigatordleIncludeSignatures: savedSettings.investigatordleIncludeSignatures ?? true,
+          investigatordleIncludeBondedCard: savedSettings.investigatordleIncludeBondedCard ?? false,
 
           storyGuesserUseGlobalPackFilter: savedSettings.storyGuesserUseGlobalPackFilter ?? true,
           storyGuesserFilteredPacks: savedSettings.storyGuesserFilteredPacks || [],
           storyGuesserIncludeWeakness: savedSettings.storyGuesserIncludeWeakness ?? false,
           storyGuesserIncludeSignatures: savedSettings.storyGuesserIncludeSignatures ?? true,
+          storyGuesserIncludeBondedCard: savedSettings.storyGuesserIncludeBondedCard ?? false,
 
           traitGuesserUseGlobalPackFilter: savedSettings.traitGuesserUseGlobalPackFilter ?? true,
           traitGuesserFilteredPacks: savedSettings.traitGuesserFilteredPacks || [],
           traitGuesserIncludeWeakness: savedSettings.traitGuesserIncludeWeakness ?? false,
           traitGuesserIncludeSignatures: savedSettings.traitGuesserIncludeSignatures ?? true,
+          traitGuesserIncludeBondedCard: savedSettings.traitGuesserIncludeBondedCard ?? false,
 
           flavourGuesserUseGlobalPackFilter: savedSettings.flavourGuesserUseGlobalPackFilter ?? true,
           flavourGuesserFilteredPacks: savedSettings.flavourGuesserFilteredPacks || [],
           flavourGuesserIncludeWeakness: savedSettings.flavourGuesserIncludeWeakness ?? false,
           flavourGuesserIncludeSignatures: savedSettings.flavourGuesserIncludeSignatures ?? true,
+          flavourGuesserIncludeBondedCard: savedSettings.flavourGuesserIncludeBondedCard ?? false,
 
           encounterGuesserUseGlobalPackFilter: savedSettings.encounterGuesserUseGlobalPackFilter ?? true,
           encounterGuesserFilteredPacks: savedSettings.encounterGuesserFilteredPacks || [],
           encounterGuesserIncludeWeakness: savedSettings.encounterGuesserIncludeWeakness ?? false,
           encounterGuesserIncludeSignatures: savedSettings.encounterGuesserIncludeSignatures ?? true,
-          encounterGuesserBlurAmount: savedSettings.encounterGuesserBlurAmount ?? 20,
+          encounterGuesserBlurAmount: savedSettings.encounterGuesserBlurAmount ?? 4,
+          encounterGuesserIncludeBondedCard: savedSettings.encounterGuesserIncludeBondedCard ?? false,
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {
@@ -282,7 +298,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     const passWeakness = settings.includeWeakness || !isWeakness;
     const isSignature = card.restrictions?.investigator;
     const passSignature = settings.includeSignatures || !isSignature;
-    return passPack && passWeakness && passSignature;
+    const isBonded = !!card.bonded_to;
+    const passBonded = settings.includeBondedCard || !isBonded;
+    return passPack && passWeakness && passSignature && passBonded;
   });
 
 

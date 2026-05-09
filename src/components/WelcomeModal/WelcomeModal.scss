@@ -1,0 +1,101 @@
+.welcome-modal-overlay {
+  z-index: 1100; // Above settings modal if needed
+}
+
+.welcome-modal-content {
+  max-width: 500px;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .icon-sparkle {
+    color: var(--accent-color);
+  }
+}
+
+.welcome-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.welcome-text {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  
+  &.highlight {
+    color: var(--accent-color);
+    font-weight: 500;
+  }
+}
+
+.welcome-section {
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 500;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &.pro-tip {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+}
+
+.settings-shortcut-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--accent-color);
+    color: white;
+  }
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--glass-border);
+
+  .start-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}

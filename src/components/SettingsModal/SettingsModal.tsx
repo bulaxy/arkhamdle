@@ -1,4 +1,4 @@
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink, Mail, X } from "lucide-react";
 import { useState } from "react";
 import { useGameContext } from "../../hooks/useGameContext";
 import PackFiltersSection from "./PackFiltersSection";
@@ -24,7 +24,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Settings</h2>
+          <h2>Settings <small className="version-tag">v1.1.0</small></h2>
           <button className="close-btn" onClick={onClose}>
             <X size={24} />
           </button>
@@ -57,6 +57,10 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onIncludeSignaturesChange={(include) =>
               setSettings({ ...settings, includeSignatures: include })
             }
+            includeBondedCard={settings.includeBondedCard}
+            onIncludeBondedCardChange={(include) =>
+              setSettings({ ...settings, includeBondedCard: include })
+            }
           />
 
           <WordleSection
@@ -78,6 +82,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, wordleFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, wordleIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, wordleIncludeSignatures: value })}
+            includeBondedCard={settings.wordleIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, wordleIncludeBondedCard: value })}
           />
 
           <PicGuesserSection
@@ -106,6 +112,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, picGuesserFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, picGuesserIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, picGuesserIncludeSignatures: value })}
+            includeBondedCard={settings.picGuesserIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, picGuesserIncludeBondedCard: value })}
           />
 
           <InvestigatordleSection
@@ -127,6 +135,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, investigatordleFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, investigatordleIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, investigatordleIncludeSignatures: value })}
+            includeBondedCard={settings.investigatordleIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, investigatordleIncludeBondedCard: value })}
           />
 
           <StoryGuesserSection
@@ -156,6 +166,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, storyGuesserFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, storyGuesserIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, storyGuesserIncludeSignatures: value })}
+            includeBondedCard={settings.storyGuesserIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, storyGuesserIncludeBondedCard: value })}
           />
 
           <TraitGuesserSection
@@ -190,6 +202,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, traitGuesserFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, traitGuesserIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, traitGuesserIncludeSignatures: value })}
+            includeBondedCard={settings.traitGuesserIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, traitGuesserIncludeBondedCard: value })}
           />
 
           <FlavourGuesserTypeFiltersSection
@@ -216,6 +230,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onFilterAll={() => setSettings({ ...settings, flavourGuesserFilteredPacks: packs })}
             onIncludeWeaknessChange={(value) => setSettings({ ...settings, flavourGuesserIncludeWeakness: value })}
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, flavourGuesserIncludeSignatures: value })}
+            includeBondedCard={settings.flavourGuesserIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, flavourGuesserIncludeBondedCard: value })}
           />
 
           <EncounterGuesserSection
@@ -245,14 +261,22 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             <button className="premium-btn" onClick={onClose}>
               Close Settings
             </button>
-            <a
-              href="https://github.com/bulaxy/arkhamdle"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="external-link"
-            >
-              <ExternalLink size={18} /> Issues & Feedback
-            </a>
+            <div className="footer-links">
+              <a
+                href="https://github.com/bulaxy/arkhamdle"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="external-link"
+              >
+                <ExternalLink size={18} /> GitHub
+              </a>
+              <a
+                href="mailto:feedback@arkhamdle.com"
+                className="external-link"
+              >
+                <Mail size={18} /> Feedback
+              </a>
+            </div>
           </div>
         </div>
       </div>

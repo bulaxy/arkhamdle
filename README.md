@@ -6,6 +6,8 @@ A modern, "vib-coded" wordle-style game for the Arkham Horror: The Card Game com
 
 Arkhamdle is a passion project built with a "vib-coded" philosophy—focusing on smooth interactions, thematic aesthetics, and a premium experience for Arkham Horror fans.
 
+Play it now at: **[arkhamdle.com](https://arkhamdle.com)**
+
 ## 📊 Data Source
 
 All card data and information are sourced from the [ArkhamDB API](https://arkhamdb.com/api/doc). We are grateful to the ArkhamDB team for their incredible work in maintaining the community's primary data resource.
@@ -13,9 +15,6 @@ All card data and information are sourced from the [ArkhamDB API](https://arkham
 > [!NOTE]
 > **Data Accuracy**: It is currently known that some card data may be incorrect or inconsistently formatted due to variations in the source data or processing. We are actively working on refining the data layer.
 
-## 🚀 Future Plans
-
-The project is currently in active development. While it's living here for now, it will be hosted on a **proper, dedicated site** in the very near future. Stay tuned!
 
 ## Other game mode ideas
 
