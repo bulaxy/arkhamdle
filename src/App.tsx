@@ -8,6 +8,7 @@ import Investigatordle from './pages/Investigatordle/Investigatordle';
 import StoryGuesser from './pages/StoryGuesser/StoryGuesser';
 import TraitGuesser from './pages/TraitGuesser/TraitGuesser';
 import FlavourGuesser from './pages/FlavourGuesser/FlavourGuesser';
+import EncounterGuesser from './pages/EncounterGuesser/EncounterGuesser';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import WelcomeModal from './components/WelcomeModal/WelcomeModal';
 import { useState, useEffect } from 'react';
@@ -46,6 +47,7 @@ function App() {
           <NavLink to="/story-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Story Guesser</NavLink>
           <NavLink to="/trait-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trait Guesser</NavLink>
           <NavLink to="/flavour-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Flavour Guesser</NavLink>
+          <NavLink to="/encounter-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Encounter Guesser</NavLink>
         </div>
 
         <div className="nav-right">
@@ -72,6 +74,7 @@ function App() {
             <Route path="/story-guesser" element={<StoryGuesser />} />
             <Route path="/trait-guesser" element={<TraitGuesser />} />
             <Route path="/flavour-guesser" element={<FlavourGuesser />} />
+            <Route path="/encounter-guesser" element={<EncounterGuesser />} />
           </Routes>
         )}
       </main>

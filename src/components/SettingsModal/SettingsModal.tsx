@@ -10,6 +10,7 @@ import TraitGuesserSection from "./TraitGuesserSection";
 import GeneralSettingsSection from "./GeneralSettingsSection";
 import WordleSection from "./WordleSection";
 import InvestigatordleSection from "./InvestigatordleSection";
+import EncounterGuesserSection from "./EncounterGuesserSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings } = useGameContext();
@@ -23,7 +24,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Settings <small className="version-tag">v1.1.0</small></h2>
+          <h2>Settings <small className="version-tag">v{APP_VERSION}</small></h2>
           <button className="close-btn" onClick={onClose}>
             <X size={24} />
           </button>
@@ -231,6 +232,31 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, flavourGuesserIncludeSignatures: value })}
             includeBondedCard={settings.flavourGuesserIncludeBondedCard}
             onIncludeBondedCardChange={(value) => setSettings({ ...settings, flavourGuesserIncludeBondedCard: value })}
+          />
+
+          <EncounterGuesserSection
+            isOpen={openSection === "encounterGuesser"}
+            onToggle={() => toggleSection("encounterGuesser")}
+            blurAmount={settings.encounterGuesserBlurAmount}
+            onBlurAmountChange={(value) => setSettings({ ...settings, encounterGuesserBlurAmount: value })}
+            packs={packs}
+            useGlobalPackFilter={settings.encounterGuesserUseGlobalPackFilter}
+            filteredPacks={settings.encounterGuesserFilteredPacks}
+            includeWeakness={settings.encounterGuesserIncludeWeakness}
+            includeSignatures={settings.encounterGuesserIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, encounterGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.encounterGuesserFilteredPacks.includes(pack)
+                ? settings.encounterGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.encounterGuesserFilteredPacks, pack];
+              setSettings({ ...settings, encounterGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, encounterGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, encounterGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, encounterGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, encounterGuesserIncludeSignatures: value })}
+            includeBondedCard={settings.encounterGuesserIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, encounterGuesserIncludeBondedCard: value })}
           />
 
           <div className="footer-buttons">

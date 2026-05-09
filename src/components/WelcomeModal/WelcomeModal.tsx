@@ -13,7 +13,7 @@ export default function WelcomeModal({ onClose, onOpenSettings }: WelcomeModalPr
         <div className="modal-header">
           <div className="title-with-icon">
             <Sparkles className="icon-sparkle" size={24} />
-            <h2>Welcome to Arkhamdle! <small className="version-tag">v1.1.0</small></h2>
+            <h2>Welcome to Arkhamdle! <small className="version-tag">v{APP_VERSION}</small></h2>
           </div>
           <button className="close-btn" onClick={onClose}>
             <X size={24} />

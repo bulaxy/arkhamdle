@@ -81,6 +81,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     traitGuesserRequirementType: "Fixed Number",
     traitGuesserRequirementValue: 3,
     includeEncounter: false,
+    showCampaignCards: true,
     enableHints: true,
     includeBondedCard: false,
 
@@ -119,6 +120,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     flavourGuesserIncludeWeakness: false,
     flavourGuesserIncludeSignatures: true,
     flavourGuesserIncludeBondedCard: false,
+
+    encounterGuesserUseGlobalPackFilter: true,
+    encounterGuesserFilteredPacks: [],
+    encounterGuesserIncludeWeakness: false,
+    encounterGuesserIncludeSignatures: true,
+    encounterGuesserBlurAmount: 4,
+	encounterGuesserIncludeBondedCard: false
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -227,6 +235,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           traitGuesserRequirementType: savedSettings.traitGuesserRequirementType || "Fixed Number",
           traitGuesserRequirementValue: savedSettings.traitGuesserRequirementValue ?? 3,
           includeEncounter: savedSettings.includeEncounter ?? false,
+          showCampaignCards: savedSettings.showCampaignCards ?? true,
           enableHints: savedSettings.enableHints ?? true,
           includeBondedCard: savedSettings.includeBondedCard ?? false,
 
@@ -265,6 +274,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           flavourGuesserIncludeWeakness: savedSettings.flavourGuesserIncludeWeakness ?? false,
           flavourGuesserIncludeSignatures: savedSettings.flavourGuesserIncludeSignatures ?? true,
           flavourGuesserIncludeBondedCard: savedSettings.flavourGuesserIncludeBondedCard ?? false,
+
+          encounterGuesserUseGlobalPackFilter: savedSettings.encounterGuesserUseGlobalPackFilter ?? true,
+          encounterGuesserFilteredPacks: savedSettings.encounterGuesserFilteredPacks || [],
+          encounterGuesserIncludeWeakness: savedSettings.encounterGuesserIncludeWeakness ?? false,
+          encounterGuesserIncludeSignatures: savedSettings.encounterGuesserIncludeSignatures ?? true,
+          encounterGuesserBlurAmount: savedSettings.encounterGuesserBlurAmount ?? 4,
+          encounterGuesserIncludeBondedCard: savedSettings.encounterGuesserIncludeBondedCard ?? false,
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {
@@ -286,7 +302,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     const passSignature = settings.includeSignatures || !isSignature;
     const isBonded = !!card.bonded_to;
     const passBonded = settings.includeBondedCard || !isBonded;
-    return passPack && passWeakness && passSignature && passBonded;
+    const isCampaign = !!(card.encounter_code || card.encounter_name);
+    const passCampaign = settings.showCampaignCards || !isCampaign;
+    return passPack && passWeakness && passSignature && passBonded && passCampaign;
   });
 
 
