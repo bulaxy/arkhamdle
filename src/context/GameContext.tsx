@@ -125,8 +125,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     encounterGuesserFilteredPacks: [],
     encounterGuesserIncludeWeakness: false,
     encounterGuesserIncludeSignatures: true,
-    encounterGuesserBlurAmount: 4,
-	encounterGuesserIncludeBondedCard: false
+    encounterGuesserBlurAmount: 10,
+    encounterGuesserIncludeBondedCard: false,
+
+    triviaGuesserUseGlobalPackFilter: true,
+    triviaGuesserFilteredPacks: [],
+    triviaGuesserIncludeWeakness: false,
+    triviaGuesserIncludeSignatures: true,    
+    triviaGuesserIncludeBondedCard: false,
+    triviaGuesserQuestionType: 'Mixed',
+    triviaGuesserInputMode: 'Multiple Choice',
+    triviaGuesserPoolFilter: 'Player Cards Only',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -281,6 +290,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           encounterGuesserIncludeSignatures: savedSettings.encounterGuesserIncludeSignatures ?? true,
           encounterGuesserBlurAmount: savedSettings.encounterGuesserBlurAmount ?? 4,
           encounterGuesserIncludeBondedCard: savedSettings.encounterGuesserIncludeBondedCard ?? false,
+
+          triviaGuesserUseGlobalPackFilter: savedSettings.triviaGuesserUseGlobalPackFilter ?? true,
+          triviaGuesserFilteredPacks: savedSettings.triviaGuesserFilteredPacks || [],
+          triviaGuesserIncludeWeakness: savedSettings.triviaGuesserIncludeWeakness ?? false,
+          triviaGuesserIncludeSignatures: savedSettings.triviaGuesserIncludeSignatures ?? true,
+          triviaGuesserIncludeBondedCard: savedSettings.triviaGuesserIncludeSignatures ?? false,
+          triviaGuesserQuestionType: savedSettings.triviaGuesserQuestionType ?? 'Mixed',
+          triviaGuesserInputMode: savedSettings.triviaGuesserInputMode ?? 'Multiple Choice',
+          triviaGuesserPoolFilter: savedSettings.triviaGuesserPoolFilter ?? 'Player Cards Only',
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {

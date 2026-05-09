@@ -91,6 +91,10 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
         encounter_code: o.encounter_code,
         encounter_name: o.encounter_name,
         permanent: o.permanent,
+        exile: o.exile,
+        exceptional: o.exceptional,
+        myriad: o.myriad,
+        is_unique: o.is_unique,
         bonded_to: o.bonded_to,
       };
     })

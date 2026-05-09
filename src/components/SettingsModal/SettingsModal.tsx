@@ -10,6 +10,7 @@ import TraitGuesserSection from "./TraitGuesserSection";
 import GeneralSettingsSection from "./GeneralSettingsSection";
 import WordleSection from "./WordleSection";
 import InvestigatordleSection from "./InvestigatordleSection";
+import TriviaGuesserTypeFiltersSection from "./TriviaGuesserTypeFiltersSection";
 import EncounterGuesserSection from "./EncounterGuesserSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
@@ -257,6 +258,36 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, encounterGuesserIncludeSignatures: value })}
             includeBondedCard={settings.encounterGuesserIncludeBondedCard}
             onIncludeBondedCardChange={(value) => setSettings({ ...settings, encounterGuesserIncludeBondedCard: value })}
+          />
+
+          <TriviaGuesserTypeFiltersSection
+            isOpen={openSection === "triviaGuesser"}
+            onToggle={() => toggleSection("triviaGuesser")}
+            questionType={settings.triviaGuesserQuestionType}
+            onQuestionTypeChange={(value) => setSettings({ ...settings, triviaGuesserQuestionType: value })}
+            inputMode={settings.triviaGuesserInputMode}
+            onInputModeChange={(value) => setSettings({ ...settings, triviaGuesserInputMode: value })}
+            poolFilter={settings.triviaGuesserPoolFilter}
+            onPoolFilterChange={(value) => setSettings({ ...settings, triviaGuesserPoolFilter: value })}
+            packs={packs}
+            useGlobalPackFilter={settings.triviaGuesserUseGlobalPackFilter}
+            filteredPacks={settings.triviaGuesserFilteredPacks}
+            includeWeakness={settings.triviaGuesserIncludeWeakness}
+            includeSignatures={settings.triviaGuesserIncludeSignatures}
+            includeBondedCard={settings.triviaGuesserIncludeBondedCard}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, triviaGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.triviaGuesserFilteredPacks.includes(pack)
+                ? settings.triviaGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.triviaGuesserFilteredPacks, pack];
+              setSettings({ ...settings, triviaGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, triviaGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, triviaGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, triviaGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, triviaGuesserIncludeSignatures: value })}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, triviaGuesserIncludeBondedCard: value })}
+    
           />
 
           <div className="footer-buttons">

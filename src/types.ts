@@ -84,7 +84,16 @@ export interface AppSettings {
   encounterGuesserIncludeSignatures: boolean;
   encounterGuesserBlurAmount: number;
   encounterGuesserIncludeBondedCard: boolean;
-}
+
+  // Trivia Guesser
+  triviaGuesserUseGlobalPackFilter: boolean;
+  triviaGuesserFilteredPacks: string[];
+  triviaGuesserIncludeWeakness: boolean;
+  triviaGuesserIncludeSignatures: boolean;
+  triviaGuesserIncludeBondedCard: boolean;
+  triviaGuesserQuestionType: 'Mixed' | 'Only How Many' | 'Only Which Card';
+  triviaGuesserInputMode: 'Multiple Choice' | 'Direct Input';
+  triviaGuesserPoolFilter: 'Player Cards Only' | 'All Cards';}
 
 export interface TransformedCard {
   id: string;
@@ -126,6 +135,10 @@ export interface TransformedCard {
   encounter_code?: string;
   encounter_name?: string;
   permanent?: boolean;
+  exile?: boolean;
+  exceptional?: boolean;
+  myriad?: boolean;
+  is_unique?: boolean;
   bonded_to?: string;
 }
 
