@@ -19,6 +19,7 @@ export default function EncounterGuesser() {
   const [selectedEncounter, setSelectedEncounter] = useState<string>('');
   const [encounterSearch, setEncounterSearch] = useState<string>('');
   const [showEncounterDropdown, setShowEncounterDropdown] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const gameCards = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'encounterGuesser');
@@ -66,6 +67,7 @@ export default function EncounterGuesser() {
     setSelectedPack('');
     setSelectedEncounter('');
     setEncounterSearch('');
+    setImageLoaded(false);
     if (gameCardsWithPic.length > 0) {
       setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
     } else {
@@ -143,15 +145,24 @@ export default function EncounterGuesser() {
           <>
             <div className="encounter-image-container">
               {answer && answer.imagesrc ? (
-                <img
-                  src={`https://arkhamdb.com${answer.imagesrc}`}
-                  alt="Guess this encounter card"
-                  className={win || gaveUp ? 'encounter-image-full' : 'encounter-image-blurred'}
-                  style={{
-                    filter: (!win && !gaveUp) ? `blur(${settings.encounterGuesserBlurAmount}px)` : 'none',
-                    transition: 'filter 0.5s ease-out'
-                  }}
-                />
+                <>
+                  {!imageLoaded && (
+                    <div className="encounter-image-loading">
+                      <div className="spinner" />
+                    </div>
+                  )}
+                  <img
+                    src={`https://arkhamdb.com${answer.imagesrc}`}
+                    alt="Guess this encounter card"
+                    className={win || gaveUp ? 'encounter-image-full' : 'encounter-image-blurred'}
+                    style={{
+                      filter: (!win && !gaveUp) ? `blur(${settings.encounterGuesserBlurAmount}px)` : 'none',
+                      transition: 'filter 0.5s ease-out',
+                      opacity: imageLoaded ? 1 : 0,
+                    }}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                </>
               ) : (
                 <div className="encounter-image-unavailable">Image not available</div>
               )}

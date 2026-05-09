@@ -74,6 +74,15 @@
   color: var(--text-secondary);
 }
 
+.pic-image-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
 .pic-result {
   width: 100%;
   text-align: center;

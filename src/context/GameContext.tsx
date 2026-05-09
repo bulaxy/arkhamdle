@@ -136,6 +136,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     triviaGuesserQuestionType: 'Mixed',
     triviaGuesserInputMode: 'Multiple Choice',
     triviaGuesserPoolFilter: 'Player Cards Only',
+
+    iconGuesserUseGlobalPackFilter: true,
+    iconGuesserFilteredPacks: [],
+    iconGuesserIncludeWeakness: false,
+    iconGuesserIncludeSignatures: true,
+    iconGuesserIncludeBondedCard: false,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
@@ -299,6 +305,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           triviaGuesserQuestionType: savedSettings.triviaGuesserQuestionType ?? 'Mixed',
           triviaGuesserInputMode: savedSettings.triviaGuesserInputMode ?? 'Multiple Choice',
           triviaGuesserPoolFilter: savedSettings.triviaGuesserPoolFilter ?? 'Player Cards Only',
+
+          iconGuesserUseGlobalPackFilter: savedSettings.iconGuesserUseGlobalPackFilter ?? true,
+          iconGuesserFilteredPacks: savedSettings.iconGuesserFilteredPacks || [],
+          iconGuesserIncludeWeakness: savedSettings.iconGuesserIncludeWeakness ?? false,
+          iconGuesserIncludeSignatures: savedSettings.iconGuesserIncludeSignatures ?? true,
+          iconGuesserIncludeBondedCard: savedSettings.iconGuesserIncludeBondedCard ?? false,
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {

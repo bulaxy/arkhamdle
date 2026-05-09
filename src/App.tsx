@@ -1,5 +1,5 @@
-import { Routes, Route, NavLink } from 'react-router-dom';
-import { Settings, Menu, X as CloseIcon } from 'lucide-react';
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { Settings, Menu, X as CloseIcon, ChevronDown } from 'lucide-react';
 import './App.scss';
 import { useGameContext } from './hooks/useGameContext';
 import WordleGame from './pages/WordleGame/WordleGame';
@@ -10,9 +10,10 @@ import TraitGuesser from './pages/TraitGuesser/TraitGuesser';
 import FlavourGuesser from './pages/FlavourGuesser/FlavourGuesser';
 import TriviaGuesser from './pages/TriviaGuesser/TriviaGuesser';
 import EncounterGuesser from './pages/EncounterGuesser/EncounterGuesser';
+import IconGuesser from './pages/IconGuesser/IconGuesser';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import WelcomeModal from './components/WelcomeModal/WelcomeModal';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 function App() {
   const { isLoading, loadingMessage } = useGameContext();
@@ -29,7 +30,26 @@ function App() {
   }, [isWelcomeOpen]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const closeMenu = () => setIsMenuOpen(false);
+  const closeMenu = () => { setIsMenuOpen(false); setIsMoreOpen(false); };
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsMoreOpen(false);
+      }
+    };
+    if (isMoreOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMoreOpen]);
+
+  const location = useLocation();
+  const moreGamePaths = ['/story-guesser', '/trait-guesser', '/flavour-guesser', '/encounter-guesser', '/icon-guesser', '/trivia-guesser'];
+  const isMoreActive = moreGamePaths.includes(location.pathname);
 
   return (
     <div className="app-container">
@@ -45,11 +65,32 @@ function App() {
           <NavLink to="/" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu} end>Classic Mode</NavLink>
           <NavLink to="/pic-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Pic Guesser</NavLink>
           <NavLink to="/investigatordle" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Investigatordle</NavLink>
-          <NavLink to="/story-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Story Guesser</NavLink>
-          <NavLink to="/trait-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trait Guesser</NavLink>
-          <NavLink to="/flavour-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Flavour Guesser</NavLink>
-          <NavLink to="/encounter-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Encounter Guesser</NavLink>
-          <NavLink to="/trivia-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trivia</NavLink>
+          
+          {/* Desktop dropdown */}
+          <div className={`nav-dropdown desktop-only ${isMoreOpen ? 'open' : ''}`} ref={dropdownRef}>
+            <button 
+              className={`nav-link nav-dropdown-trigger ${isMoreActive ? 'active' : ''}`}
+              onClick={() => setIsMoreOpen(!isMoreOpen)}
+            >
+              More Games <ChevronDown size={16} className={`dropdown-chevron ${isMoreOpen ? 'rotated' : ''}`} />
+            </button>
+            <div className="nav-dropdown-menu">
+              <NavLink to="/story-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Story Guesser</NavLink>
+              <NavLink to="/trait-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trait Guesser</NavLink>
+              <NavLink to="/flavour-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Flavour Guesser</NavLink>
+              <NavLink to="/encounter-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Encounter Guesser</NavLink>
+              <NavLink to="/icon-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Icon Guesser</NavLink>
+              <NavLink to="/trivia-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trivia Questions</NavLink>
+            </div>
+          </div>
+
+          {/* Mobile flat links */}
+          <NavLink to="/story-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Story Guesser</NavLink>
+          <NavLink to="/trait-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trait Guesser</NavLink>
+          <NavLink to="/flavour-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Flavour Guesser</NavLink>
+          <NavLink to="/encounter-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Encounter Guesser</NavLink>
+          <NavLink to="/icon-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Icon Guesser</NavLink>
+          <NavLink to="/trivia-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trivia Questions</NavLink>
         </div>
 
         <div className="nav-right">
@@ -78,6 +119,7 @@ function App() {
             <Route path="/flavour-guesser" element={<FlavourGuesser />} />
             <Route path="/trivia-guesser" element={<TriviaGuesser />} />
             <Route path="/encounter-guesser" element={<EncounterGuesser />} />
+            <Route path="/icon-guesser" element={<IconGuesser />} />
           </Routes>
         )}
       </main>

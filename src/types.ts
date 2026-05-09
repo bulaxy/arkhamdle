@@ -93,7 +93,15 @@ export interface AppSettings {
   triviaGuesserIncludeBondedCard: boolean;
   triviaGuesserQuestionType: 'Mixed' | 'Only How Many' | 'Only Which Card';
   triviaGuesserInputMode: 'Multiple Choice' | 'Direct Input';
-  triviaGuesserPoolFilter: 'Player Cards Only' | 'All Cards';}
+  triviaGuesserPoolFilter: 'Player Cards Only' | 'All Cards';
+
+  // Icon Guesser
+  iconGuesserUseGlobalPackFilter: boolean;
+  iconGuesserFilteredPacks: string[];
+  iconGuesserIncludeWeakness: boolean;
+  iconGuesserIncludeSignatures: boolean;
+  iconGuesserIncludeBondedCard: boolean;
+}
 
 export interface TransformedCard {
   id: string;

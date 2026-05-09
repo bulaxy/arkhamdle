@@ -12,6 +12,7 @@ import WordleSection from "./WordleSection";
 import InvestigatordleSection from "./InvestigatordleSection";
 import TriviaGuesserTypeFiltersSection from "./TriviaGuesserTypeFiltersSection";
 import EncounterGuesserSection from "./EncounterGuesserSection";
+import IconGuesserSection from "./IconGuesserSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings } = useGameContext();
@@ -258,6 +259,29 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onIncludeSignaturesChange={(value) => setSettings({ ...settings, encounterGuesserIncludeSignatures: value })}
             includeBondedCard={settings.encounterGuesserIncludeBondedCard}
             onIncludeBondedCardChange={(value) => setSettings({ ...settings, encounterGuesserIncludeBondedCard: value })}
+          />
+
+          <IconGuesserSection
+            isOpen={openSection === "iconGuesser"}
+            onToggle={() => toggleSection("iconGuesser")}
+            packs={packs}
+            useGlobalPackFilter={settings.iconGuesserUseGlobalPackFilter}
+            filteredPacks={settings.iconGuesserFilteredPacks}
+            includeWeakness={settings.iconGuesserIncludeWeakness}
+            includeSignatures={settings.iconGuesserIncludeSignatures}
+            onUseGlobalPackFilterChange={(value) => setSettings({ ...settings, iconGuesserUseGlobalPackFilter: value })}
+            onPackToggle={(pack) => {
+              const newPacks = settings.iconGuesserFilteredPacks.includes(pack)
+                ? settings.iconGuesserFilteredPacks.filter(p => p !== pack)
+                : [...settings.iconGuesserFilteredPacks, pack];
+              setSettings({ ...settings, iconGuesserFilteredPacks: newPacks });
+            }}
+            onSelectAll={() => setSettings({ ...settings, iconGuesserFilteredPacks: [] })}
+            onFilterAll={() => setSettings({ ...settings, iconGuesserFilteredPacks: packs })}
+            onIncludeWeaknessChange={(value) => setSettings({ ...settings, iconGuesserIncludeWeakness: value })}
+            onIncludeSignaturesChange={(value) => setSettings({ ...settings, iconGuesserIncludeSignatures: value })}
+            includeBondedCard={settings.iconGuesserIncludeBondedCard}
+            onIncludeBondedCardChange={(value) => setSettings({ ...settings, iconGuesserIncludeBondedCard: value })}
           />
 
           <TriviaGuesserTypeFiltersSection

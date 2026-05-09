@@ -33,11 +33,10 @@ Play it now at: **[arkhamdle.com](https://arkhamdle.com)**
 All card data and information are sourced from the [ArkhamDB API](https://arkhamdb.com/api/doc) and the [arkhamdb-json-data](https://github.com/Kamalisk/arkhamdb-json-data) repository. We are grateful to the ArkhamDB team and contributors for their incredible work in maintaining the community's primary data resource.
 
 ## 🚀 Current Development Roadmap
-
 - [ ] Refine Trivia game mechanics and question quality
 - [ ] Random question mode
-- [ ] Enhanced header/navigation
-- [ ] Add Card icon display game ("What icon are on this card")
+- [x] Enhanced header/navigation
+- [x] Add Card icon display game ("What icon are on this card")
 
 ## 🛠️ Tech Stack
 

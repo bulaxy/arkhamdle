@@ -19,6 +19,7 @@ export default function PicGuesser() {
   const [offsetX, setOffsetX] = useState(150); 
   const [offsetY, setOffsetY] = useState(150); 
   const [gaveUp, setGaveUp] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // PicGuesser does NOT filter duplicate_of_code — exception per task spec
   const gameCards = useMemo(() => {
@@ -57,6 +58,7 @@ export default function PicGuesser() {
     setOffsetY(Math.floor(Math.random() * 251)+50);
     setSizeMultiplier(8);
     setShowFull(false);
+    setImageLoaded(false);
   }, [gameCardsWithPic]);
 
   useEffect(() => {
@@ -132,16 +134,25 @@ export default function PicGuesser() {
           <>
             <div className="pic-image-container">
               {answer && answer.imagesrc ? (
-                 <img
-                  src={`https://arkhamdb.com${answer.imagesrc}`}
-                  alt="Guess this card"
-                  className={showFull ? 'pic-image-full' : 'pic-image-zoomed'}
-                  style={
-                    !showFull ? {
-                      transform: `scale(${sizeMultiplier}) translateX(${offsetX / sizeMultiplier}px) translateY(${offsetY / sizeMultiplier}px)`
-                    } : {}
-                  }
-                />
+                <>
+                  {!imageLoaded && (
+                    <div className="pic-image-loading">
+                      <div className="spinner" />
+                    </div>
+                  )}
+                  <img
+                    src={`https://arkhamdb.com${answer.imagesrc}`}
+                    alt="Guess this card"
+                    className={showFull ? 'pic-image-full' : 'pic-image-zoomed'}
+                    style={{
+                      ...(!showFull ? {
+                        transform: `scale(${sizeMultiplier}) translateX(${offsetX / sizeMultiplier}px) translateY(${offsetY / sizeMultiplier}px)`
+                      } : {}),
+                      opacity: imageLoaded ? 1 : 0,
+                    }}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                </>
               ) : (
                 <div className="pic-image-unavailable">Image not available</div>
               )}

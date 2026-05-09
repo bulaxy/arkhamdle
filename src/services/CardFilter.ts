@@ -7,7 +7,7 @@ import { TypeName as TypeNameEnum } from '../types/arkham';
 export function filterBySettings(
   cards: TransformedCard[],
   settings: AppSettings,
-  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'encounterGuesser' | 'triviaGuesser'
+  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'encounterGuesser' | 'triviaGuesser' | 'iconGuesser'
 ): TransformedCard[] {
   const useGlobal = (settings[(`${gameId}UseGlobalPackFilter`) as keyof AppSettings] as boolean) ?? true;
   
@@ -216,4 +216,13 @@ export function filterDuplicateOfCode<T extends { duplicate_of_code?: string }>(
  */
 export function filterForEncounterGuesser(cards: TransformedCard[]): TransformedCard[] {
   return cards.filter((card) => !!card.encounter_name);
+}
+
+/**
+ * Filter cards for IconGuesser game.
+ * Only Asset, Event, and Skill type cards.
+ */
+export function filterForIconGuesser(cards: TransformedCard[]): TransformedCard[] {
+  const allowedTypes: TypeName[] = [TypeNameEnum.ASSET, TypeNameEnum.EVENT, TypeNameEnum.SKILL];
+  return cards.filter((card) => allowedTypes.includes(card.typeName));
 }
