@@ -64,6 +64,7 @@ export interface CountGuesserSettings extends BaseGameSettings {
   poolFilter: 'Player Cards Only' | 'All Cards';
 }
 
+
 export interface RandomTriviaSettings {
   enabledModes: Record<string, boolean>;
 }
@@ -91,6 +92,7 @@ export interface AppSettings {
   guessCardByTrait: GuessCardByTraitSettings;
   countGuesser: CountGuesserSettings;
   iconGuesser: BaseGameSettings;
+  trueOrFalse: BaseGameSettings;
   randomTrivia: RandomTriviaSettings;
 }
 

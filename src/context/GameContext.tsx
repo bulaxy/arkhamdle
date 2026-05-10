@@ -116,6 +116,7 @@ const defaultSettings: AppSettings = {
     poolFilter: 'Player Cards Only',
   },
   iconGuesser: { ...defaultBaseGameSettings },
+  trueOrFalse: { ...defaultBaseGameSettings },
   randomTrivia: {
     enabledModes: {
       WordleGame: false,
@@ -128,6 +129,7 @@ const defaultSettings: AppSettings = {
       GuessCardByTrait: true,
       CountGuesser: true,
       IconGuesser: true,
+      TrueOrFalse: true,
     }
   },
 };

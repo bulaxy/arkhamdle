@@ -34,6 +34,7 @@ export default function RandomTriviaSection({
     { key: 'GuessCardByTrait', label: 'Guess Card By Trait' },
     { key: 'CountGuesser', label: 'Count Guesser' },
     { key: 'IconGuesser', label: 'Icon Guesser' },
+    { key: 'TrueOrFalse', label: 'True Or False' },
     { key: 'WordleGame', label: 'Classic Mode (Wordle)' },
     { key: 'PicGuesser', label: 'Pic Guesser' },
     { key: 'Investigatordle', label: 'Investigatordle' }

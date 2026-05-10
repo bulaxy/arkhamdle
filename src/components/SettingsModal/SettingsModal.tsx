@@ -14,6 +14,7 @@ import GuessCardByTraitSection from "./GuessCardByTraitSection";
 import CountGuesserSection from "./CountGuesserSection";
 import CampaignPackGuesserSection from "./CampaignPackGuesserSection";
 import IconGuesserSection from "./IconGuesserSection";
+import TrueOrFalseSection from "./TrueOrFalseSection";
 import RandomTriviaSection from "./RandomTriviaSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
@@ -166,6 +167,14 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             packs={packs}
             settings={settings.iconGuesser}
             onChange={(newSettings) => setSettings({ ...settings, iconGuesser: newSettings })}
+          />
+
+          <TrueOrFalseSection
+            isOpen={openSection === "trueOrFalse"}
+            onToggle={() => toggleSection("trueOrFalse")}
+            packs={packs}
+            settings={settings.trueOrFalse}
+            onChange={(newSettings) => setSettings({ ...settings, trueOrFalse: newSettings })}
           />
 
           <GuessCardByTraitSection

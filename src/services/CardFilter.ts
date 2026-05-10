@@ -7,7 +7,7 @@ import { TypeName as TypeNameEnum } from '../types/arkham';
 export function filterBySettings(
   cards: TransformedCard[],
   settings: AppSettings,
-  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'campaignPackGuesser' | 'guessCardByTrait' | 'countGuesser' | 'iconGuesser'
+  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'campaignPackGuesser' | 'guessCardByTrait' | 'countGuesser' | 'iconGuesser' | 'trueOrFalse'
 ): TransformedCard[] {
   const gameSettings = settings[gameId];
   const useGlobal = gameSettings.useGlobalPackFilter ?? true;
@@ -225,5 +225,5 @@ export function filterForCampaignPackGuesser(cards: TransformedCard[]): Transfor
  */
 export function filterForIconGuesser(cards: TransformedCard[]): TransformedCard[] {
   const allowedTypes: TypeName[] = [TypeNameEnum.ASSET, TypeNameEnum.EVENT, TypeNameEnum.SKILL];
-  return cards.filter((card) => allowedTypes.includes(card.typeName));
+  return cards.filter((card) => allowedTypes.includes(card.typeName) && card.permanent !== true);
 }
