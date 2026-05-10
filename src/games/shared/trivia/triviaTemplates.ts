@@ -28,7 +28,9 @@ export type QuestionTemplateType =
   | 'Keyword Massive'
   | 'Keyword Prey'
   | 'Keyword Aloof'
-  | 'Keyword Surge';
+  | 'Keyword Surge'
+  | 'Multi Skill 2'
+  | 'Multi Skill 3';
 
 export interface QuestionTemplate {
   type: QuestionTemplateType;
@@ -394,6 +396,37 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       return count >= 2 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many cards have the "Surge" keyword in ${packName}?`
+  },
+  // Skill icon diversity questions
+  {
+    type: 'Multi Skill 2',
+    condition: (card) => {
+      const skills = [card.willpower, card.intellect, card.combat, card.agility, card.wild];
+      return skills.filter(s => s > 0).length >= 2;
+    },
+    generateValues: (cards) => {
+      const count = cards.filter(c => {
+        const skills = [c.willpower, c.intellect, c.combat, c.agility, c.wild];
+        return skills.filter(s => s > 0).length >= 2;
+      }).length;
+      return count >= 2 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have 2 or more different skill icons in ${packName}?`
+  },
+  {
+    type: 'Multi Skill 3',
+    condition: (card) => {
+      const skills = [card.willpower, card.intellect, card.combat, card.agility, card.wild];
+      return skills.filter(s => s > 0).length >= 3;
+    },
+    generateValues: (cards) => {
+      const count = cards.filter(c => {
+        const skills = [c.willpower, c.intellect, c.combat, c.agility, c.wild];
+        return skills.filter(s => s > 0).length >= 3;
+      }).length;
+      return count >= 2 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have 3 or more different skill icons in ${packName}?`
   },
 ];
 
