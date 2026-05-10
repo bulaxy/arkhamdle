@@ -41,6 +41,11 @@ export function generateHowManyQuestion(
     const matchingCards = pool.filter(c => template.condition(c, val));
     const count = matchingCards.length;
 
+    // If the answer is 0, 90% of the time try a different question
+    if (count === 0 && Math.random() < 0.9) {
+      continue;
+    }
+
     // Generate wrong options (within +/- 5 or 50%)
     const optionsSet = new Set<number>();
     optionsSet.add(count);
