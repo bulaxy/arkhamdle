@@ -101,8 +101,6 @@ export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
     }
   };
 
-  const allFieldsFilled = SKILL_KEYS.every(skill => skillGuesses[skill] !== '');
-
   return (
     <div className="icon-container">
       <div className="icon-header">
@@ -218,7 +216,6 @@ export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
                 <button
                   className="premium-btn icon-answer-btn"
                   onClick={submitGuess}
-                  disabled={!allFieldsFilled}
                 >
                   Answer
                 </button>
