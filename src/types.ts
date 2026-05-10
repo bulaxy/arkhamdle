@@ -47,6 +47,7 @@ export interface TraitGuesserSettings extends BaseGameSettings {
 
 export interface FlavourGuesserSettings extends BaseGameSettings {
   typeFilters: Record<TypeName, boolean>;
+  inputMode: 'Multiple Choice' | 'Direct Input';
 }
 
 export interface CampaignPackGuesserSettings extends BaseGameSettings {
@@ -138,5 +139,6 @@ export interface TransformedCard {
   myriad?: boolean;
   is_unique?: boolean;
   bonded_to?: string;
+  text?: string;
 }
 

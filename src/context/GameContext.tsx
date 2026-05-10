@@ -99,6 +99,7 @@ const defaultSettings: AppSettings = {
       [TypeNameEnum.ENEMY_LOCATION]: true,
       [TypeNameEnum.OTHER]: true,
     },
+    inputMode: 'Multiple Choice',
   },
   campaignPackGuesser: {
     ...defaultBaseGameSettings,

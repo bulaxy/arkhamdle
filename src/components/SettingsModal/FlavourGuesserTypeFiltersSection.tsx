@@ -8,6 +8,8 @@ interface FlavourGuesserTypeFiltersSectionProps {
   isOpen: boolean;
   onToggle: () => void;
   onTypeFilterChange: (typeCode: TypeName, include: boolean) => void;
+  inputMode?: 'Multiple Choice' | 'Direct Input';
+  onInputModeChange?: (mode: 'Multiple Choice' | 'Direct Input') => void;
   packs: string[];
   settings: FlavourGuesserSettings;
   onChange: (settings: FlavourGuesserSettings) => void;
@@ -35,6 +37,8 @@ export default function FlavourGuesserTypeFiltersSection({
   isOpen,
   onToggle,
   onTypeFilterChange,
+  inputMode,
+  onInputModeChange,
   packs,
   settings,
   onChange,
@@ -87,6 +91,32 @@ export default function FlavourGuesserTypeFiltersSection({
           />
 
           <hr className="settings-divider" />
+
+          {inputMode && onInputModeChange && (
+            <>
+              <div>
+                <h4>Input Mode</h4>
+                <p className="settings-text mb-8">
+                  Select how you want to answer questions.
+                </p>
+                <div className="setting-toggle-group">
+                  <button
+                    className={`toggle-btn ${inputMode === "Multiple Choice" ? "active" : ""}`}
+                    onClick={() => onInputModeChange("Multiple Choice")}
+                  >
+                    Multiple Choice
+                  </button>
+                  <button
+                    className={`toggle-btn ${inputMode === "Direct Input" ? "active" : ""}`}
+                    onClick={() => onInputModeChange("Direct Input")}
+                  >
+                    Direct Input
+                  </button>
+                </div>
+              </div>
+              <hr className="settings-divider" />
+            </>
+          )}
 
           <div>
             <h4>Card Types</h4>

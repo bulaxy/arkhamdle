@@ -118,6 +118,7 @@ export function generateWhichCardQuestion(
       // Find cards sharing at least 1 trait
       const sharingTraits = allCards.filter(c => 
         c.id !== card.id && 
+        c.name !== card.name &&
         c.traits && 
         card.traits!.some((t: string) => c.traits!.includes(t))
       );
@@ -130,7 +131,7 @@ export function generateWhichCardQuestion(
 
       // If not enough, find same type_code
       if (optionsSet.size < 4) {
-        const sameType = allCards.filter(c => c.id !== card.id && c.typeName === card.typeName);
+        const sameType = allCards.filter(c => c.id !== card.id && c.name !== card.name && c.typeName === card.typeName);
         const shuffledSameType = shuffle(sameType);
         for (const opt of shuffledSameType) {
           if (optionsSet.size >= 4) break;
@@ -140,7 +141,7 @@ export function generateWhichCardQuestion(
       
       // If STILL not enough, random cards
       if (optionsSet.size < 4) {
-        const remaining = shuffle(allCards);
+        const remaining = shuffle(allCards.filter(c => c.name !== card.name));
         for (const opt of remaining) {
           if (optionsSet.size >= 4) break;
           optionsSet.add(opt.id);

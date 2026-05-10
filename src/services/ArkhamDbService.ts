@@ -96,6 +96,7 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
         myriad: o.myriad,
         is_unique: o.is_unique,
         bonded_to: o.bonded_to,
+        text: o.text,
       };
     })
     .filter((card, _, array) => {

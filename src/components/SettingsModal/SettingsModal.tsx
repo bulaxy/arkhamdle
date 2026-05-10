@@ -143,6 +143,8 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
               ...settings,
               flavourGuesser: { ...settings.flavourGuesser, typeFilters: { ...settings.flavourGuesser.typeFilters, [typeCode]: include } }
             })}
+            inputMode={settings.flavourGuesser.inputMode}
+            onInputModeChange={(value) => setSettings({ ...settings, flavourGuesser: { ...settings.flavourGuesser, inputMode: value } })}
             packs={packs}
             settings={settings.flavourGuesser}
             onChange={(newSettings) => setSettings({ ...settings, flavourGuesser: newSettings })}

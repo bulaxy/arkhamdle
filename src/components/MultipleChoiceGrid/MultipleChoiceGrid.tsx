@@ -1,13 +1,14 @@
+import React from 'react';
 import './MultipleChoiceGrid.scss';
 
-interface MultipleChoiceGridProps<T extends string | number> {
+interface MultipleChoiceGridProps<T> {
   options: T[];
   onSelect: (option: T) => void;
-  getLabel?: (option: T) => string | number;
+  getLabel?: (option: T) => React.ReactNode;
   disabled?: boolean;
 }
 
-export default function MultipleChoiceGrid<T extends string | number>({
+export default function MultipleChoiceGrid<T>({
   options,
   onSelect,
   getLabel,
@@ -22,7 +23,7 @@ export default function MultipleChoiceGrid<T extends string | number>({
           onClick={() => onSelect(opt)}
           disabled={disabled}
         >
-          {getLabel ? getLabel(opt) : opt}
+          {getLabel ? getLabel(opt) : (opt as React.ReactNode)}
         </button>
       ))}
     </div>
