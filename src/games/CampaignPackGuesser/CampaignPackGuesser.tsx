@@ -260,12 +260,17 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
             
             {guesses.length > 0 && (
               <div className="campaign-pack-guesses-container">
-                {guesses.map((g, i) => (
-                  <div key={`${g}-${i}`} className="glass-panel campaign-pack-guess-item fade-in incorrect">
-                    <span>{g}</span>
-                    <span className="result-text">Incorrect</span>
-                  </div>
-                ))}
+                {guesses.map((g, i) => {
+                  const isCorrect = g === answer?.encounter_name;
+                  return (
+                    <div key={`${g}-${i}`} className={`glass-panel campaign-pack-guess-item fade-in ${isCorrect ? 'correct' : 'incorrect'}`}>
+                      <span>{g}</span>
+                      <span className={`result-text ${isCorrect ? 'correct' : 'incorrect'}`}>
+                        {isCorrect ? 'Correct' : 'Incorrect'}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>

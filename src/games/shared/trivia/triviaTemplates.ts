@@ -1,4 +1,5 @@
 import type { TransformedCard } from "../../../types";
+import { packsAtLeastOneNewerThan } from "../../../data/packStructure";
 
 export type QuestionTemplateType = 
   | 'Trait'
@@ -30,12 +31,14 @@ export type QuestionTemplateType =
   | 'Keyword Aloof'
   | 'Keyword Surge'
   | 'Multi Skill 2'
-  | 'Multi Skill 3';
+  | 'Multi Skill 3'
+  | 'Keyword Elusive'
+  | 'Keyword Fast';
 
 export interface QuestionTemplate {
   type: QuestionTemplateType;
   condition: (card: TransformedCard, value?: unknown, value2?: unknown) => boolean;
-  generateValues: (cards: TransformedCard[]) => unknown[];
+  generateValues: (cards: TransformedCard[], remainderPacks: string[]) => unknown[];
   formatQuestion: (value?: unknown, value2?: unknown, packName?: string) => string;
 }
 
@@ -181,7 +184,12 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
   {
     type: 'Myriad',
     condition: (card: TransformedCard) => card.myriad === true,
-    generateValues: () => [true],
+    generateValues: (_, packs) => {
+      if (packsAtLeastOneNewerThan(packs, 'tde')) {
+        return [true];
+      }
+      return [];
+    },
     formatQuestion: (_, __, packName) => `How many myriad cards are in ${packName}?`
   },
   {
@@ -327,7 +335,10 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
   {
     type: 'Keyword Alert',
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Alert'),
-    generateValues: (cards) => {
+    generateValues: (cards, packs) => {
+      if(!packsAtLeastOneNewerThan(packs,'tfa')) {
+        return [];
+      }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Alert')).length;
       return count >= 2 ? [true] : [];
     },
@@ -381,8 +392,23 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
   {
     type: 'Keyword Aloof',
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Aloof'),
-    generateValues: (cards) => {
+    generateValues: (cards, packs) => {
+      if(!packsAtLeastOneNewerThan(packs,'dwl')) {
+        return [];
+      }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Aloof')).length;
+      return count >= 2 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many enemies have the "Aloof" keyword in ${packName}?`
+  },
+  {
+    type: 'Keyword Elusive',
+    condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Elusive'),
+    generateValues: (cards, packs) => {
+      if(!packsAtLeastOneNewerThan(packs,'fhv')) {
+        return [];
+      }
+      const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Elusive')).length;
       return count >= 2 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Aloof" keyword in ${packName}?`

@@ -29,9 +29,13 @@ export function generateHowManyQuestion(
 ): TriviaQuestion {
   // Shuffle templates to try
   const templates = shuffle([...TRIVIA_TEMPLATES]);
+  
+  // get remainder packs, some game mode only allow certain packs
+  const remainderPacks = Array.from(new Set(pool.map(c => c.pack_code)));
 
   for (const template of templates) {
-    const possibleValues = template.generateValues(pool);
+    // generateValues Also check if card pool allow specific packs
+    const possibleValues = template.generateValues(pool, remainderPacks);
     if (possibleValues.length === 0) continue;
 
     // Pick a random value

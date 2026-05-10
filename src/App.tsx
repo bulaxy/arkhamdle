@@ -91,7 +91,6 @@ function App() {
           </div>
 
           {/* Mobile flat links */}
-          <NavLink to="/random-trivia" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Random Trivia</NavLink>
           <NavLink to="/story-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Story Guesser</NavLink>
           <NavLink to="/trait-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trait Guesser</NavLink>
           <NavLink to="/flavour-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Flavour Guesser</NavLink>

@@ -4,8 +4,6 @@
  */
 export const PACK_STRUCTURE: Record<string, string[]> = {
   core: ["core", "core_encounter"],
-  "core 2026": ["core_2026", "core_2026_encounter"],
-  rcore: ["rcore"],
   dwl: ["bota", "bota_encounter", "dwl", "dwl_encounter", "litas", "litas_encounter", "tece", "tece_encounter", "tmm", "tmm_encounter", "uau", "uau_encounter", "wda", "wda_encounter"],
   ptc: ["apot", "apot_encounter", "bsr", "bsr_encounter", "dca", "dca_encounter", "eotp", "eotp_encounter", "ptc", "ptc_encounter", "tpm", "tpm_encounter", "tuo", "tuo_encounter"],
   tfa: ["hote", "hote_encounter", "sha", "sha_encounter", "tbb", "tbb_encounter", "tcoa", "tcoa_encounter", "tdoy", "tdoy_encounter", "tfa", "tfa_encounter", "tof", "tof_encounter"],
@@ -35,4 +33,27 @@ export function buildPackCodeToGroupMap(): Map<string, string> {
     }
   }
   return map;
+}
+const PACK_CODES = Object.keys(PACK_STRUCTURE);
+
+const PACK_INDEX: Record<string, number> = Object.fromEntries(
+  PACK_CODES.map((code, index) => [code, index]),
+);
+
+export function packNewerThan(
+  packCode: string,
+  targetPackCode: string,
+): boolean {
+  return PACK_INDEX[packCode] > PACK_INDEX[targetPackCode];
+}
+
+export function packsAtLeastOneNewerThan(
+  packCodes: string[],
+  targetPackCode: string,
+): boolean {
+  const targetIndex = PACK_INDEX[targetPackCode];
+
+  return packCodes.some(
+    packCode => PACK_INDEX[packCode] > targetIndex,
+  );
 }

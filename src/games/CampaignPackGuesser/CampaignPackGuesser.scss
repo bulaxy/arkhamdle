@@ -106,7 +106,7 @@
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  
+
   p {
     margin: 0;
     font-size: 1rem;
@@ -118,7 +118,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  
+
   &.shakeAnimation {
     animation: shake 0.3s;
   }
@@ -151,12 +151,16 @@
 }
 
 @keyframes shake {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
+
   25% {
     transform: translateX(-10px);
   }
+
   75% {
     transform: translateX(10px);
   }
@@ -187,7 +191,8 @@
   align-items: center;
 
   &.correct {
-    border-color: var(--correct-color);
+    background: rgba(34, 197, 94, 0.15);
+    border: 2px solid var(--correct-color);
 
     .result-text {
       color: var(--correct-color);
@@ -195,7 +200,8 @@
   }
 
   &.incorrect {
-    border-color: var(--wrong-color);
+    background: rgba(239, 68, 68, 0.15);
+    border: 2px solid var(--wrong-color);
 
     .result-text {
       color: var(--wrong-color);

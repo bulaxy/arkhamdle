@@ -33,7 +33,7 @@ export default function CountGuesser({ onPlayAgainOverride }: GameProps = {}) {
     setShowImages(false);
     
     const packsInPool = Array.from(new Set(pool.map(c => c.pack_name)));
-    const useAllPacks = Math.random() > 0.5 || packsInPool.length <= 1;
+    const useAllPacks = packsInPool.length <= 1 || Math.random() > (1 - (1/packsInPool.length));
 
     let finalPool = pool;
     let packNameForQuestion = "All Packs";
