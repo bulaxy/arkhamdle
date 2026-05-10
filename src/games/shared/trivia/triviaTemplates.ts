@@ -1,4 +1,4 @@
-import type { TransformedCard } from "../../types";
+import type { TransformedCard } from "../../../types";
 
 export type QuestionTemplateType = 
   | 'Trait'
@@ -35,7 +35,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     generateValues: (cards) => {
       const traitCounts = new Map<string, number>();
       cards.forEach(c => {
-        c.traits?.forEach(t => {
+        c.traits?.forEach((t: string) => {
           traitCounts.set(t, (traitCounts.get(t) || 0) + 1);
         });
       });

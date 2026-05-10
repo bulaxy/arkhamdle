@@ -53,8 +53,12 @@ export interface CampaignPackGuesserSettings extends BaseGameSettings {
   blurAmount: number;
 }
 
-export interface TriviaGuesserSettings extends BaseGameSettings {
-  questionType: 'Mixed' | 'Only How Many' | 'Only Which Card';
+export interface GuessCardByTraitSettings extends BaseGameSettings {
+  inputMode: 'Multiple Choice' | 'Direct Input';
+  poolFilter: 'Player Cards Only' | 'All Cards';
+}
+
+export interface CountGuesserSettings extends BaseGameSettings {
   inputMode: 'Multiple Choice' | 'Direct Input';
   poolFilter: 'Player Cards Only' | 'All Cards';
 }
@@ -83,7 +87,8 @@ export interface AppSettings {
   traitGuesser: TraitGuesserSettings;
   flavourGuesser: FlavourGuesserSettings;
   campaignPackGuesser: CampaignPackGuesserSettings;
-  triviaGuesser: TriviaGuesserSettings;
+  guessCardByTrait: GuessCardByTraitSettings;
+  countGuesser: CountGuesserSettings;
   iconGuesser: BaseGameSettings;
   randomTrivia: RandomTriviaSettings;
 }

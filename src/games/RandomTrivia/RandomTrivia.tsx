@@ -4,7 +4,8 @@ import StoryGuesser from '../StoryGuesser/StoryGuesser';
 import TraitGuesser from '../TraitGuesser/TraitGuesser';
 import FlavourGuesser from '../FlavourGuesser/FlavourGuesser';
 import CampaignPackGuesser from '../CampaignPackGuesser/CampaignPackGuesser';
-import TriviaGuesser from '../TriviaGuesser/TriviaGuesser';
+import GuessCardByTrait from '../GuessCardByTrait/GuessCardByTrait';
+import CountGuesser from '../CountGuesser/CountGuesser';
 import IconGuesser from '../IconGuesser/IconGuesser';
 import WordleGame from '../WordleGame/WordleGame';
 import PicGuesser from '../PicGuesser/PicGuesser';
@@ -16,7 +17,8 @@ const ALL_GAMES = {
   TraitGuesser,
   FlavourGuesser,
   CampaignPackGuesser,
-  TriviaGuesser,
+  GuessCardByTrait,
+  CountGuesser,
   IconGuesser,
   WordleGame,
   PicGuesser,

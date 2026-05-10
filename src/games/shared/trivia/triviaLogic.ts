@@ -1,5 +1,5 @@
 import { TRIVIA_TEMPLATES } from './triviaTemplates';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard } from '../../../types';
 
 export interface TriviaQuestion {
   mode: 'How Many' | 'Which Card';
@@ -119,7 +119,7 @@ export function generateWhichCardQuestion(
       const sharingTraits = allCards.filter(c => 
         c.id !== card.id && 
         c.traits && 
-        card.traits!.some(t => c.traits!.includes(t))
+        card.traits!.some((t: string) => c.traits!.includes(t))
       );
 
       const shuffledSharing = shuffle(sharingTraits);

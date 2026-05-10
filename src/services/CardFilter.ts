@@ -7,7 +7,7 @@ import { TypeName as TypeNameEnum } from '../types/arkham';
 export function filterBySettings(
   cards: TransformedCard[],
   settings: AppSettings,
-  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'campaignPackGuesser' | 'triviaGuesser' | 'iconGuesser'
+  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'campaignPackGuesser' | 'guessCardByTrait' | 'countGuesser' | 'iconGuesser'
 ): TransformedCard[] {
   const gameSettings = settings[gameId];
   const useGlobal = gameSettings.useGlobalPackFilter ?? true;

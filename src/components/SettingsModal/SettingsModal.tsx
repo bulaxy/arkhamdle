@@ -10,7 +10,8 @@ import TraitGuesserSection from "./TraitGuesserSection";
 import GeneralSettingsSection from "./GeneralSettingsSection";
 import WordleSection from "./WordleSection";
 import InvestigatordleSection from "./InvestigatordleSection";
-import TriviaGuesserTypeFiltersSection from "./TriviaGuesserTypeFiltersSection";
+import GuessCardByTraitSection from "./GuessCardByTraitSection";
+import CountGuesserSection from "./CountGuesserSection";
 import CampaignPackGuesserSection from "./CampaignPackGuesserSection";
 import IconGuesserSection from "./IconGuesserSection";
 import RandomTriviaSection from "./RandomTriviaSection";
@@ -165,18 +166,28 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onChange={(newSettings) => setSettings({ ...settings, iconGuesser: newSettings })}
           />
 
-          <TriviaGuesserTypeFiltersSection
-            isOpen={openSection === "triviaGuesser"}
-            onToggle={() => toggleSection("triviaGuesser")}
-            questionType={settings.triviaGuesser.questionType}
-            onQuestionTypeChange={(value) => setSettings({ ...settings, triviaGuesser: { ...settings.triviaGuesser, questionType: value } })}
-            inputMode={settings.triviaGuesser.inputMode}
-            onInputModeChange={(value) => setSettings({ ...settings, triviaGuesser: { ...settings.triviaGuesser, inputMode: value } })}
-            poolFilter={settings.triviaGuesser.poolFilter}
-            onPoolFilterChange={(value) => setSettings({ ...settings, triviaGuesser: { ...settings.triviaGuesser, poolFilter: value } })}
+          <GuessCardByTraitSection
+            isOpen={openSection === "guessCardByTrait"}
+            onToggle={() => toggleSection("guessCardByTrait")}
+            inputMode={settings.guessCardByTrait.inputMode}
+            onInputModeChange={(value) => setSettings({ ...settings, guessCardByTrait: { ...settings.guessCardByTrait, inputMode: value } })}
+            poolFilter={settings.guessCardByTrait.poolFilter}
+            onPoolFilterChange={(value) => setSettings({ ...settings, guessCardByTrait: { ...settings.guessCardByTrait, poolFilter: value } })}
             packs={packs}
-            settings={settings.triviaGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, triviaGuesser: newSettings })}
+            settings={settings.guessCardByTrait}
+            onChange={(newSettings) => setSettings({ ...settings, guessCardByTrait: newSettings })}
+          />
+
+          <CountGuesserSection
+            isOpen={openSection === "countGuesser"}
+            onToggle={() => toggleSection("countGuesser")}
+            inputMode={settings.countGuesser.inputMode}
+            onInputModeChange={(value) => setSettings({ ...settings, countGuesser: { ...settings.countGuesser, inputMode: value } })}
+            poolFilter={settings.countGuesser.poolFilter}
+            onPoolFilterChange={(value) => setSettings({ ...settings, countGuesser: { ...settings.countGuesser, poolFilter: value } })}
+            packs={packs}
+            settings={settings.countGuesser}
+            onChange={(newSettings) => setSettings({ ...settings, countGuesser: newSettings })}
           />
 
           <RandomTriviaSection

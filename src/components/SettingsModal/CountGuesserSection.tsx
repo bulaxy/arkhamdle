@@ -1,26 +1,22 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import PackFilterControls from "./PackFilterControls";
-import type { TriviaGuesserSettings } from "../../types";
+import type { CountGuesserSettings } from "../../types";
 
-interface TriviaGuesserTypeFiltersSectionProps {
+interface CountGuesserSectionProps {
   isOpen: boolean;
   onToggle: () => void;
-  questionType: 'Mixed' | 'Only How Many' | 'Only Which Card';
-  onQuestionTypeChange: (type: 'Mixed' | 'Only How Many' | 'Only Which Card') => void;
   inputMode: 'Multiple Choice' | 'Direct Input';
   onInputModeChange: (mode: 'Multiple Choice' | 'Direct Input') => void;
   poolFilter: 'Player Cards Only' | 'All Cards';
   onPoolFilterChange: (filter: 'Player Cards Only' | 'All Cards') => void;
   packs: string[];
-  settings: TriviaGuesserSettings;
-  onChange: (settings: TriviaGuesserSettings) => void;
+  settings: CountGuesserSettings;
+  onChange: (settings: CountGuesserSettings) => void;
 }
 
-export default function TriviaGuesserTypeFiltersSection({
+export default function CountGuesserSection({
   isOpen,
   onToggle,
-  questionType,
-  onQuestionTypeChange,
   inputMode,
   onInputModeChange,
   poolFilter,
@@ -28,11 +24,11 @@ export default function TriviaGuesserTypeFiltersSection({
   packs,
   settings,
   onChange,
-}: TriviaGuesserTypeFiltersSectionProps) {
+}: CountGuesserSectionProps) {
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Trivia Guesser</h3>
+        <h3>Game: Count Guesser</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (
@@ -62,35 +58,6 @@ export default function TriviaGuesserTypeFiltersSection({
           <hr className="settings-divider" />
 
           <div>
-            <h4>Game Mode</h4>
-            <p className="settings-text mb-8">
-              Select what type of trivia questions you want.
-            </p>
-            <div className="setting-toggle-group">
-              <button
-                className={`toggle-btn ${questionType === "Mixed" ? "active" : ""}`}
-                onClick={() => onQuestionTypeChange("Mixed")}
-              >
-                Mixed
-              </button>
-              <button
-                className={`toggle-btn ${questionType === "Only How Many" ? "active" : ""}`}
-                onClick={() => onQuestionTypeChange("Only How Many")}
-              >
-                How Many of X
-              </button>
-              <button
-                className={`toggle-btn ${questionType === "Only Which Card" ? "active" : ""}`}
-                onClick={() => onQuestionTypeChange("Only Which Card")}
-              >
-                Which Card is X
-              </button>
-            </div>
-          </div>
-          
-          <hr className="settings-divider" />
-
-          <div>
             <h4>Input Mode</h4>
             <p className="settings-text mb-8">
               Select how you want to answer questions.
@@ -116,7 +83,7 @@ export default function TriviaGuesserTypeFiltersSection({
           <div>
             <h4>Card Pool Filtering</h4>
             <p className="settings-text mb-8">
-              Select which cards to include in trivia questions.
+              Select which cards to include in the guessing pool.
             </p>
             <div className="setting-toggle-group">
               <button

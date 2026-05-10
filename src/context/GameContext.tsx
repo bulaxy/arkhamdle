@@ -104,9 +104,13 @@ const defaultSettings: AppSettings = {
     ...defaultBaseGameSettings,
     blurAmount: 10,
   },
-  triviaGuesser: {
+  guessCardByTrait: {
     ...defaultBaseGameSettings,
-    questionType: 'Mixed',
+    inputMode: 'Multiple Choice',
+    poolFilter: 'Player Cards Only',
+  },
+  countGuesser: {
+    ...defaultBaseGameSettings,
     inputMode: 'Multiple Choice',
     poolFilter: 'Player Cards Only',
   },
@@ -120,7 +124,8 @@ const defaultSettings: AppSettings = {
       TraitGuesser: true,
       FlavourGuesser: true,
       CampaignPackGuesser: true,
-      TriviaGuesser: true,
+      GuessCardByTrait: true,
+      CountGuesser: true,
       IconGuesser: true,
     }
   },

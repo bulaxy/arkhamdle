@@ -8,7 +8,8 @@ import Investigatordle from './games/Investigatordle/Investigatordle';
 import StoryGuesser from './games/StoryGuesser/StoryGuesser';
 import TraitGuesser from './games/TraitGuesser/TraitGuesser';
 import FlavourGuesser from './games/FlavourGuesser/FlavourGuesser';
-import TriviaGuesser from './games/TriviaGuesser/TriviaGuesser';
+import GuessCardByTrait from './games/GuessCardByTrait/GuessCardByTrait';
+import CountGuesser from './games/CountGuesser/CountGuesser';
 import CampaignPackGuesser from './games/CampaignPackGuesser/CampaignPackGuesser';
 import IconGuesser from './games/IconGuesser/IconGuesser';
 import RandomTrivia from './games/RandomTrivia/RandomTrivia';
@@ -49,7 +50,7 @@ function App() {
   }, [isMoreOpen]);
 
   const location = useLocation();
-  const moreGamePaths = ['/story-guesser', '/trait-guesser', '/flavour-guesser', '/campaign-pack-guesser', '/icon-guesser', '/trivia-guesser'];
+  const moreGamePaths = ['/story-guesser', '/trait-guesser', '/flavour-guesser', '/campaign-pack-guesser', '/icon-guesser', '/guess-card-by-trait', '/count-guesser'];
   const isMoreActive = moreGamePaths.includes(location.pathname);
 
   return (
@@ -82,7 +83,8 @@ function App() {
               <NavLink to="/flavour-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Flavour Guesser</NavLink>
               <NavLink to="/campaign-pack-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Campaign Pack Guesser</NavLink>
               <NavLink to="/icon-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Icon Guesser</NavLink>
-              <NavLink to="/trivia-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trivia Questions</NavLink>
+              <NavLink to="/guess-card-by-trait" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Guess Card By Trait</NavLink>
+              <NavLink to="/count-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Count Guesser</NavLink>
             </div>
           </div>
 
@@ -93,7 +95,8 @@ function App() {
           <NavLink to="/flavour-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Flavour Guesser</NavLink>
           <NavLink to="/campaign-pack-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Campaign Pack Guesser</NavLink>
           <NavLink to="/icon-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Icon Guesser</NavLink>
-          <NavLink to="/trivia-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trivia Questions</NavLink>
+          <NavLink to="/guess-card-by-trait" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Guess Card By Trait</NavLink>
+          <NavLink to="/count-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Count Guesser</NavLink>
         </div>
 
         <div className="nav-right">
@@ -121,7 +124,8 @@ function App() {
             <Route path="/story-guesser" element={<StoryGuesser />} />
             <Route path="/trait-guesser" element={<TraitGuesser />} />
             <Route path="/flavour-guesser" element={<FlavourGuesser />} />
-            <Route path="/trivia-guesser" element={<TriviaGuesser />} />
+            <Route path="/guess-card-by-trait" element={<GuessCardByTrait />} />
+            <Route path="/count-guesser" element={<CountGuesser />} />
             <Route path="/campaign-pack-guesser" element={<CampaignPackGuesser />} />
             <Route path="/icon-guesser" element={<IconGuesser />} />
           </Routes>
