@@ -137,11 +137,14 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
   ]);
 
   const submitGuess = (card: TransformedCard) => {
-    console.log('[FlavourGuesser] Guess:', card);
     if (card.id === answer?.id) {
       setWin(true);
     } else {
-      setWrongGuesses([card, ...wrongGuesses]);
+      if(settings.flavourGuesser.inputMode === 'Multiple Choice'){
+        setGaveUp(true)
+      }else{
+        setWrongGuesses([card, ...wrongGuesses]);
+      }
     }
   };
 

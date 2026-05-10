@@ -423,6 +423,15 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     },
     formatQuestion: (_, __, packName) => `How many cards have the "Surge" keyword in ${packName}?`
   },
+  {
+    type: 'Keyword Fast',
+    condition: (card) => cardHasKeyword(card, 'Fast'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'Fast')).length;
+      return count >= 2 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have the "Fast" keyword in ${packName}?`
+  },
   // Skill icon diversity questions
   {
     type: 'Multi Skill 2',

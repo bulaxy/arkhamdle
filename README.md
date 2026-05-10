@@ -72,3 +72,11 @@ This project is created by the community for the community. Card data is sourced
 ---
 
 *Happy investigating! 🔍*
+
+
+## TODO
+TrueOrFalse, add setting on Trait True or false toggle on or off
+Have another new mode. Enemies Keyword True or False
+It will search enemies,
+It will check whether Ask whether it got`Hunter` keyword (50% true/false)
+If it is an enemies is after pack TFA, potentially 
