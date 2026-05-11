@@ -469,15 +469,6 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     formatQuestion: (_, __, packName) => `How many cards have the "Surge" keyword in ${packName}?`
   },
   {
-    type: 'Keyword Fast',
-    condition: (card) => cardHasKeyword(card, 'Fast'),
-    generateValues: (cards) => {
-      const count = cards.filter(c => cardHasKeyword(c, 'Fast')).length;
-      return count > 0 ? [true] : [];
-    },
-    formatQuestion: (_, __, packName) => `How many cards have the "Fast" keyword in ${packName}?`
-  },
-  {
     type: 'Keyword Spawn',
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Spawn'),
     generateValues: (cards) => {
@@ -553,32 +544,32 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     },
     formatQuestion: (_, __, packName) => `How many cards have the "Parley" keyword in ${packName}?`
   },
-  {
-    type: 'Keyword Action',
-    condition: (card) => cardHasKeyword(card, 'action'),
-    generateValues: (cards) => {
-      const count = cards.filter(c => cardHasKeyword(c, 'action')).length;
-      return count > 0 ? [true] : [];
-    },
-    formatQuestion: (_, __, packName) => `How many cards have an "[action]" symbol (player can spend actions to do something) in ${packName}?`
-  },
-  {
-    type: 'Keyword Reaction',
-    condition: (card) => cardHasKeyword(card, 'reaction'),
-    generateValues: (cards) => {
-      const count = cards.filter(c => cardHasKeyword(c, 'reaction')).length;
-      return count > 0 ? [true] : [];
-    },
-    formatQuestion: (_, __, packName) => `How many cards have a "[reaction]" symbol (can be used when triggered) in ${packName}?`
-  },
-  {
-    type: 'Keyword Fast',
-    condition: (card) => cardHasKeyword(card, 'fast'),
-    generateValues: (cards) => {
-      const count = cards.filter(c => cardHasKeyword(c, 'fast')).length;
-      return count > 0 ? [true] : [];
-    },
-    formatQuestion: (_, __, packName) => `How many cards have a "[fast]" action (can be used at any time) in ${packName}?`
-  },
+  // {
+  //   type: 'Keyword Action',
+  //   condition: (card) => cardHasKeyword(card, 'action'),
+  //   generateValues: (cards) => {
+  //     const count = cards.filter(c => cardHasKeyword(c, 'action')).length;
+  //     return count > 0 ? [true] : [];
+  //   },
+  //   formatQuestion: (_, __, packName) => `How many cards have an "[action]" symbol (player can spend actions to do something) in ${packName}?`
+  // },
+  // {
+  //   type: 'Keyword Reaction',
+  //   condition: (card) => cardHasKeyword(card, 'reaction'),
+  //   generateValues: (cards) => {
+  //     const count = cards.filter(c => cardHasKeyword(c, 'reaction')).length;
+  //     return count > 0 ? [true] : [];
+  //   },
+  //   formatQuestion: (_, __, packName) => `How many cards have a "[reaction]" symbol (can be used when triggered) in ${packName}?`
+  // },
+  // {
+  //   type: 'Keyword Fast',
+  //   condition: (card) => cardHasKeyword(card, 'fast'),
+  //   generateValues: (cards) => {
+  //     const count = cards.filter(c => cardHasKeyword(c, 'fast')).length;
+  //     return count > 0 ? [true] : [];
+  //   },
+  //   formatQuestion: (_, __, packName) => `How many cards have a "[fast]" action (can be used at any time) in ${packName}?`
+  // },
 ];
 

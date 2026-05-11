@@ -18,12 +18,12 @@ function getPackGroup(packCode: string): string {
 type EnemyQuestionType = 
   | 'Fight' | 'Horror' | 'Damage' | 'Evade' | 'Health' 
   | 'Retaliate' | 'Hunter' | 'Alert' | 'Aloof' | 'Elusive' | 'Victory'
-  | 'Prey' | 'Massive' | 'Spawn' | 'Action' | 'Forced' | 'Revelation';
+  | 'Prey' | 'Massive' | 'Spawn' | 'Forced' | 'Revelation';
 
-type LocationQuestionType = 'Clues' | 'Shroud' | 'Forced' | 'Resign' | 'Reaction' | 'Action' | 'Fast' | 'Victory';
-type ActQuestionType = 'Clues' | 'Revelation' | 'Forced' | 'Objective' | 'Resign' | 'Reaction' | 'Action' | 'Fast';
-type AgendaQuestionType = 'Doom' | 'Forced' | 'Resign' | 'Revelation' | 'Reaction' | 'Action' | 'Fast';
-type TreacheryQuestionType = 'Forced'| 'Surge' | 'Action' | 'Fast';
+type LocationQuestionType = 'Clues' | 'Shroud' | 'Forced' | 'Resign' | 'Victory';
+type ActQuestionType = 'Clues' | 'Revelation' | 'Forced' | 'Objective' | 'Resign';
+type AgendaQuestionType = 'Doom' | 'Forced' | 'Resign';
+type TreacheryQuestionType = 'Forced'| 'Surge' ;
 
 type AnyQuestionType = EnemyQuestionType | LocationQuestionType | ActQuestionType | AgendaQuestionType | TreacheryQuestionType | 'Traits';
 
@@ -35,10 +35,11 @@ interface GameQuestion {
   type: AnyQuestionType;
 }
 
-const KEYWORD_TRAITS = [
-  'Retaliate', 'Hunter', 'Prey', 'Massive', 'Spawn', 'Forced', 'Resign', 
-  'Reaction', 'Action', 'Fast', 'Revelation', 'Objective', 'Surge'
-];
+const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation'];
+const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign', 'Victory'];
+const ACT_KEYWORD_TRAITS = ['Revelation', 'Forced', 'Objective', 'Resign'];
+const AGENDA_KEYWORD_TRAITS = ['Forced', 'Resign'];
+const TREACHERY_KEYWORD_TRAITS = ['Forced', 'Surge'];
 
 function generateFalseStatValue(
   val: number,
@@ -99,7 +100,6 @@ function getKeywordDisplayValue(
   const hasKeywords = allowedKeywords.filter(k => cardHasKeyword(card, k));
   const hasNotKeywords = allowedKeywords.filter(k => !cardHasKeyword(card, k));
   const pool = isTrue ? hasKeywords : hasNotKeywords;
-
   if (pool.length === 0) return null;
   return pool.includes(selectedOption) 
     ? selectedOption 
@@ -152,19 +152,18 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
       const availableModes: { type: GameMode; weight: number }[] = [];
       
       if (tfSettings.traitMode && traitPool.length > 0) availableModes.push({ type: 'Traits', weight: 10 });
-      if (tfSettings.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 10 }); 
-      if (tfSettings.locationTraitsMode && locationPool.length > 0) availableModes.push({ type: 'Location', weight: 10 }); 
-      if (tfSettings.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 2 }); 
-      if (tfSettings.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight: 2 });
-      if (tfSettings.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 4 }); 
+      if (tfSettings.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 5 }); 
+      if (tfSettings.locationTraitsMode && locationPool.length > 0) availableModes.push({ type: 'Location', weight: 20 }); 
+      if (tfSettings.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 20 }); 
+      if (tfSettings.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight:20 });
+      if (tfSettings.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 20 }); 
 
       if (availableModes.length === 0) return null;
 
       const selectedMode = getWeightedRandom(availableModes);
       const isTrue = Math.random() >= 0.5;
-
       switch(selectedMode) {
-        case 'Traits': {
+        case 'Traits': 
           const randomCard = traitPool[Math.floor(Math.random() * traitPool.length)];
           let displayedTraits = randomCard.traits.join('. ') + '.';
           
@@ -183,7 +182,6 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
             displayedValue: displayedTraits,
             type: 'Traits'
           };
-        }
 
         case 'Enemy': {
           const randomCard = enemyPool[Math.floor(Math.random() * enemyPool.length)];
@@ -192,7 +190,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
           const options: { type: EnemyQuestionType; weight: number }[] = [
             { type: 'Fight', weight: 1 }, { type: 'Horror', weight: 1 }, { type: 'Damage', weight: 1 },
             { type: 'Evade', weight: 1 }, { type: 'Retaliate', weight: 1.5 }, { type: 'Hunter', weight: 1.5 },
-            { type: 'Spawn', weight: 1.5 }, { type: 'Action', weight: 0.5 }, { type: 'Forced', weight: 0.5 },
+            { type: 'Spawn', weight: 1.5 }, { type: 'Forced', weight: 0.5 },
             { type: 'Revelation', weight: 0.5 }
           ];
 
@@ -209,8 +207,8 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
 
           const selectedOption = getWeightedRandom(options);
           
-          if (KEYWORD_TRAITS.includes(selectedOption)) {
-            const allowedKeywords = KEYWORD_TRAITS.filter(k => {
+          if (ENEMY_KEYWORD_TRAITS.includes(selectedOption)) {
+            const allowedKeywords = ENEMY_KEYWORD_TRAITS.filter(k => {
               if (k === 'Alert') return packSameOrNewerThan(group, 'tfa');
               if (k === 'Aloof') return packSameOrNewerThan(group, 'dwl');
               if (k === 'Elusive') return packSameOrNewerThan(group, 'fhv');
@@ -255,14 +253,13 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
           const options: { type: ActQuestionType; weight: number }[] = [
             {type: 'Clues', weight: 1}, {type: 'Revelation', weight: 1}, 
             {type: 'Forced', weight: 1}, {type: 'Objective', weight: 0.2}, 
-            {type: 'Resign', weight: 0.2}, {type: 'Reaction', weight: 0.5}, 
-            {type: 'Action', weight: 0.5}, {type: 'Fast', weight: 0.5}
+            {type: 'Resign', weight: 0.2}
           ];
-          
+          console.log('option',options)
           const selectedOption = getWeightedRandom(options);
           
-          if (KEYWORD_TRAITS.includes(selectedOption)) {
-            const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, KEYWORD_TRAITS);
+          if (ACT_KEYWORD_TRAITS. includes(selectedOption)) {
+            const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, ACT_KEYWORD_TRAITS);
             if (!displayedValue) return null;
 
             return {
@@ -285,13 +282,12 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
           const randomCard = agendaPool[Math.floor(Math.random() * agendaPool.length)];
           const options: { type: AgendaQuestionType; weight: number }[] = [
             {type: 'Doom', weight: 1}, {type: 'Forced', weight: 1}, {type: 'Resign', weight: 0.2}, 
-            {type: 'Reaction', weight: 0.2}, {type: 'Action', weight: 0.2}, {type: 'Fast', weight: 0.2}
           ];
           
           const selectedOption = getWeightedRandom(options);
           
-          if (KEYWORD_TRAITS.includes(selectedOption)) {
-            const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, KEYWORD_TRAITS);
+          if (AGENDA_KEYWORD_TRAITS.includes(selectedOption)) {
+            const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, AGENDA_KEYWORD_TRAITS);
             if (!displayedValue) return null;
 
             return {
@@ -314,14 +310,15 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
           const randomCard = locationPool[Math.floor(Math.random() * locationPool.length)];
           const options: { type: LocationQuestionType; weight: number }[] = [
             {type: 'Clues', weight: 1}, {type: 'Shroud', weight: 1}, {type: 'Forced', weight: 0.5},
-            {type: 'Resign', weight: 0.1}, {type: 'Reaction', weight: 0.2}, {type: 'Action', weight: 0.2}, 
-            {type: 'Fast', weight: 0.2}
+            {type: 'Resign', weight: 0.1},
           ];
           
+          console.log('option',options)
           const selectedOption = getWeightedRandom(options);
+          console.log('opselectedOptiontion',selectedOption)
 
-          if (KEYWORD_TRAITS.includes(selectedOption)) {
-            const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, KEYWORD_TRAITS);
+          if (LOCATION_KEYWORD_TRAITS.includes(selectedOption)) {
+            const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, LOCATION_KEYWORD_TRAITS);
             if (!displayedValue) return null;
 
             return {
@@ -344,13 +341,11 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
           const randomCard = treacheryPool[Math.floor(Math.random() * treacheryPool.length)];
           const options: { type: TreacheryQuestionType; weight: number }[] = [
             {type: 'Forced', weight: 1}, {type: 'Surge', weight: 1}, 
-            {type: 'Action', weight: 0.5}, {type: 'Fast', weight: 0.5}
           ];
           
           const selectedOption = getWeightedRandom(options);
-          const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, KEYWORD_TRAITS);
+          const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, TREACHERY_KEYWORD_TRAITS);
           if (!displayedValue) return null;
-
           return {
             card: randomCard, isTrue, questionText: `Does this Treachery have the ${displayedValue} keyword?`,
             displayedValue: '', type: selectedOption
