@@ -23,7 +23,7 @@ type EnemyQuestionType =
 type LocationQuestionType = 'Clues' | 'Shroud' | 'Forced' | 'Resign' | 'Reaction' | 'Action' | 'Fast' | 'Victory';
 type ActQuestionType = 'Clues' | 'Revelation' | 'Forced' | 'Objective' | 'Resign' | 'Reaction' | 'Action' | 'Fast';
 type AgendaQuestionType = 'Doom' | 'Forced' | 'Resign' | 'Revelation' | 'Reaction' | 'Action' | 'Fast';
-type TreacheryQuestionType = 'Forced'| 'Revelation' | 'Surge' | 'Action' | 'Fast';
+type TreacheryQuestionType = 'Forced'| 'Surge' | 'Action' | 'Fast';
 
 type AnyQuestionType = EnemyQuestionType | LocationQuestionType | ActQuestionType | AgendaQuestionType | TreacheryQuestionType | 'Traits';
 
@@ -156,7 +156,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
       if (tfSettings.locationTraitsMode && locationPool.length > 0) availableModes.push({ type: 'Location', weight: 10 }); 
       if (tfSettings.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 2 }); 
       if (tfSettings.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight: 2 });
-      if (tfSettings.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 10 }); 
+      if (tfSettings.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 4 }); 
 
       if (availableModes.length === 0) return null;
 
@@ -275,7 +275,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
             if (fakeValue === null) return null;
 
             return {
-              card: randomCard, isTrue, questionText: `Is the clues value of this Act ${fakeValue}?`,
+              card: randomCard, isTrue, questionText: `How many clue (per investigator) is required to advance of this Act ${fakeValue}?`,
               displayedValue: '', type: selectedOption
             };
           }
@@ -343,7 +343,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
         case 'Treachery': {
           const randomCard = treacheryPool[Math.floor(Math.random() * treacheryPool.length)];
           const options: { type: TreacheryQuestionType; weight: number }[] = [
-            {type: 'Revelation', weight: 1}, {type: 'Forced', weight: 1}, {type: 'Surge', weight: 1}, 
+            {type: 'Forced', weight: 1}, {type: 'Surge', weight: 1}, 
             {type: 'Action', weight: 0.5}, {type: 'Fast', weight: 0.5}
           ];
           
