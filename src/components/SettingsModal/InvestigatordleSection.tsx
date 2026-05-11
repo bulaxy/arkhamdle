@@ -21,7 +21,7 @@ export default function InvestigatordleSection({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Investigatordle</h3>
+        <h3>Investigatordle</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (

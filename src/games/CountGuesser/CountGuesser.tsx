@@ -128,14 +128,14 @@ export default function CountGuesser({ onPlayAgainOverride }: GameProps = {}) {
       <div className="trivia-header">
         <h1>Count Guesser</h1>
         <div className="game-header-row">
-          <p>Test your Arkham Horror LCG knowledge</p>
+          <p>Challenge your mastery of card distributions and counts within the game.</p>
           <GameInfoButton
             gameRules={{
               title: 'Count Guesser',
               cardTypes: settings.countGuesser.poolFilter,
               answerEvaluation: 'Multiple Choice or Direct Input',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: "Answer how many cards fit the specific criteria! You get one try per question!"
+              howToPlay: "A specific criteria is given (e.g., \"How many Level 0 Seeker events are in the Core Set?\"). You must provide the exact count of matching cards. You have only one attempt per question, so think carefully before submitting your answer!"
             }}
           />
         </div>
@@ -166,7 +166,7 @@ export default function CountGuesser({ onPlayAgainOverride }: GameProps = {}) {
 
         {!isGameOver && settings.countGuesser.inputMode !== 'Direct Input' && (
           <div className="trivia-actions">
-            <button className="give-up-btn premium-btn-secondary" onClick={() => setGaveUp(true)}>Give Up</button>
+            <button className="premium-btn guess-give-up" onClick={() => setGaveUp(true)}>Give Up</button>
           </div>
         )}
       </div>

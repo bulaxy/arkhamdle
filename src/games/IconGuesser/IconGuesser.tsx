@@ -106,7 +106,7 @@ export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
       <div className="icon-header">
         <h1>Icon Guesser</h1>
         <div className="game-header-row">
-          <p>Guess the skill icons on this card.</p>
+          <p>Prove your familiarity with card commitment values by identifying hidden skill icons.</p>
           <p className="small-note">Note: Some cards may not have images available yet.</p>
           <GameInfoButton
             gameRules={{
@@ -114,7 +114,7 @@ export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
               cardTypes: 'Asset, Event, Skill (only)',
               answerEvaluation: 'Must match all 5 skill icon values exactly',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: 'A card image is shown with the skill icons hidden behind a black box. Enter the values for each of the 5 skill icons (Willpower, Intellect, Combat, Agility, Wild). You only get 1 attempt!'
+              howToPlay: 'A card is displayed with its skill icon panel obscured. Enter the exact number of icons for each of the five skills (Willpower, Intellect, Combat, Agility, and Wild). You have only one chance to get all five correct!'
             }}
           />
         </div>

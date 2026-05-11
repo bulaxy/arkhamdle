@@ -153,14 +153,14 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
       <div className="flavour-header">
         <h1>Flavour Text Guesser</h1>
         <div className="game-header-row">
-          <p>Guess the card by its flavour text!</p>
+          <p>Immerse yourself in the story by identifying cards from their atmospheric flavour text.</p>
           <GameInfoButton
             gameRules={{
               title: 'Flavour Text Guesser',
               cardTypes: 'Asset, Event, Skill, Enemy, Treachery, Location, Story (Configurable via Type Filters in Settings)',
               answerEvaluation: 'Must match: Class, Pack, Name, XP',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter, Type filters',
-              howToPlay: 'A flavour text of a card is shown, guess what card is it?\nHints available after 3 wrong guesses.'
+              howToPlay: 'A quote or snippet of flavour text is presented. You must identify which card it belongs to. You can choose between Search-based entry or Multiple Choice in the settings. Faction and expansion pack hints unlock after several incorrect attempts.'
             }}
           />
         </div>
@@ -214,7 +214,7 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
 
             {settings.flavourGuesser.inputMode === 'Multiple Choice' && (
               <div style={{ marginTop: '1rem' }}>
-                <button className="give-up-btn premium-btn-secondary" onClick={() => setGaveUp(true)}>Give Up</button>
+                <button className="premium-btn guess-give-up" onClick={() => setGaveUp(true)}>Give Up</button>
               </div>
             )}
           </div>

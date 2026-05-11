@@ -1,4 +1,3 @@
-
 import type { RandomTriviaSettings } from '../../types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -30,12 +29,12 @@ export default function RandomTriviaSection({
     { key: 'StoryGuesser', label: 'Story Guesser' },
     { key: 'TraitGuesser', label: 'Trait Guesser' },
     { key: 'FlavourGuesser', label: 'Flavour Guesser' },
-    { key: 'CampaignPackGuesser', label: 'Campaign Pack Guesser' },
-    { key: 'GuessCardByTrait', label: 'Guess Card By Trait' },
+    { key: 'CampaignPackGuesser', label: 'Campaign Pack' },
+    { key: 'GuessCardByTrait', label: 'Guess Trait' },
     { key: 'CountGuesser', label: 'Count Guesser' },
     { key: 'IconGuesser', label: 'Icon Guesser' },
     { key: 'TrueOrFalse', label: 'True Or False' },
-    { key: 'WordleGame', label: 'Classic Mode (Wordle)' },
+    { key: 'WordleGame', label: 'Classic' },
     { key: 'PicGuesser', label: 'Pic Guesser' },
     { key: 'Investigatordle', label: 'Investigatordle' }
   ];
@@ -47,22 +46,25 @@ export default function RandomTriviaSection({
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (
-        <div className="settings-section-content fade-in">
+        <div className="settings-section-content settings-column fade-in">
           <p className="settings-text">
             Select which game modes are included when playing Random Trivia.
           </p>
 
-          <div className="filter-grid">
-            {GAME_MODES.map((mode) => (
-              <label key={mode.key} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={settings.enabledModes[mode.key] ?? false}
-                  onChange={() => handleToggleMode(mode.key)}
-                />
-                {mode.label}
-              </label>
-            ))}
+          <div className="pack-grid">
+            {GAME_MODES.map((mode) => {
+              const isActive = settings.enabledModes[mode.key] ?? false;
+              return (
+                <button
+                  key={mode.key}
+                  className={`pack-btn ${isActive ? "active" : ""}`}
+                  onClick={() => handleToggleMode(mode.key)}
+                  title={mode.label}
+                >
+                  {mode.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

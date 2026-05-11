@@ -25,25 +25,26 @@ const CampaignPackGuesserSection: React.FC<CampaignPackGuesserSectionProps> = ({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Campaign Pack Guesser</h3>
+        <h3>Campaign Pack Guesser</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       
       {isOpen && (
         <div className="settings-section-content settings-column">
-          <div className="setting-item">
-            <div className="setting-header">
-              <span className="setting-label">Blur Amount ({blurAmount}px)</span>
+          <div className="setting-item no-cursor">
+            <div className="setting-label">
+              <span>Blur Amount ({blurAmount}px)</span>
+              <p className="setting-description">Adjust the blur amount for the encounter card image.</p>
             </div>
-            <p className="setting-description">Adjust the blur amount for the encounter card image.</p>
             <input
               type="range"
-              min="0"
-              max="50"
+              min="1"
+              max="25"
               step="1"
               value={blurAmount}
               onChange={(e) => onBlurAmountChange(parseInt(e.target.value, 10))}
               className="range-slider"
+              style={{ width: '120px' }}
             />
           </div>
 

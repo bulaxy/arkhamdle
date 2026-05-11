@@ -36,7 +36,7 @@ export default function StoryGuesserSection({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Story Guesser</h3>
+        <h3>Story Guesser</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (
@@ -65,35 +65,59 @@ export default function StoryGuesserSection({
 
           <hr className="settings-divider" />
 
-          <div>
+          <div className="settings-column">
             <h4>Game Rules</h4>
             <p className="settings-text">Configure how the text is scrambled.</p>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={scrambleWords}
-                onChange={(e) => onScrambleWordsChange(e.target.checked)}
-              />
-              <span className="bold">Scramble Word Order (Shuffle paragraphs)</span>
+            
+            <label className="setting-item">
+              <div className="setting-label">
+                <span>Scramble Word Order</span>
+                <span className="setting-description">Shuffle the paragraphs of the card text.</span>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={scrambleWords}
+                  onChange={(e) => onScrambleWordsChange(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </div>
             </label>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={scrambleLetters}
-                onChange={(e) => onScrambleLettersChange(e.target.checked)}
-              />
-              <span className="bold">Scramble Letters (Inside each word)</span>
+
+            <label className="setting-item">
+              <div className="setting-label">
+                <span>Scramble Letters</span>
+                <span className="setting-description">Shuffle the letters inside each word.</span>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={scrambleLetters}
+                  onChange={(e) => onScrambleLettersChange(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </div>
             </label>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={hideName}
-                onChange={(e) => onHideNameChange(e.target.checked)}
-              />
-              <span className="bold">Hide Investigator Name in Text</span>
+
+            <label className="setting-item">
+              <div className="setting-label">
+                <span>Hide Investigator Name</span>
+                <span className="setting-description">Censor investigator names if they appear in the text.</span>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={hideName}
+                  onChange={(e) => onHideNameChange(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </div>
             </label>
-            <div className="range-container mt-16">
-              <span className="bold">Text Display Length: {Math.round(sliceScale * 100)}%</span>
+
+            <div className="setting-item no-cursor">
+              <div className="setting-label">
+                <span>Text Display Length: {Math.round(sliceScale * 100)}%</span>
+              </div>
               <input
                 type="range"
                 min="0.1"
@@ -101,7 +125,8 @@ export default function StoryGuesserSection({
                 step="0.1"
                 value={sliceScale}
                 onChange={(e) => onSliceScaleChange(parseFloat(e.target.value))}
-                className="settings-slider"
+                className="range-slider"
+                style={{ width: '120px' }}
               />
             </div>
           </div>

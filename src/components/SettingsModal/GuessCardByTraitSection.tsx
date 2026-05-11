@@ -28,7 +28,7 @@ export default function GuessCardByTraitSection({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Guess Card By Trait</h3>
+        <h3>Guess Card By Trait</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (

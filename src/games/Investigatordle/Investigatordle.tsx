@@ -104,14 +104,14 @@ export default function Investigatordle({ onPlayAgainOverride }: GameProps = {})
       <div className="investigator-header">
         <h1>Investigatordle</h1>
         <div className="game-header-row">
-          <p>Guess the Arkham Horror LCG Investigator</p>
+          <p>Identify the investigator based on their stats, faction, and traits.</p>
           <GameInfoButton
             gameRules={{
               title: 'Investigatordle',
               cardTypes: 'Investigator (only)',
               answerEvaluation: 'Must match: Name, Pack, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: "Similar to wordle game, but investigator only.\nNote: Cards like TCU's Disappearance at the Twilight Estate's investigators and Yithian Body are all included if other filters allow."
+              howToPlay: "Enter an investigator's name to see how their profile compares to the hidden target. Match stats (Willpower, Intellect, Combat, Agility), health, sanity, and traits. Arrows help you narrow down the exact numbers. Special investigators from certain campaigns may also be featured!"
             }}
           />
         </div>

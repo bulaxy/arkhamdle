@@ -169,7 +169,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride }: GameProps = {}
 
         {!isGameOver && settings.guessCardByTrait.inputMode !== 'Direct Input' && (
           <div className="trivia-actions">
-            <button className="give-up-btn premium-btn-secondary" onClick={() => setGaveUp(true)}>Give Up</button>
+            <button className="premium-btn guess-give-up" onClick={() => setGaveUp(true)}>Give Up</button>
           </div>
         )}
       </div>

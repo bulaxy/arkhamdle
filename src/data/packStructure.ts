@@ -43,20 +43,20 @@ const PACK_INDEX: Record<string, number> = Object.fromEntries(
   PACK_CODES.map((code, index) => [code, index]),
 );
 
-export function packNewerThan(
+export function packSameOrNewerThan(
   packCode: string,
   targetPackCode: string,
 ): boolean {
-  return PACK_INDEX[packCode] > PACK_INDEX[targetPackCode];
+  return PACK_INDEX[packCode] >= PACK_INDEX[targetPackCode];
 }
 
-export function packsAtLeastOneNewerThan(
+export function packsAtLeastOneSameOrNewerThan(
   packCodes: string[],
   targetPackCode: string,
 ): boolean {
   const targetIndex = PACK_INDEX[targetPackCode];
 
   return packCodes.some(
-    packCode => PACK_INDEX[packCode] > targetIndex,
+    packCode => PACK_INDEX[packCode] >= targetIndex,
   );
 }

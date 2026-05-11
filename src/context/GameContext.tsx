@@ -32,7 +32,7 @@ const defaultSettings: AppSettings = {
   wordle: { ...defaultBaseGameSettings },
   picGuesser: {
     ...defaultBaseGameSettings,
-    difficulty: "Hard",
+    difficulty: "Normal",
     typeFilters: {
       [TypeNameEnum.ASSET]: true,
       [TypeNameEnum.EVENT]: true,
@@ -103,7 +103,7 @@ const defaultSettings: AppSettings = {
   },
   campaignPackGuesser: {
     ...defaultBaseGameSettings,
-    blurAmount: 10,
+    blurAmount: 4,
   },
   guessCardByTrait: {
     ...defaultBaseGameSettings,
@@ -116,7 +116,11 @@ const defaultSettings: AppSettings = {
     poolFilter: 'Player Cards Only',
   },
   iconGuesser: { ...defaultBaseGameSettings },
-  trueOrFalse: { ...defaultBaseGameSettings },
+  trueOrFalse: { 
+    ...defaultBaseGameSettings,
+    enemyStatsMode: true,
+    traitMode: true,
+  },
   randomTrivia: {
     enabledModes: {
       WordleGame: false,

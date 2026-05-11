@@ -113,14 +113,14 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
       <div className="wordle-header">
         <h1>Classic Mode</h1>
         <div className="game-header-row">
-          <p>Guess the Arkham Horror LCG Card</p>
+          <p>Deduce the identity of a player card using property-based feedback.</p>
           <GameInfoButton
             gameRules={{
               title: 'Classic Mode',
               cardTypes: 'Skill, Asset, Event, Weakness',
               answerEvaluation: 'Must match: Name, Subname, XP, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: 'Wordle game - similar to wordle, guess a player card, it will show whether it is correct or not, and guess the card'
+              howToPlay: 'Start by typing any player card name. The feedback will indicate if the type, class, cost, and other stats match the target card. Green means an exact match, yellow means a partial match (like one shared class), and red means no match. Arrows indicate if the target\'s value is higher or lower.'
             }}
           />
         </div>

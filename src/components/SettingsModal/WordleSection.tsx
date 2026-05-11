@@ -20,7 +20,7 @@ export default function WordleSection({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Classic Mode</h3>
+        <h3>Classic Mode</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (

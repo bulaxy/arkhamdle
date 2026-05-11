@@ -4,18 +4,10 @@ import { useGameContext } from "../../hooks/useGameContext";
 import PackFiltersSection from "./PackFiltersSection";
 import PicGuesserSection from "./PicGuesserSection";
 import "./SettingsModal.scss";
-import StoryGuesserSection from "./StoryGuesserSection";
-import FlavourGuesserTypeFiltersSection from "./FlavourGuesserTypeFiltersSection";
-import TraitGuesserSection from "./TraitGuesserSection";
 import GeneralSettingsSection from "./GeneralSettingsSection";
 import WordleSection from "./WordleSection";
 import InvestigatordleSection from "./InvestigatordleSection";
-import GuessCardByTraitSection from "./GuessCardByTraitSection";
-import CountGuesserSection from "./CountGuesserSection";
-import CampaignPackGuesserSection from "./CampaignPackGuesserSection";
-import IconGuesserSection from "./IconGuesserSection";
-import TrueOrFalseSection from "./TrueOrFalseSection";
-import RandomTriviaSection from "./RandomTriviaSection";
+import TriviaSettingsSection from "./TriviaSettingsSection";
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const { packs, settings, setSettings } = useGameContext();
@@ -99,113 +91,12 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             onChange={(newSettings) => setSettings({ ...settings, investigatordle: newSettings })}
           />
 
-          <StoryGuesserSection
-            isOpen={openSection === "storyGuesser"}
-            onToggle={() => toggleSection("storyGuesser")}
-            scrambleWords={settings.storyGuesser.scrambleWords}
-            scrambleLetters={settings.storyGuesser.scrambleLetters}
-            hideName={settings.storyGuesser.hideName}
-            sliceScale={settings.storyGuesser.sliceScale}
-            onScrambleWordsChange={(value) => setSettings({ ...settings, storyGuesser: { ...settings.storyGuesser, scrambleWords: value } })}
-            onScrambleLettersChange={(value) => setSettings({ ...settings, storyGuesser: { ...settings.storyGuesser, scrambleLetters: value } })}
-            onHideNameChange={(value) => setSettings({ ...settings, storyGuesser: { ...settings.storyGuesser, hideName: value } })}
-            onSliceScaleChange={(value) => setSettings({ ...settings, storyGuesser: { ...settings.storyGuesser, sliceScale: value } })}
+          <TriviaSettingsSection
+            isOpen={openSection === "trivia"}
+            onToggle={() => toggleSection("trivia")}
             packs={packs}
-            settings={settings.storyGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, storyGuesser: newSettings })}
-          />
-
-          <TraitGuesserSection
-            isOpen={openSection === "traitGuesser"}
-            onToggle={() => toggleSection("traitGuesser")}
-            minCards={settings.traitGuesser.minCards}
-            maxCards={settings.traitGuesser.maxCards}
-            requirementType={settings.traitGuesser.requirementType}
-            requirementValue={settings.traitGuesser.requirementValue}
-            typeFilters={settings.traitGuesser.typeFilters}
-            onMinCardsChange={(value) => setSettings({ ...settings, traitGuesser: { ...settings.traitGuesser, minCards: value } })}
-            onMaxCardsChange={(value) => setSettings({ ...settings, traitGuesser: { ...settings.traitGuesser, maxCards: value } })}
-            onRequirementTypeChange={(value) => setSettings({ ...settings, traitGuesser: { ...settings.traitGuesser, requirementType: value } })}
-            onRequirementValueChange={(value) => setSettings({ ...settings, traitGuesser: { ...settings.traitGuesser, requirementValue: value } })}
-            onTypeFilterChange={(typeCode, include) => setSettings({
-              ...settings,
-              traitGuesser: { ...settings.traitGuesser, typeFilters: { ...settings.traitGuesser.typeFilters, [typeCode]: include } }
-            })}
-            packs={packs}
-            settings={settings.traitGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, traitGuesser: newSettings })}
-          />
-
-          <FlavourGuesserTypeFiltersSection
-            isOpen={openSection === "flavourGuesser"}
-            onToggle={() => toggleSection("flavourGuesser")}
-            typeFilters={settings.flavourGuesser.typeFilters}
-            onTypeFilterChange={(typeCode, include) => setSettings({
-              ...settings,
-              flavourGuesser: { ...settings.flavourGuesser, typeFilters: { ...settings.flavourGuesser.typeFilters, [typeCode]: include } }
-            })}
-            inputMode={settings.flavourGuesser.inputMode}
-            onInputModeChange={(value) => setSettings({ ...settings, flavourGuesser: { ...settings.flavourGuesser, inputMode: value } })}
-            packs={packs}
-            settings={settings.flavourGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, flavourGuesser: newSettings })}
-          />
-
-          <CampaignPackGuesserSection
-            isOpen={openSection === "campaignPackGuesser"}
-            onToggle={() => toggleSection("campaignPackGuesser")}
-            blurAmount={settings.campaignPackGuesser.blurAmount}
-            onBlurAmountChange={(value) => setSettings({ ...settings, campaignPackGuesser: { ...settings.campaignPackGuesser, blurAmount: value } })}
-            packs={packs}
-            settings={settings.campaignPackGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, campaignPackGuesser: newSettings })}
-          />
-
-          <IconGuesserSection
-            isOpen={openSection === "iconGuesser"}
-            onToggle={() => toggleSection("iconGuesser")}
-            packs={packs}
-            settings={settings.iconGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, iconGuesser: newSettings })}
-          />
-
-          <TrueOrFalseSection
-            isOpen={openSection === "trueOrFalse"}
-            onToggle={() => toggleSection("trueOrFalse")}
-            packs={packs}
-            settings={settings.trueOrFalse}
-            onChange={(newSettings) => setSettings({ ...settings, trueOrFalse: newSettings })}
-          />
-
-          <GuessCardByTraitSection
-            isOpen={openSection === "guessCardByTrait"}
-            onToggle={() => toggleSection("guessCardByTrait")}
-            inputMode={settings.guessCardByTrait.inputMode}
-            onInputModeChange={(value) => setSettings({ ...settings, guessCardByTrait: { ...settings.guessCardByTrait, inputMode: value } })}
-            poolFilter={settings.guessCardByTrait.poolFilter}
-            onPoolFilterChange={(value) => setSettings({ ...settings, guessCardByTrait: { ...settings.guessCardByTrait, poolFilter: value } })}
-            packs={packs}
-            settings={settings.guessCardByTrait}
-            onChange={(newSettings) => setSettings({ ...settings, guessCardByTrait: newSettings })}
-          />
-
-          <CountGuesserSection
-            isOpen={openSection === "countGuesser"}
-            onToggle={() => toggleSection("countGuesser")}
-            inputMode={settings.countGuesser.inputMode}
-            onInputModeChange={(value) => setSettings({ ...settings, countGuesser: { ...settings.countGuesser, inputMode: value } })}
-            poolFilter={settings.countGuesser.poolFilter}
-            onPoolFilterChange={(value) => setSettings({ ...settings, countGuesser: { ...settings.countGuesser, poolFilter: value } })}
-            packs={packs}
-            settings={settings.countGuesser}
-            onChange={(newSettings) => setSettings({ ...settings, countGuesser: newSettings })}
-          />
-
-          <RandomTriviaSection
-            isOpen={openSection === "randomTrivia"}
-            onToggle={() => toggleSection("randomTrivia")}
-            settings={settings.randomTrivia}
-            onChange={(newSettings) => setSettings({ ...settings, randomTrivia: newSettings })}
+            settings={settings}
+            setSettings={setSettings}
           />
 
           <div className="footer-buttons">

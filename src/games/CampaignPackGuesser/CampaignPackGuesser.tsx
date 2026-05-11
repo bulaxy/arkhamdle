@@ -114,14 +114,14 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
       <div className="campaign-pack-header">
         <h1>Campaign Pack Guesser</h1>
         <div className="game-header-row">
-          <p>Identify the encounter set of the card from the blurred image.</p>
+          <p>Test your knowledge of the mythos by identifying encounter sets from blurred artwork.</p>
           <GameInfoButton
             gameRules={{
               title: 'Campaign Pack Guesser',
               cardTypes: 'Encounter Cards',
               answerEvaluation: 'Must guess the Encounter Set Name',
               currentFilters: 'Applied: Pack filters, Include Encounter Cards required',
-              howToPlay: 'A blurred encounter card is shown. Select the pack and encounter set it belongs to. After 3 wrong guesses, the pack name will be revealed as a hint.'
+              howToPlay: 'Examine the blurred encounter card artwork. Select the correct expansion pack and then the specific encounter set it belongs to. If you\'re stuck, a pack name hint will appear after three incorrect guesses.'
             }}
           />
         </div>

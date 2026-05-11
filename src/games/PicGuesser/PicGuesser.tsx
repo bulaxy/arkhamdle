@@ -101,7 +101,7 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
       <div className="pic-header">
         <h1>Pic Guesser</h1>
         <div className="game-header-row">
-          <p>Identify the card from a zoomed-in image.</p>
+          <p>Guess the card identity based on a zoomed-in fragment of its artwork.</p>
         <p className="small-note">Note: Some cards (mostly from newer expansions) may not have zoomed images supported yet.</p>
           <GameInfoButton
             gameRules={{
@@ -109,7 +109,7 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
               cardTypes: 'Asset, Event, Skill (only)',
               answerEvaluation: 'Must match: Class, Pack, Name, XP',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: 'pic guesser - a small portion of the art is shown, each guess will zoom out. Hints available after 3 wrong guesses.'
+              howToPlay: 'A tiny portion of a card\'s illustration is displayed. With each incorrect guess, the view zooms out further, revealing more of the art. Difficulty settings affect how quickly it zooms out. Expansion pack hints appear after three wrong guesses.'
             }}
           />
         </div>

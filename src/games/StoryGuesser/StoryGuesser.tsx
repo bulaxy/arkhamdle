@@ -169,14 +169,14 @@ export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
       <div className="story-header">
         <h1>Story Guesser</h1>
         <div className="game-header-row">
-          <p>Guess the Investigator by their scrambled story!</p>
+          <p>Unravel the history of Arkham's heroes by identifying them from their scrambled backstories.</p>
           <GameInfoButton
             gameRules={{
               title: 'Story Guesser',
               cardTypes: 'Investigator (only, back flavor text)',
               answerEvaluation: 'Must match: Class, Pack, Name',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: "The investigator's backstory is scrambled.\nNote: Card Like TCU's Disappearance at the Twilight Estate's investigators and Yithian Body are all included if other filters allow.\nHints available after 3 wrong guesses."
+              howToPlay: "An investigator's background story is presented in a scrambled or fragmented state. Your task is to deduce who the story belongs to. Settings allow you to scramble letters, words, or hide names for added difficulty. Faction hints unlock after three incorrect guesses."
             }}
           />
         </div>

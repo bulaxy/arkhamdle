@@ -122,14 +122,14 @@ export default function TraitGuesser({ onPlayAgainOverride }: GameProps = {}) {
       <div className="trait-header">
         <h1>Trait Guesser</h1>
         <div className="game-header-row">
-          <p>Guess the cards and investigators by their shared traits!</p>
+          <p>Identify cards that share a specific trait under various conditions.</p>
           <GameInfoButton
             gameRules={{
               title: 'Trait Guesser',
               cardTypes: 'Configurable via Type Filters in Settings',
               answerEvaluation: 'Must match: Name, Pack, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter, Type filters',
-              howToPlay: 'A trait is shown (from any card based on filter) and name the specified number of cards (configurable in setting)'
+              howToPlay: 'A trait (e.g., "Ally", "Cursed", or "Silver Twilight") is displayed. You must identify a specified number of cards that possess this trait. You can adjust the required count and difficulty in the settings.'
             }}
           />
         </div>

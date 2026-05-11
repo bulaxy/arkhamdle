@@ -63,7 +63,7 @@ export default function FlavourGuesserTypeFiltersSection({
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Game: Flavour Guesser</h3>
+        <h3>Flavour Guesser</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (
@@ -123,17 +123,21 @@ export default function FlavourGuesserTypeFiltersSection({
             <p className="settings-text mb-8">
               Select which card types to include.
             </p>
-            <div className="type-filter-buttons">
+            <div className="setting-grid">
               {typeNames.map((typeCode) => (
-                <button
-                  key={typeCode}
-                  className={`pack-btn ${typeFilters[typeCode] ? "active" : ""}`}
-                  onClick={() =>
-                    onTypeFilterChange(typeCode, !typeFilters[typeCode])
-                  }
-                >
-                  {TYPE_DISPLAY_NAMES[typeCode]}
-                </button>
+                <label key={typeCode} className="setting-item">
+                  <div className="setting-label">
+                    <span>{TYPE_DISPLAY_NAMES[typeCode]}</span>
+                  </div>
+                  <div className="toggle-switch small">
+                    <input
+                      type="checkbox"
+                      checked={typeFilters[typeCode]}
+                      onChange={(e) => onTypeFilterChange(typeCode, e.target.checked)}
+                    />
+                    <span className="toggle-slider"></span>
+                  </div>
+                </label>
               ))}
             </div>
           </div>

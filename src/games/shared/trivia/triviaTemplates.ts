@@ -1,5 +1,5 @@
 import type { TransformedCard } from "../../../types";
-import { packsAtLeastOneNewerThan } from "../../../data/packStructure";
+import { packsAtLeastOneSameOrNewerThan } from "../../../data/packStructure";
 
 export type QuestionTemplateType = 
   | 'Trait'
@@ -33,7 +33,8 @@ export type QuestionTemplateType =
   | 'Multi Skill 2'
   | 'Multi Skill 3'
   | 'Keyword Elusive'
-  | 'Keyword Fast';
+  | 'Keyword Fast'
+  | 'Keyword Spawn';
 
 export interface QuestionTemplate {
   type: QuestionTemplateType;
@@ -53,7 +54,7 @@ export interface QuestionTemplate {
  * 
  * Excludes conditional usages like: 'gains: "Hunter."' or 'gains Hunter'
  */
-function cardHasKeyword(card: TransformedCard, keyword: string): boolean {
+export function cardHasKeyword(card: TransformedCard, keyword: string): boolean {
   const text = card.text;
   if (!text || !text.includes(keyword)) return false;
 
@@ -77,10 +78,10 @@ function cardHasKeyword(card: TransformedCard, keyword: string): boolean {
     // Remove HTML bold tags for cleaner matching
     const clean = stripped.replace(/<\/?b>/g, '');
 
-    if (keyword === 'Prey') {
-      // Prey appears as "Prey - description" (possibly with <b> tags)
+    if (keyword === 'Prey' || keyword === 'Spawn') {
+      // Prey and Spawn appear as "Keyword - description" (possibly with <b> tags)
       // Must be at the start of the line (after stripping)
-      if (/^Prey\s*-/.test(clean)) {
+      if (new RegExp(`^${keyword}\\s*-`).test(clean)) {
         return true;
       }
     } else if (keyword === 'Patrol') {
@@ -185,7 +186,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     type: 'Myriad',
     condition: (card: TransformedCard) => card.myriad === true,
     generateValues: (_, packs) => {
-      if (packsAtLeastOneNewerThan(packs, 'tde')) {
+      if (packsAtLeastOneSameOrNewerThan(packs, 'tde')) {
         return [true];
       }
       return [];
@@ -336,7 +337,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     type: 'Keyword Alert',
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Alert'),
     generateValues: (cards, packs) => {
-      if(!packsAtLeastOneNewerThan(packs,'tfa')) {
+      if(!packsAtLeastOneSameOrNewerThan(packs,'tfa')) {
         return [];
       }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Alert')).length;
@@ -393,7 +394,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     type: 'Keyword Aloof',
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Aloof'),
     generateValues: (cards, packs) => {
-      if(!packsAtLeastOneNewerThan(packs,'dwl')) {
+      if(!packsAtLeastOneSameOrNewerThan(packs,'dwl')) {
         return [];
       }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Aloof')).length;
@@ -405,7 +406,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     type: 'Keyword Elusive',
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Elusive'),
     generateValues: (cards, packs) => {
-      if(!packsAtLeastOneNewerThan(packs,'fhv')) {
+      if(!packsAtLeastOneSameOrNewerThan(packs,'fhv')) {
         return [];
       }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Elusive')).length;
@@ -431,6 +432,15 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       return count >= 2 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many cards have the "Fast" keyword in ${packName}?`
+  },
+  {
+    type: 'Keyword Spawn',
+    condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Spawn'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Spawn')).length;
+      return count >= 2 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many enemies have the "Spawn" keyword in ${packName}?`
   },
   // Skill icon diversity questions
   {
