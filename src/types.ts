@@ -151,5 +151,6 @@ export interface TransformedCard {
   is_unique?: boolean;
   bonded_to?: string;
   text?: string;
+  backimagesrc?: string;
 }
 

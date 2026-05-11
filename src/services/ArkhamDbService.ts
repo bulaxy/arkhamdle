@@ -97,6 +97,7 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
         is_unique: o.is_unique,
         bonded_to: o.bonded_to,
         text: o.text,
+        backimagesrc: o.backimagesrc,
       };
     })
     .filter((card, _, array) => {

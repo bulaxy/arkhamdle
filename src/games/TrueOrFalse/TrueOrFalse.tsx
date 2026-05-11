@@ -164,7 +164,9 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
       const isTrue = Math.random() >= 0.5;
       switch(selectedMode) {
         case 'Traits': 
+          // eslint-disable-next-line no-case-declarations
           const randomCard = traitPool[Math.floor(Math.random() * traitPool.length)];
+          // eslint-disable-next-line no-case-declarations
           let displayedTraits = randomCard.traits.join('. ') + '.';
           
           if (!isTrue) {
@@ -459,7 +461,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
               </div>
             )}
             <img 
-              src={`https://arkhamdb.com${question.card.imagesrc}`} 
+              src={`https://arkhamdb.com${question.card.backimagesrc && question.card.typeName==="location"?question.card.backimagesrc : question.card.imagesrc}`} 
               alt={question.card.name} 
               className={`${['agenda', 'act'].includes(question.card.typeName) ? 'card-preview-image-side' : 'card-preview-image'}`}
               onLoad={() => setImageLoaded(true)}
