@@ -39,7 +39,7 @@ const CampaignPackGuesserSection: React.FC<CampaignPackGuesserSectionProps> = ({
             <input
               type="range"
               min="1"
-              max="25"
+              max="10"
               step="1"
               value={blurAmount}
               onChange={(e) => onBlurAmountChange(parseInt(e.target.value, 10))}

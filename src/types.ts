@@ -67,6 +67,10 @@ export interface CountGuesserSettings extends BaseGameSettings {
 export interface TrueOrFalseSettings extends BaseGameSettings {
   enemyStatsMode: boolean;
   traitMode: boolean;
+  locationTraitsMode: boolean;
+  actTraitsMode: boolean;
+  agendaTraitsMode: boolean;
+  treacheryTraitsMode: boolean;
 }
 
 

@@ -103,7 +103,7 @@ const defaultSettings: AppSettings = {
   },
   campaignPackGuesser: {
     ...defaultBaseGameSettings,
-    blurAmount: 4,
+    blurAmount: 3,
   },
   guessCardByTrait: {
     ...defaultBaseGameSettings,
@@ -120,6 +120,10 @@ const defaultSettings: AppSettings = {
     ...defaultBaseGameSettings,
     enemyStatsMode: true,
     traitMode: true,
+    locationTraitsMode: true,
+    actTraitsMode: true,
+    agendaTraitsMode: true,
+    treacheryTraitsMode: true,
   },
   randomTrivia: {
     enabledModes: {

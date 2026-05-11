@@ -28,7 +28,7 @@ export default function TrueOrFalseSection({
         <div className="settings-section-content settings-column">
           <label className="setting-item">
             <div className="setting-label">
-              <span>Trait Mode</span>
+              <span>Cards Trait Mode</span>
               <span className="setting-description">Ask if a card has certain traits.</span>
             </div>
             <div className="toggle-switch">
@@ -51,6 +51,66 @@ export default function TrueOrFalseSection({
                 type="checkbox"
                 checked={settings.enemyStatsMode}
                 onChange={(e) => onChange({ ...settings, enemyStatsMode: e.target.checked })}
+              />
+              <span className="toggle-slider"></span>
+            </div>
+          </label>
+
+          <label className="setting-item">
+            <div className="setting-label">
+              <span>Location Mode</span>
+              <span className="setting-description">Ask about location clues, shroud and keywords.</span>
+            </div>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.locationTraitsMode}
+                onChange={(e) => onChange({ ...settings, locationTraitsMode: e.target.checked })}
+              />
+              <span className="toggle-slider"></span>
+            </div>
+          </label>
+
+          <label className="setting-item">
+            <div className="setting-label">
+              <span>Act and Agenda Mode</span>
+              <span className="setting-description">Ask about Act stats and keywords.</span>
+            </div>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.actTraitsMode}
+                onChange={(e) => onChange({ ...settings, actTraitsMode: e.target.checked })}
+              />
+              <span className="toggle-slider"></span>
+            </div>
+          </label>
+
+          <label className="setting-item">
+            <div className="setting-label">
+              <span>Agenda Mode</span>
+              <span className="setting-description">Ask about agenda stats and keywords.</span>
+            </div>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.agendaTraitsMode}
+                onChange={(e) => onChange({ ...settings, agendaTraitsMode: e.target.checked })}
+              />
+              <span className="toggle-slider"></span>
+            </div>
+          </label>
+
+          <label className="setting-item">
+            <div className="setting-label">
+              <span>Treachery Mode</span>
+              <span className="setting-description">Ask about treachery cards keywords.</span>
+            </div>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.treacheryTraitsMode}
+                onChange={(e) => onChange({ ...settings, treacheryTraitsMode: e.target.checked })}
               />
               <span className="toggle-slider"></span>
             </div>

@@ -34,7 +34,14 @@ export type QuestionTemplateType =
   | 'Multi Skill 3'
   | 'Keyword Elusive'
   | 'Keyword Fast'
-  | 'Keyword Spawn';
+  | 'Keyword Spawn'
+  | 'Keyword Revelation'
+  | 'Keyword Forced'
+  | 'Keyword Resign'
+  | 'Keyword Parley'
+  | 'Keyword Action'
+  | 'Keyword Reaction'
+  | 'Keyword Fast';
 
 export interface QuestionTemplate {
   type: QuestionTemplateType;
@@ -75,7 +82,44 @@ export function cardHasKeyword(card: TransformedCard, keyword: string): boolean 
       }
     }
 
-    // Remove HTML bold tags for cleaner matching
+    // 1. Bracket keywords: reaction, action, fast
+    if (keyword === 'Reaction' || keyword === 'Action' || keyword === 'Fast') {
+      if (stripped.includes(`[${keyword.toLowerCase()}]`)) {
+        return true;
+      }
+      continue; // Skip standard parsing for these specific keywords
+    }
+
+    // 2. Bold exact keywords: Revelation, Forced, Resign, Parley
+    if (keyword === 'Revelation' || keyword === 'Forced' || keyword === 'Resign' || keyword === 'Parley' || keyword === 'Objective') {
+      // Base match exactly as requested (no other text around B tag)
+      if (stripped.includes(`<b>${keyword}</b>`)) {
+        return true;
+      }
+      
+      // The 5 specific exceptions for Day/Night cycles and Forced variations
+      if (keyword === 'Forced') {
+        if (
+          stripped.includes(`<b>(Day [day]) Forced</b>`) ||
+          stripped.includes(`<b>(Night [night]) Forced</b>`) ||
+          stripped.includes(`<b>Forced -</b>`)
+        ) {
+          return true;
+        }
+      }
+      
+      if (keyword === 'Revelation') {
+        if (
+          stripped.includes(`<b>(Day [day]) Revelation</b>`) ||
+          stripped.includes(`<b>(Night [night]) Revelation</b>`)
+        ) {
+          return true;
+        }
+      }
+      continue; // Skip standard parsing for these specific keywords
+    }
+
+    // Remove HTML bold tags for cleaner matching of standard keywords
     const clean = stripped.replace(/<\/?b>/g, '');
 
     if (keyword === 'Prey' || keyword === 'Spawn') {
@@ -91,8 +135,8 @@ export function cardHasKeyword(card: TransformedCard, keyword: string): boolean 
         return true;
       }
     } else {
-      // Standard keywords: "Hunter." at start of line or after ". "
-      // Matches: "Hunter.", "Aloof. Hunter.", "Hunter. Retaliate."
+      // Standard keywords: Surge, Hunter, Aloof, Retaliate, etc.
+      // Matches: "Surge.", "Hunter.", "Aloof. Hunter.", "Hunter. Retaliate."
       if (new RegExp(`(?:^|(?:\\.\\s+))${keyword}\\.`).test(clean)) {
         return true;
       }
@@ -115,7 +159,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       });
       // Only include traits that appear on at least 2 cards
       return Array.from(traitCounts.entries())
-        .filter(([, count]) => count >= 2)
+        .filter(([, count]) => count > 0)
         .map(([t]) => t);
     },
     formatQuestion: (trait, _, packName) => `How many cards with Trait "${trait}" are in ${packName}?`
@@ -142,7 +186,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       });
       // Only include pairs that appear on at least 2 cards
       return Array.from(traitPairs.entries())
-        .filter(([, count]) => count >= 2)
+        .filter(([, count]) => count > 0)
         .map(([p]) => p.split('|'));
     },
     formatQuestion: (traits, _, packName) => {
@@ -205,7 +249,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       });
       // Only include health values that appear on at least 2 cards
       return Array.from(healthCounts.entries())
-        .filter(([, count]) => count >= 2)
+        .filter(([, count]) => count > 0)
         .map(([h]) => h);
     },
     formatQuestion: (val, _, packName) => {
@@ -224,7 +268,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       });
       // Only include sanity values that appear on at least 2 cards
       return Array.from(sanityCounts.entries())
-        .filter(([, count]) => count >= 2)
+        .filter(([, count]) => count > 0)
         .map(([s]) => s);
     },
     formatQuestion: (val, _, packName) => {
@@ -301,7 +345,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       cards.forEach(c => { if (c.clues !== undefined) vals.add(c.clues); });
       return Array.from(vals);
     },
-    formatQuestion: (clu, _, packName) => `How many locations have ${clu} clues are in ${packName}?`
+    formatQuestion: (clu, _, packName) => `How many locations have ${clu} clues (per investigator) are in ${packName}?`
   },
   {
     type: 'Shroud',
@@ -311,7 +355,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
       cards.forEach(c => { if (c.shroud !== undefined) vals.add(c.shroud); });
       return Array.from(vals);
     },
-    formatQuestion: (shd, _, packName) => `How many locations have ${shd} shroud are in ${packName}?`
+    formatQuestion: (shd, _, packName) => `How many locations have ${shd} base shroud are in ${packName}?`
   },
   {
     type: 'Victory',
@@ -329,7 +373,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Hunter'),
     generateValues: (cards) => {
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Hunter')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Hunter" keyword in ${packName}?`
   },
@@ -341,7 +385,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
         return [];
       }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Alert')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Alert" keyword in ${packName}?`
   },
@@ -350,7 +394,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Retaliate'),
     generateValues: (cards) => {
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Retaliate')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Retaliate" keyword in ${packName}?`
   },
@@ -359,7 +403,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Patrol'),
     generateValues: (cards) => {
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Patrol')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Patrol" keyword in ${packName}?`
   },
@@ -368,7 +412,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Peril'),
     generateValues: (cards) => {
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Peril')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Peril" keyword in ${packName}?`
   },
@@ -377,7 +421,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Massive'),
     generateValues: (cards) => {
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Massive')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Massive" keyword in ${packName}?`
   },
@@ -386,7 +430,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Prey'),
     generateValues: (cards) => {
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Prey')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Prey" keyword in ${packName}?`
   },
@@ -398,7 +442,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
         return [];
       }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Aloof')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Aloof" keyword in ${packName}?`
   },
@@ -410,7 +454,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
         return [];
       }
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Elusive')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Aloof" keyword in ${packName}?`
   },
@@ -420,7 +464,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => cardHasKeyword(card, 'Surge'),
     generateValues: (cards) => {
       const count = cards.filter(c => cardHasKeyword(c, 'Surge')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many cards have the "Surge" keyword in ${packName}?`
   },
@@ -429,7 +473,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => cardHasKeyword(card, 'Fast'),
     generateValues: (cards) => {
       const count = cards.filter(c => cardHasKeyword(c, 'Fast')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many cards have the "Fast" keyword in ${packName}?`
   },
@@ -438,7 +482,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card) => card.typeName === 'enemy' && cardHasKeyword(card, 'Spawn'),
     generateValues: (cards) => {
       const count = cards.filter(c => c.typeName === 'enemy' && cardHasKeyword(c, 'Spawn')).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many enemies have the "Spawn" keyword in ${packName}?`
   },
@@ -454,7 +498,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
         const skills = [c.willpower, c.intellect, c.combat, c.agility, c.wild];
         return skills.filter(s => s > 0).length >= 2;
       }).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many cards have 2 or more different skill icons in ${packName}?`
   },
@@ -469,9 +513,72 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
         const skills = [c.willpower, c.intellect, c.combat, c.agility, c.wild];
         return skills.filter(s => s > 0).length >= 3;
       }).length;
-      return count >= 2 ? [true] : [];
+      return count > 0 ? [true] : [];
     },
     formatQuestion: (_, __, packName) => `How many cards have 3 or more different skill icons in ${packName}?`
+  },
+  {
+    type: 'Keyword Revelation',
+    condition: (card) => cardHasKeyword(card, 'Revelation'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'Revelation')).length;
+      return count > 0 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have the "Revelation" keyword in ${packName}?`
+  },
+  {
+    type: 'Keyword Forced',
+    condition: (card) => cardHasKeyword(card, 'Forced'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'Forced')).length;
+      return count > 0 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have the "Forced" keyword in ${packName}?`
+  },
+  {
+    type: 'Keyword Resign',
+    condition: (card) => cardHasKeyword(card, 'Resign'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'Resign')).length;
+      return count > 0 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have the "Resign" keyword in ${packName}?`
+  },
+  {
+    type: 'Keyword Parley',
+    condition: (card) => cardHasKeyword(card, 'Parley'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'Parley')).length;
+      return count > 0 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have the "Parley" keyword in ${packName}?`
+  },
+  {
+    type: 'Keyword Action',
+    condition: (card) => cardHasKeyword(card, 'action'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'action')).length;
+      return count > 0 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have an "[action]" symbol (player can spend actions to do something) in ${packName}?`
+  },
+  {
+    type: 'Keyword Reaction',
+    condition: (card) => cardHasKeyword(card, 'reaction'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'reaction')).length;
+      return count > 0 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have a "[reaction]" symbol (can be used when triggered) in ${packName}?`
+  },
+  {
+    type: 'Keyword Fast',
+    condition: (card) => cardHasKeyword(card, 'fast'),
+    generateValues: (cards) => {
+      const count = cards.filter(c => cardHasKeyword(c, 'fast')).length;
+      return count > 0 ? [true] : [];
+    },
+    formatQuestion: (_, __, packName) => `How many cards have a "[fast]" action (can be used at any time) in ${packName}?`
   },
 ];
 
