@@ -35,18 +35,24 @@ export default function PackFilterControls({
 }: PackFilterControlsProps) {
   return (
     <div className="pack-filter-controls">
-      {title && <h4>{title}</h4>}
-      {description && <p className="settings-text">{description}</p>}
+      {title && <h4 className="mb-4">{title}</h4>}
+      {description && <p className="settings-text mb-8">{description}</p>}
 
       {onUseGlobalFilterChange !== undefined && (
         <div className="global-filter-toggle">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={useGlobalFilter}
-              onChange={(e) => onUseGlobalFilterChange(e.target.checked)}
-            />
-            <span className="bold">Use Global Pack Filter</span>
+          <label className="setting-item">
+            <div className="setting-label">
+              <span>Use Global Pack Filter</span>
+              <span className="setting-description">Use the pack filters defined in the Global settings section.</span>
+            </div>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={useGlobalFilter}
+                onChange={(e) => onUseGlobalFilterChange(e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+            </div>
           </label>
         </div>
       )}
@@ -62,30 +68,45 @@ export default function PackFilterControls({
             </button>
           </div>
 
-          <div className="pack-filter-container">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={includeWeakness}
-                onChange={(e) => onIncludeWeaknessChange(e.target.checked)}
-              />
-              <span className="bold">Include Weaknesses</span>
+          <div className="pack-filter-container settings-column mt-10">
+            <label className="setting-item">
+              <div className="setting-label">
+                <span>Include Weaknesses</span>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={includeWeakness}
+                  onChange={(e) => onIncludeWeaknessChange(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </div>
             </label>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={includeSignatures}
-                onChange={(e) => onIncludeSignaturesChange(e.target.checked)}
-              />
-              <span className="bold">Include Signatures</span>
+            <label className="setting-item">
+              <div className="setting-label">
+                <span>Include Signatures</span>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={includeSignatures}
+                  onChange={(e) => onIncludeSignaturesChange(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </div>
             </label>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={includeBondedCard}
-                onChange={(e) => onIncludeBondedCardChange(e.target.checked)}
-              />
-              <span className="bold">Include Bonded Cards</span>
+            <label className="setting-item">
+              <div className="setting-label">
+                <span>Include Bonded Cards</span>
+              </div>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={includeBondedCard}
+                  onChange={(e) => onIncludeBondedCardChange(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </div>
             </label>
           </div>
 

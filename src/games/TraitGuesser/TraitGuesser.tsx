@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import './TraitGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function TraitGuesser() {
+export default function TraitGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [trait, setTrait] = useState<string>('');
   const [win, setWin] = useState(false);
@@ -18,7 +18,7 @@ export default function TraitGuesser() {
   const allPossibleOptions = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'traitGuesser');
     const uniqueCards = filterDuplicateOfCode(baseFiltered);
-    return uniqueCards.filter(c => settings.traitGuesserTypeFilters[c.typeName] ?? true);
+    return uniqueCards.filter(c => settings.traitGuesser.typeFilters[c.typeName] ?? true);
   }, [cards, settings]);
 
   const gameTraits = useMemo(() => {
@@ -34,11 +34,11 @@ export default function TraitGuesser() {
     return Array.from(traitCountMap.entries())
       .filter(([, names]) => {
         const count = names.size;
-        return count >= settings.traitGuesserMinCards && 
-               (settings.traitGuesserMaxCards === 0 || count <= settings.traitGuesserMaxCards);
+        return count >= settings.traitGuesser.minCards && 
+               (settings.traitGuesser.maxCards === 0 || count <= settings.traitGuesser.maxCards);
       })
       .map(([trait]) => trait);
-  }, [allPossibleOptions, settings.traitGuesserMinCards, settings.traitGuesserMaxCards]);
+  }, [allPossibleOptions, settings.traitGuesser.minCards, settings.traitGuesser.maxCards]);
 
   const gameOptions = useMemo(() => {
     return deduplicateByEvaluationCriteria(
@@ -61,11 +61,11 @@ export default function TraitGuesser() {
 
   const requiredGuesses = useMemo(() => {
     const total = possibleAnswers.length;
-    if (settings.traitGuesserRequirementType === 'All') return total;
-    if (settings.traitGuesserRequirementType === 'Percentage') {
-      return Math.max(1, Math.ceil(total * (settings.traitGuesserRequirementValue / 100)));
+    if (settings.traitGuesser.requirementType === 'All') return total;
+    if (settings.traitGuesser.requirementType === 'Percentage') {
+      return Math.max(1, Math.ceil(total * (settings.traitGuesser.requirementValue / 100)));
     }
-    return Math.min(total, settings.traitGuesserRequirementValue);
+    return Math.min(total, settings.traitGuesser.requirementValue);
   }, [possibleAnswers.length, settings]);
 
   const resetGame = useCallback(() => {
@@ -89,15 +89,7 @@ export default function TraitGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.traitGuesserMinCards,
-    settings.traitGuesserMaxCards,
-    settings.traitGuesserRequirementType,
-    settings.traitGuesserRequirementValue,
-    settings.traitGuesserTypeFilters,
-    settings.traitGuesserUseGlobalPackFilter,
-    settings.traitGuesserFilteredPacks,
-    settings.traitGuesserIncludeWeakness,
-    settings.traitGuesserIncludeSignatures,
+    settings.traitGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -130,14 +122,14 @@ export default function TraitGuesser() {
       <div className="trait-header">
         <h1>Trait Guesser</h1>
         <div className="game-header-row">
-          <p>Guess the cards and investigators by their shared traits!</p>
+          <p>Identify cards that share a specific trait under various conditions.</p>
           <GameInfoButton
             gameRules={{
               title: 'Trait Guesser',
               cardTypes: 'Configurable via Type Filters in Settings',
               answerEvaluation: 'Must match: Name, Pack, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter, Type filters',
-              howToPlay: 'A trait is shown (from any card based on filter) and name the specified number of cards (configurable in setting)'
+              howToPlay: 'A trait (e.g., "Ally", "Cursed", or "Silver Twilight") is displayed. You must identify a specified number of cards that possess this trait. You can adjust the required count and difficulty in the settings.'
             }}
           />
         </div>
@@ -149,7 +141,7 @@ export default function TraitGuesser() {
         </div>
 
         {win || gaveUp ? (
-          <ResultPanel win={win} item={null} onPlayAgain={resetGame} className="trait-result">
+          <ResultPanel win={win} item={null} onPlayAgain={onPlayAgainOverride || resetGame} className="trait-result">
             <div className="trait-all-answers">
               <h3>All matches with "{trait}"</h3>
               <div className="trait-card-display">

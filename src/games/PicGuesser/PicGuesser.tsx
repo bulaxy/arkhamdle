@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { Eye, EyeOff } from 'lucide-react';
@@ -8,7 +8,7 @@ import './PicGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function PicGuesser() {
+export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
@@ -19,13 +19,14 @@ export default function PicGuesser() {
   const [offsetX, setOffsetX] = useState(150); 
   const [offsetY, setOffsetY] = useState(150); 
   const [gaveUp, setGaveUp] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // PicGuesser does NOT filter duplicate_of_code — exception per task spec
   const gameCards = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'picGuesser');
     const filtered = filterForPicGuesser(baseFiltered);
     // Apply type filters from settings
-    const typeFiltered = filtered.filter(c => settings.picGuesserTypeFilters[c.typeName] ?? true);
+    const typeFiltered = filtered.filter(c => settings.picGuesser.typeFilters[c.typeName] ?? true);
     const noDupes = filterDuplicateOfCode(typeFiltered);
     const deduped = deduplicateByEvaluationCriteria(
       noDupes,
@@ -45,8 +46,8 @@ export default function PicGuesser() {
   };
 
   let zoomOutRate = 1;
-  if (settings.picGuesserDifficulty === 'Normal') zoomOutRate = 1.8;
-  if (settings.picGuesserDifficulty === 'Easy') zoomOutRate = 2.5;
+  if (settings.picGuesser.difficulty === 'Normal') zoomOutRate = 1.8;
+  if (settings.picGuesser.difficulty === 'Easy') zoomOutRate = 2.5;
 
   const resetGame = useCallback(() => {
     setWin(false);
@@ -57,6 +58,7 @@ export default function PicGuesser() {
     setOffsetY(Math.floor(Math.random() * 251)+50);
     setSizeMultiplier(8);
     setShowFull(false);
+    setImageLoaded(false);
   }, [gameCardsWithPic]);
 
   useEffect(() => {
@@ -65,12 +67,7 @@ export default function PicGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.picGuesserDifficulty,
-    settings.picGuesserTypeFilters,
-    settings.picGuesserUseGlobalPackFilter,
-    settings.picGuesserFilteredPacks,
-    settings.picGuesserIncludeWeakness,
-    settings.picGuesserIncludeSignatures,
+    settings.picGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -104,7 +101,7 @@ export default function PicGuesser() {
       <div className="pic-header">
         <h1>Pic Guesser</h1>
         <div className="game-header-row">
-          <p>Identify the card from a zoomed-in image.</p>
+          <p>Guess the card identity based on a zoomed-in fragment of its artwork.</p>
         <p className="small-note">Note: Some cards (mostly from newer expansions) may not have zoomed images supported yet.</p>
           <GameInfoButton
             gameRules={{
@@ -112,7 +109,7 @@ export default function PicGuesser() {
               cardTypes: 'Asset, Event, Skill (only)',
               answerEvaluation: 'Must match: Class, Pack, Name, XP',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: 'pic guesser - a small portion of the art is shown, each guess will zoom out. Hints available after 3 wrong guesses.'
+              howToPlay: 'A tiny portion of a card\'s illustration is displayed. With each incorrect guess, the view zooms out further, revealing more of the art. Difficulty settings affect how quickly it zooms out. Expansion pack hints appear after three wrong guesses.'
             }}
           />
         </div>
@@ -132,23 +129,32 @@ export default function PicGuesser() {
           <>
             <div className="pic-image-container">
               {answer && answer.imagesrc ? (
-                 <img
-                  src={`https://arkhamdb.com${answer.imagesrc}`}
-                  alt="Guess this card"
-                  className={showFull ? 'pic-image-full' : 'pic-image-zoomed'}
-                  style={
-                    !showFull ? {
-                      transform: `scale(${sizeMultiplier}) translateX(${offsetX / sizeMultiplier}px) translateY(${offsetY / sizeMultiplier}px)`
-                    } : {}
-                  }
-                />
+                <>
+                  {!imageLoaded && (
+                    <div className="pic-image-loading">
+                      <div className="spinner" />
+                    </div>
+                  )}
+                  <img
+                    src={`https://arkhamdb.com${answer.imagesrc}`}
+                    alt="Guess this card"
+                    className={showFull ? 'pic-image-full' : 'pic-image-zoomed'}
+                    style={{
+                      ...(!showFull ? {
+                        transform: `scale(${sizeMultiplier}) translateX(${offsetX / sizeMultiplier}px) translateY(${offsetY / sizeMultiplier}px)`
+                      } : {}),
+                      opacity: imageLoaded ? 1 : 0,
+                    }}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                </>
               ) : (
                 <div className="pic-image-unavailable">Image not available</div>
               )}
             </div>
 
             {(win || gaveUp) && (
-              <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="pic-result" showImage={false}>
+              <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="pic-result" showImage={false}>
                 <div className="pic-result-buttons">
                   <button className="premium-btn pic-result-button" onClick={() => setShowFull(!showFull)}>
                     {showFull ? <><EyeOff size={18} /> Hide Full Picture</> : <><Eye size={18} /> Show Full Picture</>}

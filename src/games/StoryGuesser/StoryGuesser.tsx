@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
@@ -8,7 +8,7 @@ import './StoryGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function StoryGuesser() {
+export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
 
   const uniqueInvestigators = useMemo(() => {
@@ -47,14 +47,7 @@ export default function StoryGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.storyGuesserScrambleWords,
-    settings.storyGuesserScrambleLetters,
-    settings.storyGuesserSliceScale,
-    settings.storyGuesserHideName,
-    settings.storyGuesserUseGlobalPackFilter,
-    settings.storyGuesserFilteredPacks,
-    settings.storyGuesserIncludeWeakness,
-    settings.storyGuesserIncludeSignatures,
+    settings.storyGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -87,14 +80,14 @@ export default function StoryGuesser() {
       return word.replace(/[a-zA-ZÀ-ÿ]+/, letters.join(''));
     };
 
-    if (settings.storyGuesserScrambleLetters) {
+    if (settings.storyGuesser.scrambleLetters) {
       text = text.split(/(\s+)/).map(part => {
         if (/\s+/.test(part)) return part;
         return scrambleWord(part);
       }).join('');
     }
 
-    if (settings.storyGuesserScrambleWords) {
+    if (settings.storyGuesser.scrambleWords) {
       const wordsAndSpaces = text.split(/(\s+)/);
       const justWords = wordsAndSpaces.filter(w => !/\s+/.test(w) && w.trim().length > 0);
       
@@ -113,7 +106,7 @@ export default function StoryGuesser() {
       }).join('');
     }
 
-    if (settings.storyGuesserHideName) {
+    if (settings.storyGuesser.hideName) {
       // Split name by spaces and match each part, including possessives
       const nameParts = answer.name.split(' ');
       nameParts.forEach(part => {
@@ -124,7 +117,7 @@ export default function StoryGuesser() {
       });
     }
 
-    if (settings.storyGuesserSliceScale < 1) {
+    if (settings.storyGuesser.sliceScale < 1) {
       // Smarter slice: shuffle all words and take a percentage of them
       const words = text.split(/\s+/).filter(w => w.trim().length > 0);
       const totalWords = words.length;
@@ -136,14 +129,14 @@ export default function StoryGuesser() {
         [words[i], words[j]] = [words[j], words[i]];
       }
       
-      const sliceCount = Math.max(1, Math.floor(totalWords * settings.storyGuesserSliceScale));
+      const sliceCount = Math.max(1, Math.floor(totalWords * settings.storyGuesser.sliceScale));
       text = words.slice(0, sliceCount).join(' ') + '...';
       
       currentSliceIdx = null; 
     }
 
     return { scrambledFlavor: text, sliceIdx: currentSliceIdx };
-  }, [answer, settings.storyGuesserScrambleLetters, settings.storyGuesserScrambleWords, settings.storyGuesserHideName, settings.storyGuesserSliceScale]);
+  }, [answer, settings.storyGuesser.scrambleLetters, settings.storyGuesser.scrambleWords, settings.storyGuesser.hideName, settings.storyGuesser.sliceScale]);
 
   const submitGuess = (card: TransformedCard) => {
     console.log('[StoryGuesser] Guess:', card);
@@ -176,14 +169,14 @@ export default function StoryGuesser() {
       <div className="story-header">
         <h1>Story Guesser</h1>
         <div className="game-header-row">
-          <p>Guess the Investigator by their scrambled story!</p>
+          <p>Unravel the history of Arkham's heroes by identifying them from their scrambled backstories.</p>
           <GameInfoButton
             gameRules={{
               title: 'Story Guesser',
               cardTypes: 'Investigator (only, back flavor text)',
               answerEvaluation: 'Must match: Class, Pack, Name',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: "The investigator's backstory is scrambled.\nNote: Card Like TCU's Disappearance at the Twilight Estate's investigators and Yithian Body are all included if other filters allow.\nHints available after 3 wrong guesses."
+              howToPlay: "An investigator's background story is presented in a scrambled or fragmented state. Your task is to deduce who the story belongs to. Settings allow you to scramble letters, words, or hide names for added difficulty. Faction hints unlock after three incorrect guesses."
             }}
           />
         </div>
@@ -191,7 +184,7 @@ export default function StoryGuesser() {
 
       <div className="glass-panel story-panel">
         {win || gaveUp ? (
-          <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="story-result">
+          <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="story-result">
             <div className="story-result-details">
               <div className="story-guess-text">
                 <h4>Text used for guessing:</h4>

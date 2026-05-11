@@ -13,54 +13,27 @@ import { TypeName as TypeNameEnum } from "../types/arkham";
 
 import { GameContext } from './GameContextDefinition';
 
-export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [cards, setCards] = useState<TransformedCard[]>([]);
+const defaultBaseGameSettings = {
+  useGlobalPackFilter: true,
+  filteredPacks: [],
+  includeWeakness: false,
+  includeSignatures: true,
+  includeBondedCard: false,
+};
 
-  const [packs, setPacks] = useState<string[]>([]);
-  const [settings, setSettingsState] = useState<AppSettings>({
-    filteredPacks: [],
-    picGuesserDifficulty: "Hard",
-    storyGuesserScrambleWords: true,
-    storyGuesserScrambleLetters: false,
-    storyGuesserSliceScale: 0.5,
-    storyGuesserHideName: true,
-    includeWeakness: false,
-    includeSignatures: true,
-    flavourGuesserTypeFilters: {
-      [TypeNameEnum.ASSET]: true,
-      [TypeNameEnum.EVENT]: true,
-      [TypeNameEnum.SKILL]: true,
-      [TypeNameEnum.ENEMY]: true,
-      [TypeNameEnum.TREACHERY]: true,
-      [TypeNameEnum.LOCATION]: true,
-      [TypeNameEnum.STORY]: true,
-      [TypeNameEnum.INVESTIGATOR]: true,
-      [TypeNameEnum.SCENARIO]: true,
-      [TypeNameEnum.AGENDA]: true,
-      [TypeNameEnum.ACT]: true,
-      [TypeNameEnum.KEY]: true,
-      [TypeNameEnum.ENEMY_LOCATION]: true,
-      [TypeNameEnum.OTHER]: true,
-    },
-    traitGuesserTypeFilters: {
-      [TypeNameEnum.ASSET]: true,
-      [TypeNameEnum.EVENT]: true,
-      [TypeNameEnum.SKILL]: true,
-      [TypeNameEnum.ENEMY]: false,
-      [TypeNameEnum.TREACHERY]: false,
-      [TypeNameEnum.LOCATION]: false,
-      [TypeNameEnum.STORY]: false,
-      [TypeNameEnum.INVESTIGATOR]: true,
-      [TypeNameEnum.SCENARIO]: false,
-      [TypeNameEnum.AGENDA]: false,
-      [TypeNameEnum.ACT]: false,
-      [TypeNameEnum.KEY]: false,
-      [TypeNameEnum.ENEMY_LOCATION]: false,
-      [TypeNameEnum.OTHER]: false,
-    },
-    picGuesserTypeFilters: {
+const defaultSettings: AppSettings = {
+  filteredPacks: [],
+  includeWeakness: false,
+  includeSignatures: true,
+  includeBondedCard: false,
+  includeEncounter: false,
+  showCampaignCards: true,
+  enableHints: true,
+  wordle: { ...defaultBaseGameSettings },
+  picGuesser: {
+    ...defaultBaseGameSettings,
+    difficulty: "Normal",
+    typeFilters: {
       [TypeNameEnum.ASSET]: true,
       [TypeNameEnum.EVENT]: true,
       [TypeNameEnum.SKILL]: true,
@@ -76,58 +49,102 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       [TypeNameEnum.INVESTIGATOR]: false,
       [TypeNameEnum.OTHER]: false,
     },
-    traitGuesserMinCards: 3,
-    traitGuesserMaxCards: 0,
-    traitGuesserRequirementType: "Fixed Number",
-    traitGuesserRequirementValue: 3,
-    includeEncounter: false,
-    showCampaignCards: true,
-    enableHints: true,
-    includeBondedCard: false,
+  },
+  investigatordle: { ...defaultBaseGameSettings },
+  storyGuesser: {
+    ...defaultBaseGameSettings,
+    scrambleWords: true,
+    scrambleLetters: false,
+    sliceScale: 0.5,
+    hideName: true,
+  },
+  traitGuesser: {
+    ...defaultBaseGameSettings,
+    typeFilters: {
+      [TypeNameEnum.ASSET]: true,
+      [TypeNameEnum.EVENT]: true,
+      [TypeNameEnum.SKILL]: true,
+      [TypeNameEnum.ENEMY]: false,
+      [TypeNameEnum.TREACHERY]: false,
+      [TypeNameEnum.LOCATION]: false,
+      [TypeNameEnum.STORY]: false,
+      [TypeNameEnum.INVESTIGATOR]: true,
+      [TypeNameEnum.SCENARIO]: false,
+      [TypeNameEnum.AGENDA]: false,
+      [TypeNameEnum.ACT]: false,
+      [TypeNameEnum.KEY]: false,
+      [TypeNameEnum.ENEMY_LOCATION]: false,
+      [TypeNameEnum.OTHER]: false,
+    },
+    minCards: 3,
+    maxCards: 0,
+    requirementType: "Fixed Number",
+    requirementValue: 3,
+  },
+  flavourGuesser: {
+    ...defaultBaseGameSettings,
+    typeFilters: {
+      [TypeNameEnum.ASSET]: true,
+      [TypeNameEnum.EVENT]: true,
+      [TypeNameEnum.SKILL]: true,
+      [TypeNameEnum.ENEMY]: true,
+      [TypeNameEnum.TREACHERY]: true,
+      [TypeNameEnum.LOCATION]: true,
+      [TypeNameEnum.STORY]: true,
+      [TypeNameEnum.INVESTIGATOR]: true,
+      [TypeNameEnum.SCENARIO]: true,
+      [TypeNameEnum.AGENDA]: true,
+      [TypeNameEnum.ACT]: true,
+      [TypeNameEnum.KEY]: true,
+      [TypeNameEnum.ENEMY_LOCATION]: true,
+      [TypeNameEnum.OTHER]: true,
+    },
+    inputMode: 'Multiple Choice',
+  },
+  campaignPackGuesser: {
+    ...defaultBaseGameSettings,
+    blurAmount: 4,
+  },
+  guessCardByTrait: {
+    ...defaultBaseGameSettings,
+    inputMode: 'Multiple Choice',
+    poolFilter: 'Player Cards Only',
+  },
+  countGuesser: {
+    ...defaultBaseGameSettings,
+    inputMode: 'Multiple Choice',
+    poolFilter: 'Player Cards Only',
+  },
+  iconGuesser: { ...defaultBaseGameSettings },
+  trueOrFalse: { 
+    ...defaultBaseGameSettings,
+    enemyStatsMode: true,
+    traitMode: true,
+  },
+  randomTrivia: {
+    enabledModes: {
+      WordleGame: false,
+      PicGuesser: false,
+      Investigatordle: false,
+      StoryGuesser: true,
+      TraitGuesser: true,
+      FlavourGuesser: true,
+      CampaignPackGuesser: true,
+      GuessCardByTrait: true,
+      CountGuesser: true,
+      IconGuesser: true,
+      TrueOrFalse: true,
+    }
+  },
+};
 
-    wordleUseGlobalPackFilter: true,
-    wordleFilteredPacks: [],
-    wordleIncludeWeakness: false,
-    wordleIncludeSignatures: true,
-    wordleIncludeBondedCard: false,
+export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [cards, setCards] = useState<TransformedCard[]>([]);
 
-    picGuesserUseGlobalPackFilter: true,
-    picGuesserFilteredPacks: [],
-    picGuesserIncludeWeakness: false,
-    picGuesserIncludeSignatures: true,
-    picGuesserIncludeBondedCard: false,
-
-    investigatordleUseGlobalPackFilter: true,
-    investigatordleFilteredPacks: [],
-    investigatordleIncludeWeakness: false,
-    investigatordleIncludeSignatures: true,
-    investigatordleIncludeBondedCard: false,
-
-    storyGuesserUseGlobalPackFilter: true,
-    storyGuesserFilteredPacks: [],
-    storyGuesserIncludeWeakness: false,
-    storyGuesserIncludeSignatures: true,
-    storyGuesserIncludeBondedCard: false,
-
-    traitGuesserUseGlobalPackFilter: true,
-    traitGuesserFilteredPacks: [],
-    traitGuesserIncludeWeakness: false,
-    traitGuesserIncludeSignatures: true,
-    traitGuesserIncludeBondedCard: false,
-
-    flavourGuesserUseGlobalPackFilter: true,
-    flavourGuesserFilteredPacks: [],
-    flavourGuesserIncludeWeakness: false,
-    flavourGuesserIncludeSignatures: true,
-    flavourGuesserIncludeBondedCard: false,
-
-    encounterGuesserUseGlobalPackFilter: true,
-    encounterGuesserFilteredPacks: [],
-    encounterGuesserIncludeWeakness: false,
-    encounterGuesserIncludeSignatures: true,
-    encounterGuesserBlurAmount: 4,
-	encounterGuesserIncludeBondedCard: false
-  });
+  const [packs, setPacks] = useState<string[]>([]);
+  const [settings, setSettingsState] = useState<AppSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
 
@@ -170,120 +187,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     const init = async () => {
       const savedSettings =
         await localforage.getItem<AppSettings>("arkhamdle_settings");
-      if (savedSettings) {
+      if (savedSettings && savedSettings.wordle) {
         setSettingsState({
+          ...defaultSettings,
           ...savedSettings,
-          picGuesserDifficulty: savedSettings.picGuesserDifficulty || "Hard",
-          storyGuesserScrambleWords:
-            savedSettings.storyGuesserScrambleWords ?? true,
-          storyGuesserScrambleLetters:
-            savedSettings.storyGuesserScrambleLetters ?? false,
-          storyGuesserSliceScale: savedSettings.storyGuesserSliceScale ?? 0.5,
-          storyGuesserHideName: savedSettings.storyGuesserHideName ?? true,
-          includeWeakness: savedSettings.includeWeakness ?? false,
-          includeSignatures: savedSettings.includeSignatures ?? true,
-          flavourGuesserTypeFilters: savedSettings.flavourGuesserTypeFilters || {
-            [TypeNameEnum.ASSET]: true,
-            [TypeNameEnum.EVENT]: true,
-            [TypeNameEnum.SKILL]: true,
-            [TypeNameEnum.ENEMY]: true,
-            [TypeNameEnum.TREACHERY]: true,
-            [TypeNameEnum.LOCATION]: true,
-            [TypeNameEnum.STORY]: true,
-            [TypeNameEnum.INVESTIGATOR]: true,
-            [TypeNameEnum.SCENARIO]: true,
-            [TypeNameEnum.AGENDA]: true,
-            [TypeNameEnum.ACT]: true,
-            [TypeNameEnum.KEY]: true,
-            [TypeNameEnum.ENEMY_LOCATION]: true,
-            [TypeNameEnum.OTHER]: true,
-          },
-          traitGuesserTypeFilters: savedSettings.traitGuesserTypeFilters || {
-            [TypeNameEnum.ASSET]: true,
-            [TypeNameEnum.EVENT]: true,
-            [TypeNameEnum.SKILL]: true,
-            [TypeNameEnum.ENEMY]: false,
-            [TypeNameEnum.TREACHERY]: false,
-            [TypeNameEnum.LOCATION]: false,
-            [TypeNameEnum.STORY]: false,
-            [TypeNameEnum.INVESTIGATOR]: true,
-            [TypeNameEnum.SCENARIO]: false,
-            [TypeNameEnum.AGENDA]: false,
-            [TypeNameEnum.ACT]: false,
-            [TypeNameEnum.KEY]: false,
-            [TypeNameEnum.ENEMY_LOCATION]: false,
-            [TypeNameEnum.OTHER]: false,
-          },
-          picGuesserTypeFilters: savedSettings.picGuesserTypeFilters || {
-            [TypeNameEnum.ASSET]: true,
-            [TypeNameEnum.EVENT]: true,
-            [TypeNameEnum.SKILL]: true,
-            [TypeNameEnum.ENEMY]: false,
-            [TypeNameEnum.TREACHERY]: false,
-            [TypeNameEnum.LOCATION]: false,
-            [TypeNameEnum.STORY]: false,
-            [TypeNameEnum.SCENARIO]: false,
-            [TypeNameEnum.AGENDA]: false,
-            [TypeNameEnum.ACT]: false,
-            [TypeNameEnum.KEY]: false,
-            [TypeNameEnum.ENEMY_LOCATION]: false,
-            [TypeNameEnum.INVESTIGATOR]: false,
-            [TypeNameEnum.OTHER]: false,
-          },
-          traitGuesserMinCards: savedSettings.traitGuesserMinCards ?? 3,
-          traitGuesserMaxCards: savedSettings.traitGuesserMaxCards ?? 0,
-          traitGuesserRequirementType: savedSettings.traitGuesserRequirementType || "Fixed Number",
-          traitGuesserRequirementValue: savedSettings.traitGuesserRequirementValue ?? 3,
-          includeEncounter: savedSettings.includeEncounter ?? false,
-          showCampaignCards: savedSettings.showCampaignCards ?? true,
-          enableHints: savedSettings.enableHints ?? true,
-          includeBondedCard: savedSettings.includeBondedCard ?? false,
-
-          wordleUseGlobalPackFilter: savedSettings.wordleUseGlobalPackFilter ?? true,
-          wordleFilteredPacks: savedSettings.wordleFilteredPacks || [],
-          wordleIncludeWeakness: savedSettings.wordleIncludeWeakness ?? false,
-          wordleIncludeSignatures: savedSettings.wordleIncludeSignatures ?? true,
-          wordleIncludeBondedCard: savedSettings.wordleIncludeBondedCard ?? false,
-
-          picGuesserUseGlobalPackFilter: savedSettings.picGuesserUseGlobalPackFilter ?? true,
-          picGuesserFilteredPacks: savedSettings.picGuesserFilteredPacks || [],
-          picGuesserIncludeWeakness: savedSettings.picGuesserIncludeWeakness ?? false,
-          picGuesserIncludeSignatures: savedSettings.picGuesserIncludeSignatures ?? true,
-          picGuesserIncludeBondedCard: savedSettings.picGuesserIncludeBondedCard ?? false,
-
-          investigatordleUseGlobalPackFilter: savedSettings.investigatordleUseGlobalPackFilter ?? true,
-          investigatordleFilteredPacks: savedSettings.investigatordleFilteredPacks || [],
-          investigatordleIncludeWeakness: savedSettings.investigatordleIncludeWeakness ?? false,
-          investigatordleIncludeSignatures: savedSettings.investigatordleIncludeSignatures ?? true,
-          investigatordleIncludeBondedCard: savedSettings.investigatordleIncludeBondedCard ?? false,
-
-          storyGuesserUseGlobalPackFilter: savedSettings.storyGuesserUseGlobalPackFilter ?? true,
-          storyGuesserFilteredPacks: savedSettings.storyGuesserFilteredPacks || [],
-          storyGuesserIncludeWeakness: savedSettings.storyGuesserIncludeWeakness ?? false,
-          storyGuesserIncludeSignatures: savedSettings.storyGuesserIncludeSignatures ?? true,
-          storyGuesserIncludeBondedCard: savedSettings.storyGuesserIncludeBondedCard ?? false,
-
-          traitGuesserUseGlobalPackFilter: savedSettings.traitGuesserUseGlobalPackFilter ?? true,
-          traitGuesserFilteredPacks: savedSettings.traitGuesserFilteredPacks || [],
-          traitGuesserIncludeWeakness: savedSettings.traitGuesserIncludeWeakness ?? false,
-          traitGuesserIncludeSignatures: savedSettings.traitGuesserIncludeSignatures ?? true,
-          traitGuesserIncludeBondedCard: savedSettings.traitGuesserIncludeBondedCard ?? false,
-
-          flavourGuesserUseGlobalPackFilter: savedSettings.flavourGuesserUseGlobalPackFilter ?? true,
-          flavourGuesserFilteredPacks: savedSettings.flavourGuesserFilteredPacks || [],
-          flavourGuesserIncludeWeakness: savedSettings.flavourGuesserIncludeWeakness ?? false,
-          flavourGuesserIncludeSignatures: savedSettings.flavourGuesserIncludeSignatures ?? true,
-          flavourGuesserIncludeBondedCard: savedSettings.flavourGuesserIncludeBondedCard ?? false,
-
-          encounterGuesserUseGlobalPackFilter: savedSettings.encounterGuesserUseGlobalPackFilter ?? true,
-          encounterGuesserFilteredPacks: savedSettings.encounterGuesserFilteredPacks || [],
-          encounterGuesserIncludeWeakness: savedSettings.encounterGuesserIncludeWeakness ?? false,
-          encounterGuesserIncludeSignatures: savedSettings.encounterGuesserIncludeSignatures ?? true,
-          encounterGuesserBlurAmount: savedSettings.encounterGuesserBlurAmount ?? 4,
-          encounterGuesserIncludeBondedCard: savedSettings.encounterGuesserIncludeBondedCard ?? false,
         });
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {
+        // If no settings or old structure, revert to defaults
+        setSettingsState(defaultSettings);
         loadData();
       }
     };

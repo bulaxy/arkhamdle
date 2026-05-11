@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
@@ -10,7 +10,8 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
 const ATTRIBUTES = ['typeName', 'class', 'xp', 'traits', 'slot', 'cost', 'agility', 'combat', 'intellect', 'wild', 'willpower'] as const;
 
-export default function WordleGame() {
+
+export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
@@ -55,10 +56,7 @@ export default function WordleGame() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.wordleUseGlobalPackFilter,
-    settings.wordleFilteredPacks,
-    settings.wordleIncludeWeakness,
-    settings.wordleIncludeSignatures,
+    settings.wordle,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -115,21 +113,21 @@ export default function WordleGame() {
       <div className="wordle-header">
         <h1>Classic Mode</h1>
         <div className="game-header-row">
-          <p>Guess the Arkham Horror LCG Card</p>
+          <p>Deduce the identity of a player card using property-based feedback.</p>
           <GameInfoButton
             gameRules={{
               title: 'Classic Mode',
               cardTypes: 'Skill, Asset, Event, Weakness',
               answerEvaluation: 'Must match: Name, Subname, XP, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: 'Wordle game - similar to wordle, guess a player card, it will show whether it is correct or not, and guess the card'
+              howToPlay: 'Start by typing any player card name. The feedback will indicate if the type, class, cost, and other stats match the target card. Green means an exact match, yellow means a partial match (like one shared class), and red means no match. Arrows indicate if the target\'s value is higher or lower.'
             }}
           />
         </div>
       </div>
 
       {win || gaveUp ? (
-        <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="wordle-result-panel" />
+        <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="wordle-result-panel" />
       ) : (
         <div className="wordle-input-section">
           <GuessInput

@@ -1,8 +1,9 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import PackFilterControls from "./PackFilterControls";
+
 import type { BaseGameSettings } from "../../types";
 
-interface WordleSectionProps {
+interface IconGuesserSectionProps {
   isOpen: boolean;
   onToggle: () => void;
   packs: string[];
@@ -10,17 +11,17 @@ interface WordleSectionProps {
   onChange: (settings: BaseGameSettings) => void;
 }
 
-export default function WordleSection({
+export default function IconGuesserSection({
   isOpen,
   onToggle,
   packs,
   settings,
   onChange,
-}: WordleSectionProps) {
+}: IconGuesserSectionProps) {
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Classic Mode</h3>
+        <h3>Icon Guesser</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isOpen && (

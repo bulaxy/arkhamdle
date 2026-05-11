@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
+import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
@@ -10,7 +10,8 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
 const ATTRIBUTES = ['class', 'health', 'sanity', 'agility', 'combat', 'intellect', 'willpower', 'traits'] as const;
 
-export default function Investigatordle() {
+
+export default function Investigatordle({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
 
   const gameInvestigators = useMemo(() => {
@@ -48,10 +49,7 @@ export default function Investigatordle() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.investigatordleUseGlobalPackFilter,
-    settings.investigatordleFilteredPacks,
-    settings.investigatordleIncludeWeakness,
-    settings.investigatordleIncludeSignatures,
+    settings.investigatordle,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -106,21 +104,21 @@ export default function Investigatordle() {
       <div className="investigator-header">
         <h1>Investigatordle</h1>
         <div className="game-header-row">
-          <p>Guess the Arkham Horror LCG Investigator</p>
+          <p>Identify the investigator based on their stats, faction, and traits.</p>
           <GameInfoButton
             gameRules={{
               title: 'Investigatordle',
               cardTypes: 'Investigator (only)',
               answerEvaluation: 'Must match: Name, Pack, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: "Similar to wordle game, but investigator only.\nNote: Cards like TCU's Disappearance at the Twilight Estate's investigators and Yithian Body are all included if other filters allow."
+              howToPlay: "Enter an investigator's name to see how their profile compares to the hidden target. Match stats (Willpower, Intellect, Combat, Agility), health, sanity, and traits. Arrows help you narrow down the exact numbers. Special investigators from certain campaigns may also be featured!"
             }}
           />
         </div>
       </div>
 
       {win || gaveUp ? (
-        <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="investigator-result-panel" />
+        <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="investigator-result-panel" />
       ) : (
         <div className="investigator-input-section">
           <GuessInput

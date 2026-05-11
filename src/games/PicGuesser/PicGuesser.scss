@@ -1,11 +1,11 @@
-.encounter-container {
+.pic-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   align-items: center;
 }
 
-.encounter-header {
+.pic-header {
   text-align: center;
 
   h1 {
@@ -17,7 +17,7 @@
   }
 }
 
-.encounter-panel {
+.pic-panel {
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -27,7 +27,7 @@
   overflow: visible;
 }
 
-.encounter-error-panel {
+.pic-error-panel {
   padding: 2rem;
   text-align: center;
   display: flex;
@@ -44,7 +44,7 @@
   }
 }
 
-.encounter-image-container {
+.pic-image-container {
   width: 300px;
   height: 420px;
   overflow: hidden;
@@ -56,26 +56,34 @@
   align-items: center;
 }
 
-.encounter-image-full {
+.pic-image-full {
   width: 100%;
   height: 100%;
   object-fit: contain;
   margin: 0;
-  transition: filter 0.5s ease-out;
 }
 
-.encounter-image-blurred {
+.pic-image-zoomed {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  transition: filter 0.5s ease-out;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-.encounter-image-unavailable {
+.pic-image-unavailable {
   color: var(--text-secondary);
 }
 
-.encounter-result {
+.pic-image-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.pic-result {
   width: 100%;
   text-align: center;
 
@@ -90,54 +98,33 @@
       color: var(--wrong-color);
     }
   }
-}
 
-.encounter-answer-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  
   p {
-    margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
   }
 }
 
-.encounter-inputs {
-  width: 100%;
+.pic-result-buttons {
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
-  
-  &.shakeAnimation {
-    animation: shake 0.3s;
-  }
+  justify-content: center;
 }
 
-.encounter-select {
-  width: 100%;
-  padding: 0.75rem 1rem;
+.pic-result-button {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  color: var(--text-color);
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  outline: none;
-  cursor: pointer;
+}
 
-  &:focus {
-    border-color: var(--primary-color);
-  }
+.pic-input-wrapper {
+  width: 100%;
+  position: relative;
+  text-align: center;
+  z-index: 20;
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  option {
-    background: var(--bg-color);
-    color: var(--text-color);
+  &.shakeAnimation {
+    animation: shake 0.3s;
   }
 }
 
@@ -153,7 +140,37 @@
   }
 }
 
-.encounter-gameplay {
+.pic-suggestions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-color);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  z-index: 10;
+  text-align: left;
+}
+
+.pic-suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--glass-border);
+
+  &:hover,
+  &.selected {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.pic-give-up {
+  margin-top: 1rem;
+  background: var(--wrong-color);
+  width: 100%;
+}
+
+.pic-gameplay {
   position: relative;
   z-index: 2;
   width: 100%;
@@ -163,7 +180,7 @@
   gap: 1rem;
 }
 
-.encounter-guesses-container {
+.pic-guesses-container {
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -171,7 +188,7 @@
   gap: 0.5rem;
 }
 
-.encounter-guess-item {
+.pic-guess-item {
   padding: 1rem;
   display: flex;
   justify-content: space-between;
@@ -192,17 +209,6 @@
       color: var(--wrong-color);
     }
   }
-}
-
-.guess-btn {
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
-.give-up-btn {
-  background: var(--wrong-color);
-  width: 100%;
-  margin-top: 0.5rem;
 }
 
 .result-text {

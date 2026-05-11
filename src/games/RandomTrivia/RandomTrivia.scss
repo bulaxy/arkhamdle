@@ -1,0 +1,27 @@
+.random-trivia-error {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  text-align: center;
+  
+  h2 {
+    margin-top: 0;
+    color: var(--color-text-primary);
+  }
+  
+  p {
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+  }
+  
+  .small-note {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: 2rem;
+  }
+}
+
+.random-trivia-wrapper {
+  width: 100%;
+  min-height: 100%;
+}

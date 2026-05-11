@@ -1,30 +1,53 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import PackFilterControls from "./PackFilterControls";
-import type { BaseGameSettings } from "../../types";
+import React from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import PackFilterControls from './PackFilterControls';
+import type { CampaignPackGuesserSettings } from '../../types';
 
-interface WordleSectionProps {
+interface CampaignPackGuesserSectionProps {
   isOpen: boolean;
   onToggle: () => void;
+  blurAmount: number;
+  onBlurAmountChange: (value: number) => void;
   packs: string[];
-  settings: BaseGameSettings;
-  onChange: (settings: BaseGameSettings) => void;
+  settings: CampaignPackGuesserSettings;
+  onChange: (settings: CampaignPackGuesserSettings) => void;
 }
 
-export default function WordleSection({
+const CampaignPackGuesserSection: React.FC<CampaignPackGuesserSectionProps> = ({
   isOpen,
   onToggle,
+  blurAmount,
+  onBlurAmountChange,
   packs,
   settings,
   onChange,
-}: WordleSectionProps) {
+}) => {
   return (
     <div className="settings-section">
       <div className="settings-section-header" onClick={onToggle}>
-        <h3>Classic Mode</h3>
+        <h3>Campaign Pack Guesser</h3>
         {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
+      
       {isOpen && (
         <div className="settings-section-content settings-column">
+          <div className="setting-item no-cursor">
+            <div className="setting-label">
+              <span>Blur Amount ({blurAmount}px)</span>
+              <p className="setting-description">Adjust the blur amount for the encounter card image.</p>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="25"
+              step="1"
+              value={blurAmount}
+              onChange={(e) => onBlurAmountChange(parseInt(e.target.value, 10))}
+              className="range-slider"
+              style={{ width: '120px' }}
+            />
+          </div>
+
           <PackFilterControls
             packs={packs}
             useGlobalFilter={settings.useGlobalPackFilter}
@@ -50,4 +73,6 @@ export default function WordleSection({
       )}
     </div>
   );
-}
+};
+
+export default CampaignPackGuesserSection;

@@ -7,21 +7,22 @@ import { TypeName as TypeNameEnum } from '../types/arkham';
 export function filterBySettings(
   cards: TransformedCard[],
   settings: AppSettings,
-  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'encounterGuesser'
+  gameId: 'wordle' | 'picGuesser' | 'investigatordle' | 'storyGuesser' | 'traitGuesser' | 'flavourGuesser' | 'campaignPackGuesser' | 'guessCardByTrait' | 'countGuesser' | 'iconGuesser' | 'trueOrFalse'
 ): TransformedCard[] {
-  const useGlobal = (settings[(`${gameId}UseGlobalPackFilter`) as keyof AppSettings] as boolean) ?? true;
+  const gameSettings = settings[gameId];
+  const useGlobal = gameSettings.useGlobalPackFilter ?? true;
   
   const packsToFilter = useGlobal 
     ? settings.filteredPacks 
-    : ((settings[(`${gameId}FilteredPacks`) as keyof AppSettings] as string[]) || []);
+    : (gameSettings.filteredPacks || []);
     
   const incWeakness = useGlobal 
     ? settings.includeWeakness 
-    : ((settings[(`${gameId}IncludeWeakness`) as keyof AppSettings] as boolean) ?? false);
+    : (gameSettings.includeWeakness ?? false);
     
   const incSignatures = useGlobal 
     ? settings.includeSignatures 
-    : ((settings[(`${gameId}IncludeSignatures`) as keyof AppSettings] as boolean) ?? true);
+    : (gameSettings.includeSignatures ?? true);
 
   return cards.filter((card) => {
     const passPack = packsToFilter.length === 0 || !packsToFilter.includes(card.pack_name);
@@ -32,7 +33,7 @@ export function filterBySettings(
 
     const incBonded = useGlobal
       ? settings.includeBondedCard
-      : ((settings[`${gameId}IncludeBondedCard` as keyof AppSettings] as boolean) ?? false);
+      : (gameSettings.includeBondedCard ?? false);
     const isBonded = !!card.bonded_to;
     const passBonded = incBonded || !isBonded;
 
@@ -118,7 +119,7 @@ export const GAME_EVALUATION_CRITERIA = {
   storyGuesser: { class: true, pack: true, name: true },
   flavourGuesser: { class: true, pack: true, name: true, xp: true },
   investigatordle: { name: true, pack: true, class: true },
-  encounterGuesser: { name: true, pack: true, class: true },
+  campaignPackGuesser: { name: true, pack: true, class: true },
 } as const;
 
 /**
@@ -211,9 +212,18 @@ export function filterDuplicateOfCode<T extends { duplicate_of_code?: string }>(
 }
 
 /**
- * Filter cards for EncounterGuesser game.
+ * Filter cards for CampaignPackGuesser game.
  * Requires cards to have encounter_code and encounter_name.
  */
-export function filterForEncounterGuesser(cards: TransformedCard[]): TransformedCard[] {
+export function filterForCampaignPackGuesser(cards: TransformedCard[]): TransformedCard[] {
   return cards.filter((card) => !!card.encounter_name);
+}
+
+/**
+ * Filter cards for IconGuesser game.
+ * Only Asset, Event, and Skill type cards.
+ */
+export function filterForIconGuesser(cards: TransformedCard[]): TransformedCard[] {
+  const allowedTypes: TypeName[] = [TypeNameEnum.ASSET, TypeNameEnum.EVENT, TypeNameEnum.SKILL];
+  return cards.filter((card) => allowedTypes.includes(card.typeName) && card.permanent !== true);
 }

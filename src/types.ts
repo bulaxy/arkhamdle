@@ -13,77 +13,92 @@ declare global {
   const APP_VERSION: string;
 }
 
-export interface AppSettings {
+export interface GameProps {
+  onPlayAgainOverride?: () => void;
+}
+
+export interface BaseGameSettings {
+  useGlobalPackFilter: boolean;
   filteredPacks: string[];
-  picGuesserDifficulty: 'Hard' | 'Normal' | 'Easy';
-  storyGuesserScrambleWords: boolean;
-  storyGuesserScrambleLetters: boolean;
-  storyGuesserSliceScale: number;
-  storyGuesserHideName: boolean;
   includeWeakness: boolean;
   includeSignatures: boolean;
-  flavourGuesserTypeFilters: Record<TypeName, boolean>;
-  traitGuesserTypeFilters: Record<TypeName, boolean>;
-  picGuesserTypeFilters: Record<TypeName, boolean>;
-  traitGuesserMinCards: number;
-  traitGuesserMaxCards: number;
-  traitGuesserRequirementType: 'All' | 'Percentage' | 'Fixed Number';
-  traitGuesserRequirementValue: number;
+  includeBondedCard: boolean;
+}
+
+export interface PicGuesserSettings extends BaseGameSettings {
+  difficulty: 'Hard' | 'Normal' | 'Easy';
+  typeFilters: Record<TypeName, boolean>;
+}
+
+export interface StoryGuesserSettings extends BaseGameSettings {
+  scrambleWords: boolean;
+  scrambleLetters: boolean;
+  sliceScale: number;
+  hideName: boolean;
+}
+
+export interface TraitGuesserSettings extends BaseGameSettings {
+  typeFilters: Record<TypeName, boolean>;
+  minCards: number;
+  maxCards: number;
+  requirementType: 'All' | 'Percentage' | 'Fixed Number';
+  requirementValue: number;
+}
+
+export interface FlavourGuesserSettings extends BaseGameSettings {
+  typeFilters: Record<TypeName, boolean>;
+  inputMode: 'Multiple Choice' | 'Direct Input';
+}
+
+export interface CampaignPackGuesserSettings extends BaseGameSettings {
+  blurAmount: number;
+}
+
+export interface GuessCardByTraitSettings extends BaseGameSettings {
+  inputMode: 'Multiple Choice' | 'Direct Input';
+  poolFilter: 'Player Cards Only' | 'All Cards';
+}
+
+export interface CountGuesserSettings extends BaseGameSettings {
+  inputMode: 'Multiple Choice' | 'Direct Input';
+  poolFilter: 'Player Cards Only' | 'All Cards';
+}
+
+export interface TrueOrFalseSettings extends BaseGameSettings {
+  enemyStatsMode: boolean;
+  traitMode: boolean;
+}
+
+
+export interface RandomTriviaSettings {
+  enabledModes: Record<string, boolean>;
+}
+
+export interface AppSettings {
+  // Global Pack Filter Settings
+  filteredPacks: string[];
+  includeWeakness: boolean;
+  includeSignatures: boolean;
+  includeBondedCard: boolean;
+
+  // Global settings
   includeEncounter: boolean;
   showCampaignCards: boolean;
   enableHints: boolean;
-  includeBondedCard: boolean;
-  // Global Pack Filter (already have filteredPacks, includeWeakness, includeSignatures)
-  
-  // Wordle / Classic Mode
-  wordleUseGlobalPackFilter: boolean;
-  wordleFilteredPacks: string[];
-  wordleIncludeWeakness: boolean;
-  wordleIncludeSignatures: boolean;
-  wordleIncludeBondedCard: boolean;
 
-  // Pic Guesser
-  picGuesserUseGlobalPackFilter: boolean;
-  picGuesserFilteredPacks: string[];
-  picGuesserIncludeWeakness: boolean;
-  picGuesserIncludeSignatures: boolean;
-  picGuesserIncludeBondedCard: boolean;
-
-  // Investigatordle
-  investigatordleUseGlobalPackFilter: boolean;
-  investigatordleFilteredPacks: string[];
-  investigatordleIncludeWeakness: boolean;
-  investigatordleIncludeSignatures: boolean;
-  investigatordleIncludeBondedCard: boolean;
-
-  // Story Guesser
-  storyGuesserUseGlobalPackFilter: boolean;
-  storyGuesserFilteredPacks: string[];
-  storyGuesserIncludeWeakness: boolean;
-  storyGuesserIncludeSignatures: boolean;
-  storyGuesserIncludeBondedCard: boolean;
-
-  // Trait Guesser
-  traitGuesserUseGlobalPackFilter: boolean;
-  traitGuesserFilteredPacks: string[];
-  traitGuesserIncludeWeakness: boolean;
-  traitGuesserIncludeSignatures: boolean;
-  traitGuesserIncludeBondedCard: boolean;
-
-  // Flavour Guesser
-  flavourGuesserUseGlobalPackFilter: boolean;
-  flavourGuesserFilteredPacks: string[];
-  flavourGuesserIncludeWeakness: boolean;
-  flavourGuesserIncludeSignatures: boolean;
-  flavourGuesserIncludeBondedCard: boolean;
-
-  // Encounter Guesser
-  encounterGuesserUseGlobalPackFilter: boolean;
-  encounterGuesserFilteredPacks: string[];
-  encounterGuesserIncludeWeakness: boolean;
-  encounterGuesserIncludeSignatures: boolean;
-  encounterGuesserBlurAmount: number;
-  encounterGuesserIncludeBondedCard: boolean;
+  // Game-specific settings
+  wordle: BaseGameSettings;
+  picGuesser: PicGuesserSettings;
+  investigatordle: BaseGameSettings;
+  storyGuesser: StoryGuesserSettings;
+  traitGuesser: TraitGuesserSettings;
+  flavourGuesser: FlavourGuesserSettings;
+  campaignPackGuesser: CampaignPackGuesserSettings;
+  guessCardByTrait: GuessCardByTraitSettings;
+  countGuesser: CountGuesserSettings;
+  iconGuesser: BaseGameSettings;
+  trueOrFalse: TrueOrFalseSettings;
+  randomTrivia: RandomTriviaSettings;
 }
 
 export interface TransformedCard {
@@ -126,6 +141,11 @@ export interface TransformedCard {
   encounter_code?: string;
   encounter_name?: string;
   permanent?: boolean;
+  exile?: boolean;
+  exceptional?: boolean;
+  myriad?: boolean;
+  is_unique?: boolean;
   bonded_to?: string;
+  text?: string;
 }
 

@@ -1,0 +1,175 @@
+.true-or-false-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+
+  .trivia-header {
+    text-align: center;
+
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    .game-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+
+      p {
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .trivia-question-section {
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+    text-align: center;
+    background: var(--bg-color);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+
+    .enemy-image-wrapper {
+      position: relative;
+      width: fit-content;
+      margin: 0 auto 1.5rem;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+
+      .image-loading-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+
+      .enemy-preview-image {
+        display: block;
+        width: 300px;
+        height: auto;
+        transition: opacity 0.3s ease;
+      }
+
+      .image-obscure-box {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        width: 300px;
+        height: 240px;
+        background: #000;
+        z-index: 2;
+      }
+    }
+
+    .card-info {
+      margin-bottom: 1.5rem;
+
+      h2 {
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .subname {
+        font-size: 1.2rem;
+        font-style: italic;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+      }
+
+      .card-details {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+
+        .detail-badge {
+          padding: 0.35rem 0.85rem;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          font-size: 0.95rem;
+          border: 1px solid var(--border-color);
+          color: var(--text-color);
+        }
+
+        .xp-badge {
+          padding: 0.35rem 0.85rem;
+          border-radius: 12px;
+          font-weight: bold;
+          font-size: 0.95rem;
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+      }
+    }
+
+    .question-box {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+
+      p {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+      }
+
+      .traits-display {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .true-false-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+
+    .tf-btn {
+      padding: 1rem 3rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+
+      &.btn-true {
+        background: rgba(30, 150, 60, 0.2);
+        border-color: rgba(30, 150, 60, 0.5);
+        color: var(--text-color);
+
+        &:hover {
+          background: rgba(30, 150, 60, 0.4);
+        }
+      }
+
+      &.btn-false {
+        background: rgba(180, 40, 40, 0.2);
+        border-color: rgba(180, 40, 40, 0.5);
+        color: var(--text-color);
+
+        &:hover {
+          background: rgba(180, 40, 40, 0.4);
+        }
+      }
+    }
+  }
+}

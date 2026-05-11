@@ -1,13 +1,13 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import { useGameContext } from '../../hooks/useGameContext';
-import type { TransformedCard } from '../../types';
-import { filterForEncounterGuesser, filterBySettings } from '../../services/CardFilter';
+import type { TransformedCard, GameProps } from '../../types';
+import { filterForCampaignPackGuesser, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
-import './EncounterGuesser.scss';
+import './CampaignPackGuesser.scss';
 
-export default function EncounterGuesser() {
+export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<string[]>([]);
@@ -19,10 +19,11 @@ export default function EncounterGuesser() {
   const [selectedEncounter, setSelectedEncounter] = useState<string>('');
   const [encounterSearch, setEncounterSearch] = useState<string>('');
   const [showEncounterDropdown, setShowEncounterDropdown] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const gameCards = useMemo(() => {
-    const baseFiltered = filterBySettings(cards, settings, 'encounterGuesser');
-    return filterForEncounterGuesser(baseFiltered);
+    const baseFiltered = filterBySettings(cards, settings, 'campaignPackGuesser');
+    return filterForCampaignPackGuesser(baseFiltered);
   }, [cards, settings]);
 
   const gameCardsWithPic = useMemo(() => {
@@ -66,6 +67,7 @@ export default function EncounterGuesser() {
     setSelectedPack('');
     setSelectedEncounter('');
     setEncounterSearch('');
+    setImageLoaded(false);
     if (gameCardsWithPic.length > 0) {
       setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
     } else {
@@ -79,10 +81,7 @@ export default function EncounterGuesser() {
     }, 0);
     return () => clearTimeout(timer);
   }, [
-    settings.encounterGuesserUseGlobalPackFilter,
-    settings.encounterGuesserFilteredPacks,
-    settings.encounterGuesserIncludeWeakness,
-    settings.encounterGuesserIncludeSignatures,
+    settings.campaignPackGuesser,
     settings.filteredPacks,
     settings.includeWeakness,
     settings.includeSignatures,
@@ -111,27 +110,27 @@ export default function EncounterGuesser() {
   const hasNoCardsError = !settings.includeEncounter || gameCardsWithPic.length === 0;
 
   return (
-    <div className="encounter-container">
-      <div className="encounter-header">
-        <h1>Encounter Guesser</h1>
+    <div className="campaign-pack-container">
+      <div className="campaign-pack-header">
+        <h1>Campaign Pack Guesser</h1>
         <div className="game-header-row">
-          <p>Identify the encounter set of the card from the blurred image.</p>
+          <p>Test your knowledge of the mythos by identifying encounter sets from blurred artwork.</p>
           <GameInfoButton
             gameRules={{
-              title: 'Encounter Guesser',
+              title: 'Campaign Pack Guesser',
               cardTypes: 'Encounter Cards',
               answerEvaluation: 'Must guess the Encounter Set Name',
               currentFilters: 'Applied: Pack filters, Include Encounter Cards required',
-              howToPlay: 'A blurred encounter card is shown. Select the pack and encounter set it belongs to. After 3 wrong guesses, the pack name will be revealed as a hint.'
+              howToPlay: 'Examine the blurred encounter card artwork. Select the correct expansion pack and then the specific encounter set it belongs to. If you\'re stuck, a pack name hint will appear after three incorrect guesses.'
             }}
           />
         </div>
         <p className="small-note">Note: Some encounter cards appear in multiple sets (e.g., Rotting Remains in Blood on the Altar and in Core Set). Make sure you pick the encounter set for the specific card version shown!</p>
       </div>
 
-      <div className="glass-panel encounter-panel">
+      <div className="glass-panel campaign-pack-panel">
         {hasNoCardsError ? (
-          <div className="encounter-error-panel">
+          <div className="campaign-pack-error-panel">
             <p className="settings-text error-title">
               No encounter cards available.
             </p>
@@ -141,25 +140,34 @@ export default function EncounterGuesser() {
           </div>
         ) : (
           <>
-            <div className="encounter-image-container">
+            <div className="campaign-pack-image-container">
               {answer && answer.imagesrc ? (
-                <img
-                  src={`https://arkhamdb.com${answer.imagesrc}`}
-                  alt="Guess this encounter card"
-                  className={win || gaveUp ? 'encounter-image-full' : 'encounter-image-blurred'}
-                  style={{
-                    filter: (!win && !gaveUp) ? `blur(${settings.encounterGuesserBlurAmount}px)` : 'none',
-                    transition: 'filter 0.5s ease-out'
-                  }}
-                />
+                <>
+                  {!imageLoaded && (
+                    <div className="campaign-pack-image-loading">
+                      <div className="spinner" />
+                    </div>
+                  )}
+                  <img
+                    src={`https://arkhamdb.com${answer.imagesrc}`}
+                    alt="Guess this encounter card"
+                    className={win || gaveUp ? 'campaign-pack-image-full' : 'campaign-pack-image-blurred'}
+                    style={{
+                      filter: (!win && !gaveUp) ? `blur(${settings.campaignPackGuesser.blurAmount}px)` : 'none',
+                      transition: 'filter 0.5s ease-out',
+                      opacity: imageLoaded ? 1 : 0,
+                    }}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                </>
               ) : (
-                <div className="encounter-image-unavailable">Image not available</div>
+                <div className="campaign-pack-image-unavailable">Image not available</div>
               )}
             </div>
 
             {(win || gaveUp) && (
-              <ResultPanel win={win} item={answer} onPlayAgain={resetGame} className="encounter-result" showImage={false}>
-                <div className="encounter-answer-details">
+              <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="campaign-pack-result" showImage={false}>
+                <div className="campaign-pack-answer-details">
                   <p><strong>Encounter Set:</strong> {answer?.encounter_name}</p>
                   <p><strong>Pack:</strong> {answer?.pack_name}</p>
                   <p><strong>Card:</strong> {answer?.name}</p>
@@ -168,14 +176,14 @@ export default function EncounterGuesser() {
             )}
 
             {settings.enableHints && guesses.length >= 3 && !win && answer && (
-              <div className="encounter-hint hint-text">
+              <div className="campaign-pack-hint hint-text">
                 💡 Hint — Pack: {answer.pack_name}
               </div>
             )}
 
             {!win && !gaveUp && (
-              <div className="encounter-gameplay">
-                <div className={`encounter-inputs ${animation}`}>
+              <div className="campaign-pack-gameplay">
+                <div className={`campaign-pack-inputs ${animation}`}>
 
                   <select
                     value={selectedPack}
@@ -184,7 +192,7 @@ export default function EncounterGuesser() {
                       setSelectedEncounter('');
                       setEncounterSearch('');
                     }}
-                    className="encounter-select"
+                    className="campaign-pack-select"
                   >
                     <option value="">-- Select Pack --</option>
                     {availablePacks.map(pack => (
@@ -195,7 +203,7 @@ export default function EncounterGuesser() {
                   <div style={{ position: 'relative', width: '100%' }}>
                     <input
                       type="text"
-                      className="encounter-select"
+                      className="campaign-pack-select"
                       style={{ boxSizing: 'border-box' }}
                       placeholder={selectedPack ? "-- Search Encounter Set --" : "-- Select Pack First --"}
                       value={encounterSearch}
@@ -251,13 +259,18 @@ export default function EncounterGuesser() {
             )}
             
             {guesses.length > 0 && (
-              <div className="encounter-guesses-container">
-                {guesses.map((g, i) => (
-                  <div key={`${g}-${i}`} className="glass-panel encounter-guess-item fade-in incorrect">
-                    <span>{g}</span>
-                    <span className="result-text">Incorrect</span>
-                  </div>
-                ))}
+              <div className="campaign-pack-guesses-container">
+                {guesses.map((g, i) => {
+                  const isCorrect = g === answer?.encounter_name;
+                  return (
+                    <div key={`${g}-${i}`} className={`glass-panel campaign-pack-guess-item fade-in ${isCorrect ? 'correct' : 'incorrect'}`}>
+                      <span>{g}</span>
+                      <span className={`result-text ${isCorrect ? 'correct' : 'incorrect'}`}>
+                        {isCorrect ? 'Correct' : 'Incorrect'}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>

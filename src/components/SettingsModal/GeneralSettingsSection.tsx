@@ -25,41 +25,37 @@ export default function GeneralSettingsSection({
       {isOpen && (
         <div className="settings-section-content settings-column">
           {/* Enable Hints Toggle */}
-          <div className="hint-toggle-row">
-            <div>
-              <h3 className="hint-toggle-title">Enable Hints</h3>
-              <p className="settings-text small">
-                Show hints after 3 wrong guesses in supported games
-              </p>
+          <label className="setting-item">
+            <div className="setting-label">
+              <span>Enable Hints</span>
+              <span className="setting-description">Show hints after 3 wrong guesses in supported games</span>
             </div>
-            <label className="switch">
+            <div className="toggle-switch">
               <input
                 type="checkbox"
                 checked={settings.enableHints}
                 onChange={(e) => setSettings({ ...settings, enableHints: e.target.checked })}
               />
-              <span className="slider round"></span>
-            </label>
-          </div>
+              <span className="toggle-slider"></span>
+            </div>
+          </label>
 
           {/* Include Campaign Cards Toggle */}
           {settings.includeEncounter && (
-            <div className="hint-toggle-row">
-              <div>
-                <h3 className="hint-toggle-title">Include Campaign Cards</h3>
-                <p className="settings-text small">
-                  Show campaign-specific cards in the game pool
-                </p>
+            <label className="setting-item">
+              <div className="setting-label">
+                <span>Include Campaign Cards</span>
+                <span className="setting-description">Show campaign-specific cards in the game pool</span>
               </div>
-              <label className="switch">
+              <div className="toggle-switch">
                 <input
                   type="checkbox"
                   checked={settings.showCampaignCards}
                   onChange={(e) => setSettings({ ...settings, showCampaignCards: e.target.checked })}
                 />
-                <span className="slider round"></span>
-              </label>
-            </div>
+                <span className="toggle-slider"></span>
+              </div>
+            </label>
           )}
 
           <div className="settings-group">
