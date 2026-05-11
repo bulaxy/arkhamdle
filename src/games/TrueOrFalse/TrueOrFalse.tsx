@@ -21,7 +21,7 @@ type EnemyQuestionType =
   | 'Prey' | 'Massive' | 'Spawn' | 'Forced' | 'Revelation';
 
 type LocationQuestionType = 'Clues' | 'Shroud' | 'Forced' | 'Resign' | 'Victory';
-type ActQuestionType = 'Clues' | 'Revelation' | 'Forced' | 'Objective' | 'Resign';
+type ActQuestionType = 'Clues' | 'Forced' | 'Objective' | 'Resign';
 type AgendaQuestionType = 'Doom' | 'Forced' | 'Resign';
 type TreacheryQuestionType = 'Forced'| 'Surge' ;
 
@@ -37,7 +37,7 @@ interface GameQuestion {
 
 const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation'];
 const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign', 'Victory'];
-const ACT_KEYWORD_TRAITS = ['Revelation', 'Forced', 'Objective', 'Resign'];
+const ACT_KEYWORD_TRAITS = ['Forced', 'Objective', 'Resign'];
 const AGENDA_KEYWORD_TRAITS = ['Forced', 'Resign'];
 const TREACHERY_KEYWORD_TRAITS = ['Forced', 'Surge'];
 
@@ -253,7 +253,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
         case 'Act': {
           const randomCard = actPool[Math.floor(Math.random() * actPool.length)];
           const options: { type: ActQuestionType; weight: number }[] = [
-            {type: 'Clues', weight: 1}, {type: 'Revelation', weight: 1}, 
+            {type: 'Clues', weight: 1}, 
             {type: 'Forced', weight: 1}, {type: 'Objective', weight: 0.2}, 
             {type: 'Resign', weight: 0.2}
           ];
