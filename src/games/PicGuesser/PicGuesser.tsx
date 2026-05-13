@@ -7,6 +7,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import './PicGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
+import { getPackDisplayName } from '../../data/packStructure';
 
 export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const { cards, settings } = useGameContext();
@@ -42,7 +43,7 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
 
   const getDisplayText = (card: TransformedCard): string => {
     if (!dupeNames.has(card.name)) return card.name;
-    return `${card.name} (${card.pack_name} - ${card.xp}XP)`;
+    return `${card.name} (${getPackDisplayName(card.pack_code, card.pack_name)} - ${card.xp}XP)`;
   };
 
   let zoomOutRate = 1;
@@ -101,8 +102,10 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
       <div className="pic-header">
         <h1>Pic Guesser</h1>
         <div className="game-header-row">
-          <p>Guess the card identity based on a zoomed-in fragment of its artwork.</p>
-        <p className="small-note">Note: Some cards (mostly from newer expansions) may not have zoomed images supported yet.</p>
+          <div className="game-description">  
+            <p>Guess the card identity based on a zoomed-in fragment of its artwork.</p>
+            <p className="small-note">Note: Some cards (mostly from newer expansions) may not have zoomed images supported yet.</p>
+          </div>
           <GameInfoButton
             gameRules={{
               title: 'Pic Guesser',
@@ -138,13 +141,12 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
                   <img
                     src={`https://arkhamdb.com${answer.imagesrc}`}
                     alt="Guess this card"
-                    className={showFull ? 'pic-image-full' : 'pic-image-zoomed'}
-                    style={{
-                      ...(!showFull ? {
+                    className={`${showFull ? 'pic-image-full' : 'pic-image-zoomed'} opacity-transition ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    style={
+                      !showFull ? {
                         transform: `scale(${sizeMultiplier}) translateX(${offsetX / sizeMultiplier}px) translateY(${offsetY / sizeMultiplier}px)`
-                      } : {}),
-                      opacity: imageLoaded ? 1 : 0,
-                    }}
+                      } : undefined
+                    }
                     onLoad={() => setImageLoaded(true)}
                   />
                 </>
@@ -165,7 +167,7 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
 
             {settings.enableHints && guesses.length >= 3 && !win && answer && (
               <div className="pic-hint hint-text">
-                💡 Hint — Pack: {answer.pack_name}
+                💡 Hint — Pack: {getPackDisplayName(answer.pack_code, answer.pack_name)}
               </div>
             )}
 

@@ -163,3 +163,11 @@ body {
   margin-left: 0.5rem;
   vertical-align: middle;
 }
+
+/* Margin and Width utilities */
+.mb-1rem { margin-bottom: 1rem; }
+.mt-1rem { margin-top: 1rem; }
+.max-w-600 { max-width: 600px; }
+.opacity-transition { transition: opacity 0.3s ease; }
+.opacity-0 { opacity: 0; }
+.opacity-100 { opacity: 1; }

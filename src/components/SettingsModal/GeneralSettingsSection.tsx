@@ -92,8 +92,8 @@ export default function GeneralSettingsSection({
       )}
 
       {showConfirm && (
-        <div className="modal-overlay" style={{ zIndex: 1100 }} onClick={() => setShowConfirm(false)}>
-          <div className="modal-content" style={{ maxWidth: "450px" }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay confirm-modal-overlay" onClick={() => setShowConfirm(false)}>
+          <div className="modal-content confirm-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="title-with-icon">
                 <AlertTriangle color="var(--warning)" size={24} />
@@ -101,20 +101,22 @@ export default function GeneralSettingsSection({
               </div>
             </div>
             <div className="modal-body">
-              <p className="settings-text" style={{ color: "var(--text-primary)", fontSize: "1rem", marginBottom: "1rem", lineHeight: "1.5" }}>
+              <p className="settings-text">
                 This will impact all game modes, such as including investigators like <strong>Gavriella Mizrah</strong> from <em>The Circle Undone - Disappearance at the Twilight Estate</em>, or some assets that are rarely thought of.
               </p>
-              <p className="settings-text" style={{ opacity: 0.8, marginBottom: "1rem" }}>
+              <p className="settings-text text-accent text-bold">
+                Including campaign cards greatly enhances the True/False game mode, but it might make other game modes significantly harder!
+              </p>
+              <p className="settings-text">
                 Note: Campaign cards will need to download <strong>11MB</strong> of data. This might be expensive on mobile data. You can toggle these cards off at any time after downloading.
               </p>
               <p className="settings-text">
                 Are you sure you want to continue?
               </p>
             </div>
-            <div className="modal-footer" style={{ padding: "1.5rem", display: "flex", gap: "1rem", borderTop: "1px solid var(--glass-border)" }}>
+            <div className="modal-footer">
               <button
-                className="premium-btn"
-                style={{ flex: 1 }}
+                className="premium-btn footer-btn-primary"
                 onClick={() => {
                   setShowConfirm(false);
                   setSettings({ ...settings, includeEncounter: true });
@@ -124,8 +126,7 @@ export default function GeneralSettingsSection({
                 Continue
               </button>
               <button
-                className="premium-btn"
-                style={{ flex: 1, background: "transparent", border: "1px solid var(--glass-border)" }}
+                className="premium-btn footer-btn-secondary"
                 onClick={() => setShowConfirm(false)}
               >
                 Cancel

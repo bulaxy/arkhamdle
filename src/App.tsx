@@ -70,8 +70,8 @@ function App() {
           <NavLink to="/investigatordle" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Investigatordle</NavLink>
           <NavLink to="/random-trivia" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Random Trivia</NavLink>
           
-          {/* Desktop dropdown */}
-          <div className={`nav-dropdown desktop-only ${isMoreOpen ? 'open' : ''}`} ref={dropdownRef}>
+          {/* Desktop and Mobile dropdown */}
+          <div className={`nav-dropdown ${isMoreOpen ? 'open' : ''}`} ref={dropdownRef}>
             <button 
               className={`nav-link nav-dropdown-trigger ${isMoreActive ? 'active' : ''}`}
               onClick={() => setIsMoreOpen(!isMoreOpen)}
@@ -89,16 +89,6 @@ function App() {
               <NavLink to="/true-or-false" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>True Or False</NavLink>
             </div>
           </div>
-
-          {/* Mobile flat links */}
-          <NavLink to="/story-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Story Guesser</NavLink>
-          <NavLink to="/trait-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Trait Guesser</NavLink>
-          <NavLink to="/flavour-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Flavour Guesser</NavLink>
-          <NavLink to="/campaign-pack-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Campaign Pack Guesser</NavLink>
-          <NavLink to="/icon-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Icon Guesser</NavLink>
-          <NavLink to="/guess-card-by-trait" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Guess Card By Trait</NavLink>
-          <NavLink to="/count-guesser" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>Count Guesser</NavLink>
-          <NavLink to="/true-or-false" className={({isActive}) => `nav-link mobile-only-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>True Or False</NavLink>
         </div>
 
         <div className="nav-right">

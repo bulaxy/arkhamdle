@@ -223,3 +223,25 @@
 .result-text {
   font-weight: bold;
 }
+
+.encounter-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  box-sizing: border-box;
+}
+
+.guess-suggestions {
+  margin-top: 0.2rem;
+}
+
+.campaign-pack-image {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  &.loaded {
+    opacity: 1;
+  }
+}

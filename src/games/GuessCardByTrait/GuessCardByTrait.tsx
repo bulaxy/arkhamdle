@@ -153,7 +153,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride }: GameProps = {}
         )}
 
         {!isGameOver && settings.guessCardByTrait.inputMode === 'Direct Input' && (
-          <div className="direct-input-section" style={{ maxWidth: '600px' }}>
+          <div className="direct-input-section max-w-600">
             <GuessInput
               options={allFilteredCards}
               guesses={[]}
@@ -187,7 +187,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride }: GameProps = {}
               <>
                 <h4>Matching Card</h4>
                 {!showImages ? (
-                  <button className="premium-btn" onClick={() => setShowImages(true)} style={{ marginBottom: '1rem' }}>
+                  <button className="premium-btn mb-1rem" onClick={() => setShowImages(true)}>
                     Show Card Image
                   </button>
                 ) : (

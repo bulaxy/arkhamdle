@@ -184,7 +184,7 @@ export default function CountGuesser({ onPlayAgainOverride }: GameProps = {}) {
               <>
                 <h4>Matching Cards ({question.matchingCards.length})</h4>
                 {question.matchingCards.length > 3 && !showImages ? (
-                  <button className="premium-btn" onClick={() => setShowImages(true)} style={{ marginBottom: '1rem' }}>
+                  <button className="premium-btn mb-1rem" onClick={() => setShowImages(true)}>
                     Show Card Images
                   </button>
                 ) : (

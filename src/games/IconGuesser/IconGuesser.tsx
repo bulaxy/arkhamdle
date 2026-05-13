@@ -106,8 +106,10 @@ export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
       <div className="icon-header">
         <h1>Icon Guesser</h1>
         <div className="game-header-row">
-          <p>Prove your familiarity with card commitment values by identifying hidden skill icons.</p>
-          <p className="small-note">Note: Some cards may not have images available yet.</p>
+          <div className="game-description">
+            <p>Prove your familiarity with card commitment values by identifying hidden skill icons.</p>
+            <p className="small-note">Note: Some cards may not have images available yet.</p>
+          </div>
           <GameInfoButton
             gameRules={{
               title: 'Icon Guesser',
@@ -143,8 +145,7 @@ export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
                   <img
                     src={`https://arkhamdb.com${answer.imagesrc}`}
                     alt="Guess the skill icons"
-                    className={showFull ? 'icon-image-full' : 'icon-image-normal'}
-                    style={{ opacity: imageLoaded ? 1 : 0 }}
+                    className={`${showFull ? 'icon-image-full' : 'icon-image-normal'} opacity-transition ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                     onLoad={() => setImageLoaded(true)}
                   />
                   {!showFull && <div className="icon-blackbox" />}

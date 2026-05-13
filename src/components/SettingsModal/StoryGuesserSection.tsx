@@ -125,8 +125,7 @@ export default function StoryGuesserSection({
                 step="0.1"
                 value={sliceScale}
                 onChange={(e) => onSliceScaleChange(parseFloat(e.target.value))}
-                className="range-slider"
-                style={{ width: '120px' }}
+                className="range-slider w-120"
               />
             </div>
           </div>

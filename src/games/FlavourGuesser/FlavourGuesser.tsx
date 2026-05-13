@@ -6,6 +6,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard, GameProps } from '../../types';
 import MultipleChoiceGrid from '../../components/MultipleChoiceGrid/MultipleChoiceGrid';
 import { filterForFlavourGuesser, filterDuplicateOfCode, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
+import { getPackDisplayName } from '../../data/packStructure';
 import './FlavourGuesser.scss';
 
 
@@ -174,7 +175,7 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
         {settings.enableHints && wrongGuesses.length >= 3 && !win && answer && (
           <div className="flavour-hint">
             💡 Hint — Class: {answer.class.join(', ')}
-            {wrongGuesses.length >= 5 && ` | Pack: ${answer.pack_name}`}
+            {wrongGuesses.length >= 5 && ` | Pack: ${getPackDisplayName(answer.pack_code, answer.pack_name)}`}
           </div>
         )}
 
@@ -213,7 +214,7 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
             )}
 
             {settings.flavourGuesser.inputMode === 'Multiple Choice' && (
-              <div style={{ marginTop: '1rem' }}>
+              <div className="mt-1rem">
                 <button className="premium-btn guess-give-up" onClick={() => setGaveUp(true)}>Give Up</button>
               </div>
             )}

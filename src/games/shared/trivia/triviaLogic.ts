@@ -159,7 +159,7 @@ export function generateWhichCardQuestion(
 
       return {
         mode: 'Which Card',
-        questionText: `Which is the only card that got this: ${chosenSig}?`,
+        questionText: `Which is the only card that got this traits: ${chosenSig}?`,
         correctAnswer: card.id,
         correctCardDisplay: `${card.name} (${card.pack_name})`,
         options: shuffle(Array.from(optionsSet)),

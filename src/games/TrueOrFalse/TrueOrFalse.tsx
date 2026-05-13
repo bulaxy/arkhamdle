@@ -5,7 +5,7 @@ import { filterBySettings, filterDuplicateOfCode, getCardFactionColors } from '.
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import falseTraitsData from '../../data/false_traits.json';
-import { buildPackCodeToGroupMap, packSameOrNewerThan } from '../../data/packStructure';
+import { buildPackCodeToGroupMap, packSameOrNewerThan, getPackDisplayName } from '../../data/packStructure';
 import { cardHasKeyword } from '../shared/trivia/triviaTemplates';
 import './TrueOrFalse.scss';
 
@@ -114,6 +114,16 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
   const [win, setWin] = useState(false);
   const [lose, setLose] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { setSettings, refreshData } = useGameContext();
+  
+  const [showNotification, setShowNotification] = useState(() => {
+    return !localStorage.getItem('arkhamdle_tf_notification');
+  });
+
+  const handleCloseNotification = () => {
+    localStorage.setItem('arkhamdle_tf_notification', 'true');
+    setShowNotification(false);
+  };
 
   // Consolidate base pool generation
   const filteredBaseCards = useMemo(() => {
@@ -257,10 +267,9 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
             {type: 'Forced', weight: 1}, {type: 'Objective', weight: 0.2}, 
             {type: 'Resign', weight: 0.2}
           ];
-          console.log('option',options)
           const selectedOption = getWeightedRandom(options);
           
-          if (ACT_KEYWORD_TRAITS. includes(selectedOption)) {
+          if (ACT_KEYWORD_TRAITS.includes(selectedOption)) {
             const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, ACT_KEYWORD_TRAITS);
             if (!displayedValue) return null;
 
@@ -315,9 +324,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
             {type: 'Resign', weight: 0.1},
           ];
           
-          console.log('option',options)
           const selectedOption = getWeightedRandom(options);
-          console.log('opselectedOptiontion',selectedOption)
 
           if (LOCATION_KEYWORD_TRAITS.includes(selectedOption)) {
             const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, LOCATION_KEYWORD_TRAITS);
@@ -403,10 +410,28 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
 
   if (!isPoolReady) {
     return (
-      <div className="true-or-false-container">
+      <div className="true-or-false-container fade-in">
         <div className="trivia-header">
           <h1>True Or False</h1>
           <p>No cards match your current filters and mode settings. Please adjust your settings.</p>
+          
+          {!settings.includeEncounter && (
+            <div className="variety-prompt">
+              <h3>Want more variety?</h3>
+              <p className="variety-prompt-text">
+                True/False mode relies heavily on encounter cards (Enemies, Locations, Treacheries). Enabling campaign cards will provide enough cards to play!
+              </p>
+              <button 
+                className="premium-btn"
+                onClick={() => {
+                  setSettings({ ...settings, includeEncounter: true });
+                  refreshData(true);
+                }}
+              >
+                Download & Enable Campaign Cards (11MB)
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -432,7 +457,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
               cardTypes: 'Enemies and cards with traits',
               answerEvaluation: 'True or False',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: "We will show you a card's name, subname, pack, and XP. You must guess if the displayed information is true or false."
+              howToPlay: `We will show you a card's name, subname, pack, and XP. You must guess if the displayed information is true or false.${!settings.includeEncounter ? " Note: Enabling campaign cards in the Settings greatly enhances this game mode!" : ""}`
             }}
           />
         </div>
@@ -444,7 +469,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
           {question.card.subname && <div className="subname">{question.card.subname}</div>}
           
           <div className="card-details">
-            <span className="detail-badge">{question.card.pack_name}</span>
+            <span className="detail-badge">{getPackDisplayName(question.card.pack_code, question.card.pack_name)}</span>
             {question.type === 'Traits' && question.card.xp !== undefined && question.card.xp !== null && (
               <span className="xp-badge" style={{ background: xpBackground }}>
                 XP: {question.card.xp}
@@ -463,9 +488,8 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
             <img 
               src={`https://arkhamdb.com${question.card.backimagesrc && question.card.typeName==="location"?question.card.backimagesrc : question.card.imagesrc}`} 
               alt={question.card.name} 
-              className={`${['agenda', 'act'].includes(question.card.typeName) ? 'card-preview-image-side' : 'card-preview-image'}`}
+              className={`${['agenda', 'act'].includes(question.card.typeName) ? 'card-preview-image-side' : 'card-preview-image'} ${imageLoaded ? 'loaded' : ''}`}
               onLoad={() => setImageLoaded(true)}
-              style={{ opacity: imageLoaded ? 1 : 0 }}
             />
             <div className={`image-obscure-box-${question.card.typeName}`} />
           </div>
@@ -478,7 +502,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
 
         {!isGameOver && (
           <div className="true-false-actions">
-            <button className="tf-btn btn-true" onClick={() => handleGuess(true)}>True</button>
+            <button className="tf-btn btn-true" onClick={() => handleGuess(true)} autoFocus>True</button>
             <button className="tf-btn btn-false" onClick={() => handleGuess(false)}>False</button>
           </div>
         )}
@@ -487,7 +511,12 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
       {isGameOver && (
         <ResultPanel
           win={win}
-          item={{ fullName: question.card.fullName, imagesrc: question.card.imagesrc }}
+          item={{ 
+            fullName: question.card.fullName, 
+            imagesrc: question.card.imagesrc,
+            backimagesrc: question.card.backimagesrc,
+            typeName: question.card.typeName
+          }}
           onPlayAgain={onPlayAgainOverride || resetGame}
         >
           {question.type === 'Traits' ? (
@@ -496,6 +525,44 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
             <p>The correct answer was: <strong>{question.isTrue ? 'True' : 'False'}</strong></p>
           )}
         </ResultPanel>
+      )}
+      
+      {showNotification && !settings.includeEncounter && (
+        <div className="modal-overlay" onClick={handleCloseNotification}>
+          <div className="modal-content notification-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="title-with-icon">
+                <h2>True / False Mode</h2>
+              </div>
+            </div>
+            <div className="modal-body">
+              <p className="settings-text notification-text-primary">
+                True/False game mode is best experienced with campaign cards enabled!
+              </p>
+              <p className="settings-text notification-text-secondary">
+                Including campaign cards greatly enhances this game mode by providing more variety. Note: this requires downloading 11MB of data. You can toggle these cards off at any time after downloading in Settings.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="premium-btn notification-btn-primary"
+                onClick={() => {
+                  setSettings({ ...settings, includeEncounter: true });
+                  refreshData(true);
+                  handleCloseNotification();
+                }}
+              >
+                Download Now
+              </button>
+              <button
+                className="premium-btn notification-btn-secondary"
+                onClick={handleCloseNotification}
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

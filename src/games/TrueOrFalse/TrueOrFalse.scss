@@ -219,4 +219,72 @@
       }
     }
   }
+
+  .variety-prompt {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid var(--glass-border);
+
+    .variety-prompt-text {
+      text-align: center;
+      max-width: 450px;
+      margin: 0;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+  }
+
+  .notification-modal-content {
+    max-width: 450px !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    
+    .modal-body {
+      flex: none;
+      
+      .notification-text-primary {
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+      }
+      
+      .notification-text-secondary {
+        opacity: 0.8;
+        margin-bottom: 1rem;
+      }
+    }
+    
+    .modal-footer {
+      padding: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      border-top: 1px solid var(--glass-border);
+      
+      .notification-btn-primary {
+        flex: 1;
+      }
+      
+      .notification-btn-secondary {
+        flex: 1;
+        background: transparent;
+        border: 1px solid var(--glass-border);
+      }
+    }
+  }
+}
+
+.card-preview-image, .card-preview-image-side {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  &.loaded {
+    opacity: 1;
+  }
 }

@@ -5,6 +5,7 @@ import type { TransformedCard, GameProps } from '../../types';
 import { filterForCampaignPackGuesser, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
+import { getPackDisplayName } from '../../data/packStructure';
 import './CampaignPackGuesser.scss';
 
 export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps = {}) {
@@ -151,11 +152,9 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
                   <img
                     src={`https://arkhamdb.com${answer.imagesrc}`}
                     alt="Guess this encounter card"
-                    className={win || gaveUp ? 'campaign-pack-image-full' : 'campaign-pack-image-blurred'}
+                    className={`campaign-pack-image ${win || gaveUp ? 'campaign-pack-image-full' : 'campaign-pack-image-blurred'} ${imageLoaded ? 'loaded' : ''}`}
                     style={{
                       filter: (!win && !gaveUp) ? `blur(${settings.campaignPackGuesser.blurAmount}px)` : 'none',
-                      transition: 'filter 0.5s ease-out',
-                      opacity: imageLoaded ? 1 : 0,
                     }}
                     onLoad={() => setImageLoaded(true)}
                   />
@@ -169,7 +168,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
               <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="campaign-pack-result" showImage={false}>
                 <div className="campaign-pack-answer-details">
                   <p><strong>Encounter Set:</strong> {answer?.encounter_name}</p>
-                  <p><strong>Pack:</strong> {answer?.pack_name}</p>
+                  <p><strong>Pack:</strong> {answer ? getPackDisplayName(answer.pack_code, answer.pack_name) : 'Unknown'}</p>
                   <p><strong>Card:</strong> {answer?.name}</p>
                 </div>
               </ResultPanel>
@@ -177,7 +176,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
 
             {settings.enableHints && guesses.length >= 3 && !win && answer && (
               <div className="campaign-pack-hint hint-text">
-                💡 Hint — Pack: {answer.pack_name}
+                💡 Hint — Pack: {getPackDisplayName(answer.pack_code, answer.pack_name)}
               </div>
             )}
 
@@ -200,11 +199,10 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
                     ))}
                   </select>
 
-                  <div style={{ position: 'relative', width: '100%' }}>
+                  <div className="encounter-search-wrapper">
                     <input
                       type="text"
-                      className="campaign-pack-select"
-                      style={{ boxSizing: 'border-box' }}
+                      className="campaign-pack-select search-input"
                       placeholder={selectedPack ? "-- Search Encounter Set --" : "-- Select Pack First --"}
                       value={encounterSearch}
                       onChange={(e) => {
@@ -217,7 +215,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
                       disabled={!selectedPack}
                     />
                     {showEncounterDropdown && selectedPack && (
-                      <div className="guess-suggestions" style={{ marginTop: '0.2rem' }}>
+                      <div className="guess-suggestions">
                         {encounterSuggestions.map(enc => (
                           <div
                             key={enc}

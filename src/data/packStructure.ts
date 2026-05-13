@@ -24,6 +24,27 @@ export const PACK_STRUCTURE: Record<string, string[]> = {
   "core 2026": ["core_2026", "core_2026_encounter"],
 };
 
+export const PACK_NAME_MAPPING: Record<string, string> = {
+  parallel: "Parallel Investigators",
+  return: "Return to Campaign",
+  investigator: "Investigator Starter Decks",
+  side: "Side Scenarios",
+  promo: "Promos",
+  core: "Original Core Set",
+  rcore: "Revised Core Set",
+  dwl: "The Dunwich Legacy",
+  ptc: "The Path to Carcosa",
+  tfa: "The Forgotten Age",
+  tcu: "The Circle Undone",
+  tde: "The Dream Eaters",
+  tic: "The Innsmouth Conspiracy",
+  eoe: "Edge of the Earth",
+  fhv: "The Feast of Hemlock Vale",
+  tsk: "The Scarlet Keys",
+  tdc: "The Drowned City",
+  "core 2026": "Core Set 2026",
+};
+
 /**
  * Builds a reverse lookup map: pack_code → group name.
  * Cards whose pack_code is not in the map should be assigned to "other".
@@ -59,4 +80,13 @@ export function packsAtLeastOneSameOrNewerThan(
   return packCodes.some(
     packCode => PACK_INDEX[packCode] >= targetIndex,
   );
+}
+
+export function getPackDisplayName(packCode: string, defaultName: string): string {
+  const packCodeToGroup = buildPackCodeToGroupMap();
+  const group = packCodeToGroup.get(packCode)?.toLowerCase();
+  if (group && PACK_NAME_MAPPING[group]) {
+    return PACK_NAME_MAPPING[group];
+  }
+  return defaultName;
 }

@@ -169,7 +169,7 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
                     <td className="wordle-guess-cell wordle-name-cell">{g.fullName}</td>
                     {ATTRIBUTES.map(attr => (
                       <td key={attr} className={`wordle-guess-cell ${getAttributeClass(g, attr)}`}>
-                        {Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr]}
+                        {attr === 'slot' && !g[attr] ? 'None' : (Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr])}
                         {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                       </td>
                     ))}
@@ -190,7 +190,7 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
                 {ATTRIBUTES.map(attr => (
                   <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
                     <span className="label">{attr === 'typeName' ? 'Type' : attr}</span>
-                    {Array.isArray(g[attr]) && (g[attr] as (string | number)[]).length > 1 ? (g[attr] as (string | number)[]).join(', ') : (g[attr] as string | number)}
+                    {attr === 'slot' && !g[attr] ? 'None' : (Array.isArray(g[attr]) && (g[attr] as (string | number)[]).length > 1 ? (g[attr] as (string | number)[]).join(', ') : (g[attr] as string | number))}
                     {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                   </div>
                 ))}

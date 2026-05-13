@@ -26,95 +26,26 @@ export default function TrueOrFalseSection({
       </div>
       {isOpen && (
         <div className="settings-section-content settings-column">
-          <label className="setting-item">
-            <div className="setting-label">
-              <span>Cards Trait Mode</span>
-              <span className="setting-description">Ask if a card has certain traits.</span>
-            </div>
-            <div className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={settings.traitMode}
-                onChange={(e) => onChange({ ...settings, traitMode: e.target.checked })}
-              />
-              <span className="toggle-slider"></span>
-            </div>
-          </label>
-
-          <label className="setting-item">
-            <div className="setting-label">
-              <span>Enemy Stats Mode</span>
-              <span className="setting-description">Ask about enemy stats and keywords.</span>
-            </div>
-            <div className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={settings.enemyStatsMode}
-                onChange={(e) => onChange({ ...settings, enemyStatsMode: e.target.checked })}
-              />
-              <span className="toggle-slider"></span>
-            </div>
-          </label>
-
-          <label className="setting-item">
-            <div className="setting-label">
-              <span>Location Mode</span>
-              <span className="setting-description">Ask about location clues, shroud and keywords.</span>
-            </div>
-            <div className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={settings.locationTraitsMode}
-                onChange={(e) => onChange({ ...settings, locationTraitsMode: e.target.checked })}
-              />
-              <span className="toggle-slider"></span>
-            </div>
-          </label>
-
-          <label className="setting-item">
-            <div className="setting-label">
-              <span>Act and Agenda Mode</span>
-              <span className="setting-description">Ask about Act stats and keywords.</span>
-            </div>
-            <div className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={settings.actTraitsMode}
-                onChange={(e) => onChange({ ...settings, actTraitsMode: e.target.checked })}
-              />
-              <span className="toggle-slider"></span>
-            </div>
-          </label>
-
-          <label className="setting-item">
-            <div className="setting-label">
-              <span>Agenda Mode</span>
-              <span className="setting-description">Ask about agenda stats and keywords.</span>
-            </div>
-            <div className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={settings.agendaTraitsMode}
-                onChange={(e) => onChange({ ...settings, agendaTraitsMode: e.target.checked })}
-              />
-              <span className="toggle-slider"></span>
-            </div>
-          </label>
-
-          <label className="setting-item">
-            <div className="setting-label">
-              <span>Treachery Mode</span>
-              <span className="setting-description">Ask about treachery cards keywords.</span>
-            </div>
-            <div className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={settings.treacheryTraitsMode}
-                onChange={(e) => onChange({ ...settings, treacheryTraitsMode: e.target.checked })}
-              />
-              <span className="toggle-slider"></span>
-            </div>
-          </label>
+          <div className="pack-grid">
+            <button className={`pack-btn ${settings.traitMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, traitMode: !settings.traitMode })}>
+              Cards Trait Mode
+            </button>
+            <button className={`pack-btn ${settings.enemyStatsMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, enemyStatsMode: !settings.enemyStatsMode })}>
+              Enemy Stats Mode
+            </button>
+            <button className={`pack-btn ${settings.locationTraitsMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, locationTraitsMode: !settings.locationTraitsMode })}>
+              Location Mode
+            </button>
+            <button className={`pack-btn ${settings.actTraitsMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, actTraitsMode: !settings.actTraitsMode })}>
+              Act & Agenda Mode
+            </button>
+            <button className={`pack-btn ${settings.agendaTraitsMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, agendaTraitsMode: !settings.agendaTraitsMode })}>
+              Agenda Mode
+            </button>
+            <button className={`pack-btn ${settings.treacheryTraitsMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, treacheryTraitsMode: !settings.treacheryTraitsMode })}>
+              Treachery Mode
+            </button>
+          </div>
 
           <PackFilterControls
             packs={packs}

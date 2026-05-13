@@ -43,8 +43,7 @@ const CampaignPackGuesserSection: React.FC<CampaignPackGuesserSectionProps> = ({
               step="1"
               value={blurAmount}
               onChange={(e) => onBlurAmountChange(parseInt(e.target.value, 10))}
-              className="range-slider"
-              style={{ width: '120px' }}
+              className="range-slider w-120"
             />
           </div>
 
