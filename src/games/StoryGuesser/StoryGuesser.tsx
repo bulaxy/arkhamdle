@@ -108,7 +108,7 @@ export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
 
     if (settings.storyGuesser.hideName) {
       // Split name by spaces and match each part, including possessives
-      const nameParts = answer.name.split(' ');
+      const nameParts = answer.name.replace(/"/g, '').split(' ');
       nameParts.forEach(part => {
         if (part.length < 2) return; // Skip very short parts
         const escapedPart = part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
