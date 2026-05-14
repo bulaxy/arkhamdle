@@ -120,6 +120,9 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
               </a>
             </div>
           </div>
+          <div className="copyright-footer">
+            <p>Arkham Horror: The Card Game™ and all related content © Fantasy Flight Games (FFG). This site is not produced, endorsed by or affiliated with FFG.</p>
+          </div>
         </div>
       </div>
     </div>

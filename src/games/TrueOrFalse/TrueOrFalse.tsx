@@ -283,7 +283,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
             if (fakeValue === null) return null;
 
             return {
-              card: randomCard, isTrue, questionText: `How many clue (per investigator) is required to advance of this Act ${fakeValue}?`,
+              card: randomCard, isTrue, questionText: `How many clue (per investigator) is required to advance of this Act? Is it ${fakeValue}?`,
               displayedValue: '', type: selectedOption
             };
           }

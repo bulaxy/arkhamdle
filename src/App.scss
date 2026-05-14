@@ -270,3 +270,23 @@
 .settings-mobile-link {
   display: none;
 }
+
+.copyright-footer {
+  padding: 1rem 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.55rem;
+  opacity: 0.6;
+  margin-top: auto;
+
+  p {
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 1024px) {
+  .copyright-footer {
+    display: none;
+  }
+}
