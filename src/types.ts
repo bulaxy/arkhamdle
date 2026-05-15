@@ -103,6 +103,7 @@ export interface AppSettings {
   countGuesser: CountGuesserSettings;
   iconGuesser: BaseGameSettings;
   trueOrFalse: TrueOrFalseSettings;
+  seed?: string;
   randomTrivia: RandomTriviaSettings;
 }
 

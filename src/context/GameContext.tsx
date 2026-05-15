@@ -12,6 +12,7 @@ import type {
 import { TypeName as TypeNameEnum } from "../types/arkham";
 
 import { GameContext } from './GameContextDefinition';
+import { initializeSeed } from "../utils/random";
 
 const defaultBaseGameSettings = {
   useGlobalPackFilter: true,
@@ -155,6 +156,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const setSettings = (newSettings: AppSettings) => {
     setSettingsState(newSettings);
     localforage.setItem("arkhamdle_settings", newSettings);
+    initializeSeed(newSettings.seed);
   };
 
   const loadData = React.useCallback(async (forceRefresh = false, includeEncounter = settings.includeEncounter) => {
@@ -196,6 +198,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           ...defaultSettings,
           ...savedSettings,
         });
+        initializeSeed(savedSettings.seed);
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {
         // If no settings or old structure, revert to defaults

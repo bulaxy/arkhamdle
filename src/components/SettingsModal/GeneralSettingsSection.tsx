@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash } from "lucide-react";
 import { useGameContext } from "../../hooks/useGameContext";
 import { useStats } from "../../context/StatsContext";
+import type { AppSettings } from "../../types";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;
@@ -134,6 +135,108 @@ export default function GeneralSettingsSection({
               >
                 <RefreshCw size={18} /> Force Refresh Data
               </button>
+            </div>
+          </div>
+
+          {/* Competition & Seed Section */}
+          <div className="settings-group">
+            <label className="settings-text">Competition & Seed</label>
+            <div className="settings-info-box">
+              <div className="info-header">
+                <Info size={16} />
+                <span>How to Compete</span>
+              </div>
+              <p className="settings-text smaller">
+                To compete with others:
+                <br />
+                1. Select the <strong>Game Mode</strong> you will be playing.
+                <br />
+                2. <strong>Export</strong> your settings and share the file.
+                <br />
+                3. Others should <strong>Import</strong> the settings file.
+                <br />
+                4. Everyone enters the <strong>same Seed</strong> last.
+              </p>
+            </div>
+
+            <div className="setting-item no-border">
+              <div className="setting-label">
+                <span>Game Seed</span>
+                <span className="setting-description">Ensure everyone uses the same seed for identical results</span>
+              </div>
+              <div className="seed-input-wrapper">
+                <Hash size={16} className="input-icon" />
+                <input
+                  type="text"
+                  className="seed-input"
+                  placeholder="Enter seed (e.g. daily-123)"
+                  value={settings.seed || ""}
+                  onChange={(e) => setSettings({ ...settings, seed: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="button-row tight">
+              <button
+                className="premium-btn full-width"
+                onClick={() => {
+                  const dataStr = JSON.stringify(settings, null, 2);
+                  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                  const exportFileDefaultName = `arkhamdle_settings_${new Date().toISOString().split('T')[0]}.json`;
+
+                  const linkElement = document.createElement('a');
+                  linkElement.setAttribute('href', dataUri);
+                  linkElement.setAttribute('download', exportFileDefaultName);
+                  linkElement.click();
+                }}
+              >
+                <Download size={18} /> Export Settings
+              </button>
+
+              <div className="file-input-wrapper full-width">
+                <button className="premium-btn full-width">
+                  <Upload size={18} /> Import Settings
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden-file-input"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      const reader = new FileReader();
+                      reader.onload = async (event) => {
+                        try {
+                          const content = event.target?.result as string;
+                          const importedSettings = JSON.parse(content) as AppSettings;
+
+                          // Basic validation
+                          if (!importedSettings.wordle) {
+                            throw new Error("Invalid settings file");
+                          }
+
+                          // Check if we need to load encounter cards
+                          if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                            if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                              setSettings(importedSettings);
+                              await refreshData(true);
+                            } else {
+                              setSettings({ ...importedSettings, includeEncounter: false });
+                            }
+                          } else {
+                            setSettings(importedSettings);
+                          }
+                          alert("Settings imported successfully!");
+                        } catch (err) {
+                          console.error(err);
+                          alert("Failed to import settings. Please make sure it's a valid JSON file.");
+                        }
+                      };
+                      reader.readAsText(file);
+                    }}
+                  />
+                </button>
+              </div>
             </div>
           </div>
         </div>

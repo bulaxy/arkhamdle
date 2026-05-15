@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
@@ -81,7 +82,7 @@ export default function IconGuesser({ onPlayAgainOverride, streakModeName }: Gam
   const handleSkillChange = (skill: SkillKey, value: string) => {
     // Allow empty string or non-negative integers only
     if (value === '' || /^\d+$/.test(value)) {
-      setSkillGuesses(prev => ({ ...prev, [skill]: value }));
+      setSkillGuesses((prev: Record<SkillKey, string>) => ({ ...prev, [skill]: value }));
     }
   };
 

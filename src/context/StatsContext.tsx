@@ -14,6 +14,10 @@ interface Stats {
   modeStats: Record<string, ModeStats>;
 }
 
+interface LegacyStats extends Stats {
+  modeStreaks?: Record<string, number>;
+}
+
 interface StatsContextType {
   stats: Stats;
   reportResult: (modes: string | string[], won: boolean) => void;
@@ -86,13 +90,13 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const savedStats = await localforage.getItem<Stats>("arkhamdle_stats");
       if (savedStats) {
         // Migration check: if old format, convert to new
-        if (savedStats.modeStreaks && !savedStats.modeStats) {
+        if ((savedStats as LegacyStats).modeStreaks && !savedStats.modeStats) {
           const migrated: Stats = {
             globalStreak: savedStats.globalStreak || 0,
             globalBestStreak: savedStats.globalStreak || 0,
             modeStats: {},
           };
-          Object.entries(savedStats.modeStreaks as Record<string, number>).forEach(([mode, streak]) => {
+          Object.entries((savedStats as LegacyStats).modeStreaks as Record<string, number>).forEach(([mode, streak]) => {
             migrated.modeStats[mode] = { streak, bestStreak: streak, wins: streak, losses: 0 };
           });
           setStats(migrated);
@@ -195,6 +199,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useStats = () => {
   const context = useContext(StatsContext);
   if (!context) {

@@ -103,7 +103,8 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
         setDuplicateWarning("There are more than 1 card that looks exactly like that");
       }
     }
-  };
+  }
+};
 
   const handleGiveUp = () => {
     setGaveUp(true);
