@@ -106,6 +106,13 @@ export interface DeduplicateCriteria {
   pack?: boolean;
   class?: boolean;
   xp?: boolean;
+  health?: boolean;
+  sanity?: boolean;
+  agility?: boolean;
+  combat?: boolean;
+  intellect?: boolean;
+  willpower?: boolean;
+  traits?: boolean;
 }
 
 /**
@@ -118,7 +125,7 @@ export const GAME_EVALUATION_CRITERIA = {
   traitGuesserCard: { name: true, pack: true, class: true },
   storyGuesser: { class: true, pack: true, name: true },
   flavourGuesser: { class: true, pack: true, name: true, xp: true },
-  investigatordle: { name: true, pack: true, class: true },
+  investigatordle: { name: true, class: true, health: true, sanity: true, agility: true, combat: true, intellect: true, willpower: true, traits: true },
   campaignPackGuesser: { name: true, pack: true, class: true },
 } as const;
 
@@ -153,6 +160,35 @@ function buildKeyFromCriteria(
   if (criteria.xp) {
     const xp = 'xp' in card ? card.xp : 0;
     parts.push(String(xp ?? 0));
+  }
+
+  if (criteria.health) {
+    parts.push(String(card.health ?? 0));
+  }
+
+  if (criteria.sanity) {
+    parts.push(String(card.sanity ?? 0));
+  }
+
+  if (criteria.agility) {
+    parts.push(String(card.agility ?? 0));
+  }
+
+  if (criteria.combat) {
+    parts.push(String(card.combat ?? 0));
+  }
+
+  if (criteria.intellect) {
+    parts.push(String(card.intellect ?? 0));
+  }
+
+  if (criteria.willpower) {
+    parts.push(String(card.willpower ?? 0));
+  }
+
+  if (criteria.traits) {
+    const traits = [...(card.traits || [])].sort();
+    parts.push(traits.join(','));
   }
 
   return parts.join('|');

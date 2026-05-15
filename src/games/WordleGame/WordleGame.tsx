@@ -17,6 +17,7 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
   const gameCards = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'wordle');
@@ -46,6 +47,7 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setDuplicateWarning(null);
     setGuesses([]);
     setAnswer(gameCards[Math.floor(Math.random() * gameCards.length)]);
   }, [gameCards]);
@@ -69,8 +71,26 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
     console.log('[WordleGame] Guess:', card);
     if (guesses.some(g => g.id === card.id)) return;
     setGuesses([card, ...guesses]);
+    setDuplicateWarning(null);
+
     if (card.id === answer?.id) {
       setWin(true);
+    } else if (answer) {
+      // Check if all attributes match
+      const allMatch = ATTRIBUTES.every(attr => {
+        const ansVal = answer[attr];
+        const guessVal = card[attr];
+
+        const ansArray = Array.isArray(ansVal) ? [...ansVal].sort() : [ansVal];
+        const guessArray = Array.isArray(guessVal) ? [...guessVal].sort() : [guessVal];
+
+        if (ansArray.length !== guessArray.length) return false;
+        return ansArray.every((el, idx) => el === guessArray[idx]);
+      });
+
+      if (allMatch) {
+        setDuplicateWarning("There are more than 1 card that looks exactly like that");
+      }
     }
   };
 
@@ -139,6 +159,11 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
             giveUpThreshold={5}
             getDisplayText={getDisplayText}
           />
+          {duplicateWarning && (
+            <div className="wordle-warning fade-in">
+              {duplicateWarning}
+            </div>
+          )}
         </div>
       )}
 

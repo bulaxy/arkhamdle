@@ -109,7 +109,7 @@ export default function Investigatordle({ onPlayAgainOverride }: GameProps = {})
             gameRules={{
               title: 'Investigatordle',
               cardTypes: 'Investigator (only)',
-              answerEvaluation: 'Must match: Name, Pack, Class',
+              answerEvaluation: 'Must match: Name, Stats, Health, Sanity, Traits',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
               howToPlay: "Enter an investigator's name to see how their profile compares to the hidden target. Match stats (Willpower, Intellect, Combat, Agility), health, sanity, and traits. Arrows help you narrow down the exact numbers. Special investigators from certain campaigns may also be featured!"
             }}
