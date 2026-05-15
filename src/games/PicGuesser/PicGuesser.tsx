@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -9,8 +10,10 @@ import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import { getPackDisplayName } from '../../data/packStructure';
 
-export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
+export default function PicGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'Pic Guesser';
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
@@ -20,6 +23,7 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const [offsetX, setOffsetX] = useState(150); 
   const [offsetY, setOffsetY] = useState(150); 
   const [gaveUp, setGaveUp] = useState(false);
+  const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // PicGuesser does NOT filter duplicate_of_code — exception per task spec
@@ -53,6 +57,7 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setHasReportedStreakLoss(false);
     setGuesses([]);
     setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
     setOffsetX(Math.floor(Math.random() * 301) - 150);
@@ -86,12 +91,25 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
     if (card.id === answer?.id) {
       setWin(true);
       setShowFull(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setAnimation('shakeAnimation');
       setTimeout(() => setAnimation(''), 300);
       if (sizeMultiplier > 2) {
         setSizeMultiplier(prev => Math.max(2, prev - zoomOutRate));
       }
+      if (!hasReportedStreakLoss && newGuesses.length === 6) {
+        reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+        setHasReportedStreakLoss(true);
+      }
+    }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    if (!hasReportedStreakLoss) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      setHasReportedStreakLoss(true);
     }
   };
 
@@ -178,7 +196,7 @@ export default function PicGuesser({ onPlayAgainOverride }: GameProps = {}) {
                   guesses={guesses}
                   onGuess={submitGuess}
                   placeholder="Type card name..."
-                  onGiveUp={() => setGaveUp(true)}
+                  onGiveUp={handleGiveUp}
                   giveUpThreshold={5}
                   getDisplayText={getDisplayText}
                   getOptionColors={getCardFactionColors}

@@ -4,13 +4,16 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.scss'
 import { GameProvider } from './context/GameContext'
+import { StatsProvider } from './context/StatsContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <GameProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <StatsProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </StatsProvider>
     </GameProvider>
   </React.StrictMode>,
 )

@@ -99,7 +99,7 @@ export default function RandomTrivia() {
 
   return (
     <div className="random-trivia-wrapper fade-in">
-      <GameComponent key={gameKey} onPlayAgainOverride={pickRandomGame} />
+      <GameComponent key={gameKey} onPlayAgainOverride={pickRandomGame} streakModeName="Random Trivia" />
     </div>
   );
 }

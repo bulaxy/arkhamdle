@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -11,8 +12,10 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 const ATTRIBUTES = ['class', 'health', 'sanity', 'willpower', 'intellect', 'combat', 'agility', 'traits'] as const;
 
 
-export default function Investigatordle({ onPlayAgainOverride }: GameProps = {}) {
+export default function Investigatordle({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'Investigatordle';
 
   const gameInvestigators = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'investigatordle');
@@ -35,10 +38,12 @@ export default function Investigatordle({ onPlayAgainOverride }: GameProps = {})
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
 
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setHasReportedStreakLoss(false);
     setGuesses([]);
     setAnswer(gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)]);
   }, [gameInvestigators]);
@@ -61,9 +66,25 @@ export default function Investigatordle({ onPlayAgainOverride }: GameProps = {})
   const submitGuess = (card: TransformedCard) => {
     console.log('[Investigatordle] Guess:', card);
     if (guesses.some(g => g.id === card.id)) return;
-    setGuesses([card, ...guesses]);
     if (card.id === answer?.id) {
+      setGuesses([card, ...guesses]);
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+    } else {
+      const newGuesses = [card, ...guesses];
+      setGuesses(newGuesses);
+      if (!hasReportedStreakLoss && newGuesses.length === 6) {
+        reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+        setHasReportedStreakLoss(true);
+      }
+    }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    if (!hasReportedStreakLoss) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      setHasReportedStreakLoss(true);
     }
   };
 
@@ -126,11 +147,15 @@ export default function Investigatordle({ onPlayAgainOverride }: GameProps = {})
             guesses={guesses}
             onGuess={submitGuess}
             placeholder="Type investigator name..."
-            onGiveUp={() => setGaveUp(true)}
+            onGiveUp={handleGiveUp}
             giveUpThreshold={5}
             getDisplayText={getDisplayText}
             getOptionColors={getCardFactionColors}
           />
+          <div className="guess-limit-note">
+            <span>Attempts: {guesses.length} / 6</span>
+            {guesses.length >= 4 && <span className="warning-text"> (Win streak lost if 6th guess is wrong)</span>}
+          </div>
         </div>
       )}
 

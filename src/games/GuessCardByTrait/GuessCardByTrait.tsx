@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { filterBySettings, filterDuplicateOfCode, getCardFactionColors } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -9,8 +10,10 @@ import MultipleChoiceGrid from '../../components/MultipleChoiceGrid/MultipleChoi
 import { generateWhichCardQuestion, type TriviaQuestion } from '../shared/trivia/triviaLogic';
 import './GuessCardByTrait.scss';
 
-export default function GuessCardByTrait({ onPlayAgainOverride }: GameProps = {}) {
+export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'Guess Card By Trait';
 
   const [question, setQuestion] = useState<TriviaQuestion | null>(null);
   const [win, setWin] = useState(false);
@@ -89,18 +92,27 @@ export default function GuessCardByTrait({ onPlayAgainOverride }: GameProps = {}
     if (win || gaveUp) return;
     if (option === question?.correctAnswer) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setGaveUp(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
     }
   };
 
   const handleCardGuess = (card: TransformedCard) => {
-    if (!question) return;
+    if (!question || win || gaveUp) return;
     if (card.id === question.correctAnswer) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setGaveUp(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
     }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
   };
 
   if (pool.length === 0) {
@@ -159,7 +171,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride }: GameProps = {}
               guesses={[]}
               onGuess={handleCardGuess}
               placeholder="Type card name..."
-              onGiveUp={() => setGaveUp(true)}
+              onGiveUp={handleGiveUp}
               giveUpThreshold={1} // give up button always visible essentially
               getDisplayText={(c) => c.name}
               getOptionColors={getCardFactionColors}
@@ -169,7 +181,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride }: GameProps = {}
 
         {!isGameOver && settings.guessCardByTrait.inputMode !== 'Direct Input' && (
           <div className="trivia-actions">
-            <button className="premium-btn guess-give-up" onClick={() => setGaveUp(true)}>Give Up</button>
+            <button className="premium-btn guess-give-up" onClick={handleGiveUp}>Give Up</button>
           </div>
         )}
       </div>

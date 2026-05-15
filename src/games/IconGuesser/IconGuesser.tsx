@@ -1,5 +1,5 @@
-import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { filterBySettings, filterForIconGuesser } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -18,8 +18,10 @@ const SKILL_LABELS: Record<SkillKey, string> = {
   wild: '⭐ Wild',
 };
 
-export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
+export default function IconGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'Icon Guesser';
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [win, setWin] = useState(false);
   const [lose, setLose] = useState(false);
@@ -95,9 +97,11 @@ export default function IconGuesser({ onPlayAgainOverride }: GameProps = {}) {
     if (isCorrect) {
       setWin(true);
       setShowFull(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setLose(true);
       setShowFull(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
     }
   };
 

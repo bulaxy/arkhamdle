@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import { type TransformedCard, type GameProps, type TrueOrFalseSettings, TypeName } from '../../types';
 import { filterBySettings, filterDuplicateOfCode, getCardFactionColors } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -106,10 +107,10 @@ function getKeywordDisplayValue(
     : pool[Math.floor(Math.random() * pool.length)];
 }
 
-export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
+export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
-  const tfSettings = settings.trueOrFalse as TrueOrFalseSettings;
-
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'True or False';
   const [question, setQuestion] = useState<GameQuestion | null>(null);
   const [win, setWin] = useState(false);
   const [lose, setLose] = useState(false);
@@ -401,10 +402,13 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
 
   const handleGuess = (guessTrue: boolean) => {
     if (win || lose) return;
-    if (guessTrue === question?.isTrue) {
+    const isCorrect = guessTrue === question?.isTrue;
+    if (isCorrect) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setLose(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
     }
   };
 

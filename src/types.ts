@@ -15,6 +15,7 @@ declare global {
 
 export interface GameProps {
   onPlayAgainOverride?: () => void;
+  streakModeName?: string;
 }
 
 export interface BaseGameSettings {

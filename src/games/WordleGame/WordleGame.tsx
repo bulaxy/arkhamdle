@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -11,12 +12,15 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 const ATTRIBUTES = ['typeName', 'class', 'xp', 'traits', 'slot', 'cost', 'willpower', 'intellect', 'combat', 'agility', 'wild'] as const;
 
 
-export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
+export default function WordleGame({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'Classic Mode';
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
   const gameCards = useMemo(() => {
@@ -47,6 +51,7 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setHasReportedStreakLoss(false);
     setDuplicateWarning(null);
     setGuesses([]);
     setAnswer(gameCards[Math.floor(Math.random() * gameCards.length)]);
@@ -75,7 +80,13 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
 
     if (card.id === answer?.id) {
       setWin(true);
-    } else if (answer) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+    } else {
+      if (!hasReportedStreakLoss && guesses.length === 5) { 
+        reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+        setHasReportedStreakLoss(true);
+      }
+      if (answer) {
       // Check if all attributes match
       const allMatch = ATTRIBUTES.every(attr => {
         const ansVal = answer[attr];
@@ -91,6 +102,14 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
       if (allMatch) {
         setDuplicateWarning("There are more than 1 card that looks exactly like that");
       }
+    }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    if (!hasReportedStreakLoss) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      setHasReportedStreakLoss(true);
     }
   };
 
@@ -155,10 +174,14 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
             guesses={guesses}
             onGuess={submitGuess}
             placeholder="Type card name..."
-            onGiveUp={() => setGaveUp(true)}
+            onGiveUp={handleGiveUp}
             giveUpThreshold={5}
             getDisplayText={getDisplayText}
           />
+          <div className="guess-limit-note">
+            <span>Attempts: {guesses.length} / 6</span>
+            {guesses.length >= 4 && <span className="warning-text"> (Win streak lost if 6th guess is wrong)</span>}
+          </div>
           {duplicateWarning && (
             <div className="wordle-warning fade-in">
               {duplicateWarning}

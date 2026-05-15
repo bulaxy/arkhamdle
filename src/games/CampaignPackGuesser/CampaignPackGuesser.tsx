@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { filterForCampaignPackGuesser, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -8,12 +9,15 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import { getPackDisplayName } from '../../data/packStructure';
 import './CampaignPackGuesser.scss';
 
-export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps = {}) {
+export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'Campaign Pack Guesser';
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
   const [animation, setAnimation] = useState('');
   
   const [selectedPack, setSelectedPack] = useState<string>('');
@@ -64,6 +68,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setHasReportedStreakLoss(false);
     setGuesses([]);
     setSelectedPack('');
     setSelectedEncounter('');
@@ -100,11 +105,24 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
     
     if (selectedEncounter === answer?.encounter_name) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setAnimation('shakeAnimation');
       setTimeout(() => setAnimation(''), 300);
       setSelectedEncounter('');
       setEncounterSearch('');
+      if (!hasReportedStreakLoss && newGuesses.length === 6) {
+        reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+        setHasReportedStreakLoss(true);
+      }
+    }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    if (!hasReportedStreakLoss) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      setHasReportedStreakLoss(true);
     }
   };
 
@@ -247,7 +265,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride }: GameProps =
                   {guesses.length >= 5 && (
                     <button
                       className="premium-btn give-up-btn"
-                      onClick={() => setGaveUp(true)}
+                      onClick={handleGiveUp}
                     >
                       Give Up
                     </button>

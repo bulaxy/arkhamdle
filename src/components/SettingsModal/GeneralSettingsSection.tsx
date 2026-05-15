@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info } from "lucide-react";
 import { useGameContext } from "../../hooks/useGameContext";
+import { useStats } from "../../context/StatsContext";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;
@@ -14,7 +15,9 @@ export default function GeneralSettingsSection({
   onClose,
 }: GeneralSettingsSectionProps) {
   const { settings, setSettings, refreshData } = useGameContext();
+  const { stats, stopStreak, clearRecord } = useStats();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
 
   return (
     <div className="settings-section">
@@ -58,6 +61,51 @@ export default function GeneralSettingsSection({
             </label>
           )}
 
+          {/* Win Streaks Section */}
+          <div className="settings-group">
+            <label className="settings-text">Win Streaks & Records</label>
+            <div className="settings-info-box">
+              <div className="info-header">
+                <Info size={16} />
+                <span>Streak Rules</span>
+              </div>
+              <ul className="info-list">
+                <li><strong>Wordle / Investigatordle:</strong> Loss triggered on 6th wrong guess or give up.</li>
+                <li><strong>Story / Flavour / Trait:</strong> Any wrong guess breaks the streak immediately.</li>
+                <li><strong>Trivia / Count / Icon:</strong> Single-attempt modes; any error resets the streak.</li>
+                <li><strong>Random Trivia:</strong> Wins count for both the specific game and Random mode.</li>
+              </ul>
+            </div>
+            <div className="button-row tight">
+              <button
+                className="premium-btn full-width"
+                onClick={() => setShowStatsModal(true)}
+              >
+                <BarChart2 size={18} /> View Records
+              </button>
+              <button
+                className="premium-btn full-width delete-btn"
+                onClick={() => {
+                  if (confirm("Reset current streaks to zero? (Overall records will be kept)")) {
+                    stopStreak();
+                  }
+                }}
+              >
+                <StopCircle size={18} /> Stop Streak
+              </button>
+              <button
+                className="premium-btn full-width delete-btn"
+                onClick={() => {
+                  if (confirm("Are you sure you want to PERMANENTLY clear all records and streaks?")) {
+                    clearRecord();
+                  }
+                }}
+              >
+                <Trash2 size={18} /> Clear Record
+              </button>
+            </div>
+          </div>
+
           <div className="settings-group">
             <label className="settings-text">Data Management</label>
             <div className="button-row tight">
@@ -86,6 +134,67 @@ export default function GeneralSettingsSection({
               >
                 <RefreshCw size={18} /> Force Refresh Data
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStatsModal && (
+        <div className="modal-overlay confirm-modal-overlay" onClick={() => setShowStatsModal(false)}>
+          <div className="modal-content confirm-modal-content stats-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Win Statistics</h2>
+            </div>
+            <div className="modal-body">
+              <div className="stats-summary">
+                <div className="stats-item">
+                  <span className="stats-label">Current Streak</span>
+                  <span className="stats-value">{stats.globalStreak}</span>
+                </div>
+                <div className="stats-item">
+                  <span className="stats-label">Longest Streak</span>
+                  <span className="stats-value highlight">{stats.globalBestStreak || 0}</span>
+                </div>
+              </div>
+              <div className="stats-table-wrapper">
+                <table className="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Game Mode</th>
+                      <th>Streak</th>
+                      <th>Best</th>
+                      <th>Win %</th>
+                      <th>W/L</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(stats.modeStats).length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center">No records yet. Go play some games!</td>
+                      </tr>
+                    ) : (
+                      Object.entries(stats.modeStats)
+                        .sort((a, b) => b[1].wins - a[1].wins)
+                        .map(([mode, data]) => {
+                          const total = data.wins + data.losses;
+                          const winRate = total > 0 ? ((data.wins / total) * 100).toFixed(1) : "0.0";
+                          return (
+                            <tr key={mode}>
+                              <td>{mode}</td>
+                              <td>{data.streak}</td>
+                              <td>{data.bestStreak || 0}</td>
+                              <td>{winRate}%</td>
+                              <td>{data.wins}/{data.losses}</td>
+                            </tr>
+                          );
+                        })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="premium-btn" onClick={() => setShowStatsModal(false)}>Close</button>
             </div>
           </div>
         </div>

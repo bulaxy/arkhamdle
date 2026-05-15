@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -7,13 +8,16 @@ import './TraitGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function TraitGuesser({ onPlayAgainOverride }: GameProps = {}) {
+export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = streakModeName || 'Trait Guesser';
   const [trait, setTrait] = useState<string>('');
   const [win, setWin] = useState(false);
   const [correctGuesses, setCorrectGuesses] = useState<TransformedCard[]>([]);
   const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
+  const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
 
   const allPossibleOptions = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'traitGuesser');
@@ -71,6 +75,7 @@ export default function TraitGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setHasReportedStreakLoss(false);
     setCorrectGuesses([]);
     setWrongGuesses([]);
 
@@ -108,12 +113,26 @@ export default function TraitGuesser({ onPlayAgainOverride }: GameProps = {}) {
         setCorrectGuesses(newGuesses);
         if (newGuesses.length >= requiredGuesses) {
           setWin(true);
+          reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
         }
       }
     } else {
       if (!wrongGuesses.find(c => c.name === item.name)) {
-        setWrongGuesses([item, ...wrongGuesses]);
+        const newWrong = [item, ...wrongGuesses];
+        setWrongGuesses(newWrong);
+        if (!hasReportedStreakLoss) {
+          reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+          setHasReportedStreakLoss(true);
+        }
       }
+    }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    if (!hasReportedStreakLoss) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      setHasReportedStreakLoss(true);
     }
   };
 
@@ -187,7 +206,7 @@ export default function TraitGuesser({ onPlayAgainOverride }: GameProps = {}) {
               guesses={[...correctGuesses, ...wrongGuesses]}
               onGuess={submitGuess}
               placeholder="Type name..."
-              onGiveUp={() => setGaveUp(true)}
+              onGiveUp={handleGiveUp}
               giveUpThreshold={5}
               className="trait-input-wrapper"
               getDisplayText={getDisplayText}
