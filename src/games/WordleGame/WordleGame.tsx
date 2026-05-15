@@ -8,7 +8,7 @@ import './WordleGame.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-const ATTRIBUTES = ['typeName', 'class', 'xp', 'traits', 'slot', 'cost', 'agility', 'combat', 'intellect', 'wild', 'willpower'] as const;
+const ATTRIBUTES = ['typeName', 'class', 'xp', 'traits', 'slot', 'cost', 'willpower', 'intellect', 'combat', 'agility', 'wild'] as const;
 
 
 export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
@@ -156,11 +156,11 @@ export default function WordleGame({ onPlayAgainOverride }: GameProps = {}) {
                   <th>Traits</th>
                   <th>Slot</th>
                   <th>Cost</th>
-                  <th>Agi</th>
-                  <th>Cmb</th>
-                  <th>Int</th>
-                  <th>Wld</th>
                   <th>Wil</th>
+                  <th>Int</th>
+                  <th>Cmb</th>
+                  <th>Agi</th>
+                  <th>Wld</th>
                 </tr>
               </thead>
               <tbody>

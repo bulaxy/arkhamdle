@@ -8,7 +8,7 @@ import './Investigatordle.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-const ATTRIBUTES = ['class', 'health', 'sanity', 'agility', 'combat', 'intellect', 'willpower', 'traits'] as const;
+const ATTRIBUTES = ['class', 'health', 'sanity', 'willpower', 'intellect', 'combat', 'agility', 'traits'] as const;
 
 
 export default function Investigatordle({ onPlayAgainOverride }: GameProps = {}) {
@@ -145,10 +145,10 @@ export default function Investigatordle({ onPlayAgainOverride }: GameProps = {})
                   <th>Faction</th>
                   <th>Health</th>
                   <th>Sanity</th>
-                  <th>Agi</th>
-                  <th>Cmb</th>
-                  <th>Int</th>
                   <th>Wil</th>
+                  <th>Int</th>
+                  <th>Cmb</th>
+                  <th>Agi</th>
                   <th>Traits</th>
                 </tr>
               </thead>
