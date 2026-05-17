@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import PackFilterControls from "./PackFilterControls";
+import MaxGuessesControl from "./MaxGuessesControl";
 import type { BaseGameSettings } from "../../types";
 
 interface WordleSectionProps {
@@ -46,6 +47,8 @@ export default function WordleSection({
             onIncludeBondedCardChange={(val) => onChange({ ...settings, includeBondedCard: val })}
             title="Card Filters"
           />
+          <hr className="settings-divider" />
+          <MaxGuessesControl settings={settings} onChange={onChange} />
         </div>
       )}
     </div>

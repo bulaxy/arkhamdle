@@ -1,6 +1,10 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users, Copy, Clipboard, Dices } from "lucide-react";
 import { useGameContext } from "../../hooks/useGameContext";
+import { useStats } from "../../context/StatsContext";
+import type { AppSettings } from "../../types";
+import StatsModal from "../StatsModal/StatsModal";
+import { generateRandomThematicSeed } from "../../utils/random";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;
@@ -13,8 +17,23 @@ export default function GeneralSettingsSection({
   onToggle,
   onClose,
 }: GeneralSettingsSectionProps) {
-  const { settings, setSettings, refreshData } = useGameContext();
+  const { settings, setSettings, refreshData, applySeed } = useGameContext();
+  const { stopStreak, clearRecord } = useStats();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [prevSeed, setPrevSeed] = useState(settings.seed || "");
+  const [localSeed, setLocalSeed] = useState(settings.seed || "");
+
+  const currentSeed = settings.seed || "";
+  if (currentSeed !== prevSeed) {
+    setPrevSeed(currentSeed);
+    setLocalSeed(currentSeed);
+  }
+
+  const handleGenerateRandomSeed = () => {
+    const newSeed = generateRandomThematicSeed();
+    setLocalSeed(newSeed);
+  };
 
   return (
     <div className="settings-section">
@@ -58,8 +77,78 @@ export default function GeneralSettingsSection({
             </label>
           )}
 
+          {/* Win Streaks Section */}
+          <hr className="settings-divider" />
           <div className="settings-group">
-            <label className="settings-text">Data Management</label>
+            <div className="settings-group-header">
+              <Trophy size={18} />
+              <span>Win Streaks & Records</span>
+            </div>
+            <div className="settings-info-box">
+              <div className="info-header">
+                <Info size={16} />
+                <span>Streak Rules</span>
+              </div>
+              <ul className="info-list">
+                <li><strong>Wordle / Investigatordle / Pic / Campaign:</strong> Loss triggered after the configured max guesses or give up. Set limit per mode in its settings tab.</li>
+                <li><strong>Story / Flavour (Direct) / Trait:</strong> Loss triggered after the configured max wrong guesses.</li>
+                <li><strong>Flavour (Multi-choice) / True-False / Icon / Count / Guess By Trait:</strong> Single-attempt; any error resets the streak.</li>
+                <li><strong>Random Trivia:</strong> Wins count for both the specific game and Random mode.</li>
+              </ul>
+            </div>
+
+            {/* Win Streak Display Selector */}
+            <div className="setting-item">
+              <div className="setting-label">
+                <span>Win Streak Display</span>
+                <span className="setting-description">Choose to display the personal combined win streak across all game modes or a specific game mode's streak</span>
+              </div>
+              <select
+                value={settings.streakDisplayType || "global"}
+                onChange={(e) => setSettings({ ...settings, streakDisplayType: e.target.value as 'global' | 'mode' })}
+                className="premium-input"
+              >
+                <option value="global">Personal Combined (All Game Modes)</option>
+                <option value="mode">Specific Game Mode Only</option>
+              </select>
+            </div>
+
+            <div className="button-row tight">
+              <button
+                className="premium-btn full-width"
+                onClick={() => setShowStatsModal(true)}
+              >
+                <BarChart2 size={18} /> View Records
+              </button>
+              <button
+                className="premium-btn full-width delete-btn"
+                onClick={() => {
+                  if (confirm("Reset current streaks to zero? (Overall records will be kept)")) {
+                    stopStreak();
+                  }
+                }}
+              >
+                <StopCircle size={18} /> Stop Streak
+              </button>
+              <button
+                className="premium-btn full-width delete-btn"
+                onClick={() => {
+                  if (confirm("Are you sure you want to PERMANENTLY clear all records and streaks?")) {
+                    clearRecord();
+                  }
+                }}
+              >
+                <Trash2 size={18} /> Clear Record
+              </button>
+            </div>
+          </div>
+
+          <hr className="settings-divider" />
+          <div className="settings-group">
+            <div className="settings-group-header">
+              <Database size={18} />
+              <span>Data Management</span>
+            </div>
             <div className="button-row tight">
               <button
                 className={`premium-btn full-width ${settings.includeEncounter ? "active" : ""}`}
@@ -88,7 +177,194 @@ export default function GeneralSettingsSection({
               </button>
             </div>
           </div>
+
+          {/* Competition & Seed Section */}
+          <hr className="settings-divider" />
+          <div className="settings-group">
+            <div className="settings-group-header">
+              <Users size={18} />
+              <span>Competition & Seed (Beta)</span>
+            </div>
+            <div className="settings-info-box">
+              <div className="info-header">
+                <Info size={16} />
+                <span>How to Compete</span>
+              </div>
+              <ul className="info-list">
+                <li>1. Select the <strong>Game Mode</strong> everyone will play.</li>
+                <li>2. <strong>Match Settings:</strong> All players must use the exact same settings. You can manually configure them or use <strong>Copy Settings</strong> / <strong>Export Settings</strong> to share configurations.</li>
+                <li>3. Other players should <strong>Import</strong> the shared settings file to ensure everything matches exactly.</li>
+                <li>4. Once all settings are confirmed, everyone enters the <strong>same Seed</strong> (a seed can be any random word or phrase).</li>
+                <li>5. <strong>Final Check:</strong> Before starting, confirm that all players have matching settings and identical card pools.</li>
+                <li>6. <strong>Streaks & Leaderboards:</strong> Custom seeds do not use a dedicated online leaderboard. To compete fairly, players should clear/reset their streaks before starting.</li>
+                <li>7. <strong>Desync Warning:</strong> Playing modes in a different order or switching modes differently between players can desynchronize the seed. All players must take actions and switch modes in the exact same sequence. If you wish to change modes, ensure no one has clicked "Play again" in the current mode when you switch modes.</li>
+                <li>8. <strong>Beta Notice:</strong> Seed-based competitive play is currently in Beta. Dedicated multiplayer lobbies/rooms are planned for a future update.</li>
+              </ul>
+            </div>
+
+            <div className="setting-item no-border">
+              <div className="setting-label">
+                <span>Game Seed</span>
+                <span className="setting-description">Ensure everyone uses the same seed for identical results (the seed can be any random word)</span>
+              </div>
+              <div className="seed-input-wrapper">
+                <Hash size={16} className="input-icon" />
+                <input
+                  type="text"
+                  className="seed-input"
+                  placeholder="Enter seed (e.g. daily-123)"
+                  value={localSeed}
+                  onChange={(e) => setLocalSeed(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="seed-dice-btn"
+                  title="Generate random seed word"
+                  onClick={handleGenerateRandomSeed}
+                >
+                  <Dices size={16} />
+                </button>
+                <button 
+                  className="premium-btn small-btn" 
+                  onClick={() => {
+                    applySeed(localSeed);
+                    alert(`Applied seed: "${localSeed}"`);
+                  }}
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+
+            <div className="settings-actions-row">
+              <button
+                className="premium-btn"
+                onClick={async () => {
+                  try {
+                    const dataStr = JSON.stringify(settings, null, 2);
+                    await navigator.clipboard.writeText(dataStr);
+                    alert("Settings copied to clipboard!");
+                  } catch (err) {
+                    console.error(err);
+                    alert("Failed to copy settings to clipboard. Please try exporting instead.");
+                  }
+                }}
+              >
+                <Copy size={18} /> Copy
+              </button>
+
+              <button
+                className="premium-btn"
+                onClick={async () => {
+                  try {
+                    let text = "";
+                    try {
+                      text = await navigator.clipboard.readText();
+                    } catch (clipErr) {
+                      console.warn("Clipboard access denied/failed, falling back to prompt", clipErr);
+                    }
+
+                    if (!text) {
+                      text = prompt("Paste your copied settings JSON text here:") || "";
+                    }
+
+                    if (!text.trim()) return;
+
+                    const importedSettings = JSON.parse(text) as AppSettings;
+
+                    // Basic validation
+                    if (!importedSettings.wordle) {
+                      throw new Error("Invalid settings payload");
+                    }
+
+                    // Check if we need to load encounter cards
+                    if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                      if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                        setSettings(importedSettings);
+                        await refreshData(true);
+                      } else {
+                        setSettings({ ...importedSettings, includeEncounter: false });
+                      }
+                    } else {
+                      setSettings(importedSettings);
+                    }
+                    alert("Settings pasted and imported successfully!");
+                  } catch (err) {
+                    console.error(err);
+                    alert("Failed to parse settings. Make sure you copied the correct settings JSON.");
+                  }
+                }}
+              >
+                <Clipboard size={18} /> Paste
+              </button>
+
+              <button
+                className="premium-btn"
+                onClick={() => {
+                  const dataStr = JSON.stringify(settings, null, 2);
+                  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                  const exportFileDefaultName = `arkhamdle_settings_${new Date().toISOString().split('T')[0]}.json`;
+
+                  const linkElement = document.createElement('a');
+                  linkElement.setAttribute('href', dataUri);
+                  linkElement.setAttribute('download', exportFileDefaultName);
+                  linkElement.click();
+                }}
+              >
+                <Download size={18} /> Export
+              </button>
+
+              <div className="file-input-wrapper">
+                <button className="premium-btn">
+                  <Upload size={18} /> Import
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden-file-input"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      const reader = new FileReader();
+                      reader.onload = async (event) => {
+                        try {
+                          const content = event.target?.result as string;
+                          const importedSettings = JSON.parse(content) as AppSettings;
+
+                          // Basic validation
+                          if (!importedSettings.wordle) {
+                            throw new Error("Invalid settings file");
+                          }
+
+                          // Check if we need to load encounter cards
+                          if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                            if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                              setSettings(importedSettings);
+                              await refreshData(true);
+                            } else {
+                              setSettings({ ...importedSettings, includeEncounter: false });
+                            }
+                          } else {
+                            setSettings(importedSettings);
+                          }
+                          alert("Settings imported successfully!");
+                        } catch (err) {
+                          console.error(err);
+                          alert("Failed to import settings. Please make sure it's a valid JSON file.");
+                        }
+                      };
+                      reader.readAsText(file);
+                    }}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      )}
+
+      {showStatsModal && (
+        <StatsModal onClose={() => setShowStatsModal(false)} />
       )}
 
       {showConfirm && (

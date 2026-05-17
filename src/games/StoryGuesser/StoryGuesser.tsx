@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -8,8 +9,11 @@ import './StoryGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 
-export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
+export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = 'Story Guesser';
+  const maxGuesses = settings.storyGuesser.maxGuesses ?? 6;
 
   const uniqueInvestigators = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'storyGuesser');
@@ -33,10 +37,12 @@ export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
   const [win, setWin] = useState(false);
   const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
+  const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
 
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setHasReportedStreakLoss(false);
     setWrongGuesses([]);
     setAnswer(uniqueInvestigators[Math.floor(Math.random() * uniqueInvestigators.length)]);
   }, [uniqueInvestigators]);
@@ -139,13 +145,24 @@ export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
   }, [answer, settings.storyGuesser.scrambleLetters, settings.storyGuesser.scrambleWords, settings.storyGuesser.hideName, settings.storyGuesser.sliceScale]);
 
   const submitGuess = (card: TransformedCard) => {
-    console.log('[StoryGuesser] Guess:', card);
-    if (wrongGuesses.some(g => g.id === card.id)) return;
-    
     if (card.id === answer?.id) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
-      setWrongGuesses([card, ...wrongGuesses]);
+      const newWrong = [card, ...wrongGuesses];
+      setWrongGuesses(newWrong);
+      if (!hasReportedStreakLoss && newWrong.length >= maxGuesses) {
+        reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+        setHasReportedStreakLoss(true);
+      }
+    }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    if (!hasReportedStreakLoss) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      setHasReportedStreakLoss(true);
     }
   };
 
@@ -213,8 +230,8 @@ export default function StoryGuesser({ onPlayAgainOverride }: GameProps = {}) {
               guesses={wrongGuesses}
               onGuess={submitGuess}
               placeholder="Type investigator name..."
-              onGiveUp={() => setGaveUp(true)}
-              giveUpThreshold={5}
+              onGiveUp={handleGiveUp}
+              giveUpThreshold={maxGuesses}
               className="story-input-wrapper"
               getDisplayText={getDisplayText}
               getOptionColors={getCardFactionColors}

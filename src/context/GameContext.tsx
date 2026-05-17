@@ -12,6 +12,7 @@ import type {
 import { TypeName as TypeNameEnum } from "../types/arkham";
 
 import { GameContext } from './GameContextDefinition';
+import { initializeSeed } from "../utils/random";
 
 const defaultBaseGameSettings = {
   useGlobalPackFilter: true,
@@ -19,6 +20,7 @@ const defaultBaseGameSettings = {
   includeWeakness: false,
   includeSignatures: true,
   includeBondedCard: false,
+  maxGuesses: 6,
 };
 
 const defaultSettings: AppSettings = {
@@ -29,6 +31,7 @@ const defaultSettings: AppSettings = {
   includeEncounter: false,
   showCampaignCards: true,
   enableHints: true,
+  streakDisplayType: "global",
   wordle: { ...defaultBaseGameSettings },
   picGuesser: {
     ...defaultBaseGameSettings,
@@ -155,6 +158,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const setSettings = (newSettings: AppSettings) => {
     setSettingsState(newSettings);
     localforage.setItem("arkhamdle_settings", newSettings);
+    initializeSeed(newSettings.seed);
   };
 
   const loadData = React.useCallback(async (forceRefresh = false, includeEncounter = settings.includeEncounter) => {
@@ -196,6 +200,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           ...defaultSettings,
           ...savedSettings,
         });
+        initializeSeed(savedSettings.seed);
         loadData(false, savedSettings.includeEncounter ?? false);
       } else {
         // If no settings or old structure, revert to defaults
@@ -225,6 +230,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
 
 
+  const [seedVersion, setSeedVersion] = useState(0);
+
+  const applySeed = (seed: string) => {
+    const newSettings = { ...settings, seed };
+    setSettingsState(newSettings);
+    localforage.setItem("arkhamdle_settings", newSettings);
+    initializeSeed(seed);
+    setSeedVersion((v) => v + 1);
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -236,6 +251,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         loadingMessage,
         refreshData: (includeEnc?: boolean) => loadData(true, includeEnc ?? settings.includeEncounter),
         filteredCards,
+        seedVersion,
+        applySeed,
       }}
     >
       {children}

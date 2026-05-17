@@ -15,6 +15,7 @@ declare global {
 
 export interface GameProps {
   onPlayAgainOverride?: () => void;
+  streakModeName?: string;
 }
 
 export interface BaseGameSettings {
@@ -23,6 +24,7 @@ export interface BaseGameSettings {
   includeWeakness: boolean;
   includeSignatures: boolean;
   includeBondedCard: boolean;
+  maxGuesses: number;
 }
 
 export interface PicGuesserSettings extends BaseGameSettings {
@@ -89,6 +91,7 @@ export interface AppSettings {
   includeEncounter: boolean;
   showCampaignCards: boolean;
   enableHints: boolean;
+  streakDisplayType?: 'global' | 'mode';
 
   // Game-specific settings
   wordle: BaseGameSettings;
@@ -102,6 +105,7 @@ export interface AppSettings {
   countGuesser: CountGuesserSettings;
   iconGuesser: BaseGameSettings;
   trueOrFalse: TrueOrFalseSettings;
+  seed?: string;
   randomTrivia: RandomTriviaSettings;
 }
 

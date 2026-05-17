@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
-import { type TransformedCard, type GameProps, type TrueOrFalseSettings, TypeName } from '../../types';
+import { useStats } from '../../context/StatsContext';
+import { type TransformedCard, type GameProps, TypeName } from '../../types';
 import { filterBySettings, filterDuplicateOfCode, getCardFactionColors } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
@@ -36,7 +37,7 @@ interface GameQuestion {
 }
 
 const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation'];
-const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign', 'Victory'];
+const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign'];
 const ACT_KEYWORD_TRAITS = ['Forced', 'Objective', 'Resign'];
 const AGENDA_KEYWORD_TRAITS = ['Forced', 'Resign'];
 const TREACHERY_KEYWORD_TRAITS = ['Forced', 'Surge'];
@@ -106,10 +107,10 @@ function getKeywordDisplayValue(
     : pool[Math.floor(Math.random() * pool.length)];
 }
 
-export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
+export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
-  const tfSettings = settings.trueOrFalse as TrueOrFalseSettings;
-
+  const { reportResult } = useStats();
+  const modeName = 'True or False';
   const [question, setQuestion] = useState<GameQuestion | null>(null);
   const [win, setWin] = useState(false);
   const [lose, setLose] = useState(false);
@@ -145,12 +146,12 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
   const treacheryPool = useMemo(() => filteredBaseCards.filter(c => c.typeName === TypeName.TREACHERY && c.imagesrc), [filteredBaseCards]);
 
   const isPoolReady = 
-    (tfSettings.traitMode && traitPool.length > 0) || 
-    (tfSettings.enemyStatsMode && enemyPool.length > 0) || 
-    (tfSettings.locationTraitsMode && locationPool.length > 0) || 
-    (tfSettings.actTraitsMode && actPool.length > 0) || 
-    (tfSettings.agendaTraitsMode && agendaPool.length > 0) || 
-    (tfSettings.treacheryTraitsMode && treacheryPool.length > 0);
+    (settings.trueOrFalse.traitMode && traitPool.length > 0) || 
+    (settings.trueOrFalse.enemyStatsMode && enemyPool.length > 0) || 
+    (settings.trueOrFalse.locationTraitsMode && locationPool.length > 0) || 
+    (settings.trueOrFalse.actTraitsMode && actPool.length > 0) || 
+    (settings.trueOrFalse.agendaTraitsMode && agendaPool.length > 0) || 
+    (settings.trueOrFalse.treacheryTraitsMode && treacheryPool.length > 0);
 
   const resetGame = useCallback(() => {
     setWin(false);
@@ -161,12 +162,12 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
       type GameMode = 'Traits' | 'Enemy' | 'Location' | 'Act' | 'Agenda' | 'Treachery';
       const availableModes: { type: GameMode; weight: number }[] = [];
       
-      if (tfSettings.traitMode && traitPool.length > 0) availableModes.push({ type: 'Traits', weight: 10 });
-      if (tfSettings.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 5 }); 
-      if (tfSettings.locationTraitsMode && locationPool.length > 0) availableModes.push({ type: 'Location', weight: 20 }); 
-      if (tfSettings.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 20 }); 
-      if (tfSettings.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight:20 });
-      if (tfSettings.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 20 }); 
+      if (settings.trueOrFalse.traitMode && traitPool.length > 0) availableModes.push({ type: 'Traits', weight: 10 });
+      if (settings.trueOrFalse.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 5 }); 
+      if (settings.trueOrFalse.locationTraitsMode && locationPool.length > 0) availableModes.push({ type: 'Location', weight: 20 }); 
+      if (settings.trueOrFalse.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 20 }); 
+      if (settings.trueOrFalse.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight:20 });
+      if (settings.trueOrFalse.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 20 }); 
 
       if (availableModes.length === 0) return null;
 
@@ -375,7 +376,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
       }
       attempts++;
     }
-  }, [tfSettings, traitPool, enemyPool, locationPool, actPool, agendaPool, treacheryPool]);
+  }, [settings.trueOrFalse, traitPool, enemyPool, locationPool, actPool, agendaPool, treacheryPool]);
 
   const hasInitialized = useRef(false);
 
@@ -392,7 +393,7 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
     }
   }, [
     settings,
-    tfSettings,
+    settings.trueOrFalse,
     resetGame,
     win,
     lose,
@@ -401,10 +402,13 @@ export default function TrueOrFalse({ onPlayAgainOverride }: GameProps = {}) {
 
   const handleGuess = (guessTrue: boolean) => {
     if (win || lose) return;
-    if (guessTrue === question?.isTrue) {
+    const isCorrect = guessTrue === question?.isTrue;
+    if (isCorrect) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setLose(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
     }
   };
 

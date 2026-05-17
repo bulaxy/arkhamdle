@@ -1,4 +1,4 @@
-import React from 'react';
+import { useStats } from '../../context/StatsContext';
 import './ResultPanel.scss';
 
 export interface ResultPanelProps {
@@ -18,6 +18,8 @@ export default function ResultPanel({
   children,
   showImage = true
 }: ResultPanelProps) {
+  const { lastStreakText } = useStats();
+
   return (
     <div 
       className={`glass-panel fade-in result-panel ${win ? 'win-border' : 'lose-border'} ${className}`} 
@@ -25,6 +27,11 @@ export default function ResultPanel({
       <h2 className={win ? 'win' : 'lose'}>
         {win ? 'Correct!' : 'Game Over'}
       </h2>
+      {lastStreakText && (
+        <div className={`streak-text ${win ? '' : 'broken'}`}>
+          {lastStreakText}
+        </div>
+      )}
       {showImage && item?.imagesrc && (
         <div className="result-images">
           <img src={`https://arkhamdb.com${item.imagesrc}`} alt={item.fullName} />

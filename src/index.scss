@@ -171,3 +171,22 @@ body {
 .opacity-transition { transition: opacity 0.3s ease; }
 .opacity-0 { opacity: 0; }
 .opacity-100 { opacity: 1; }
+
+.guess-limit-note {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+
+  .warning-text {
+    color: var(--warning);
+    opacity: 0.9;
+    font-weight: 500;
+    margin-left: 0.25rem;
+  }
+}

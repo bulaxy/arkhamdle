@@ -10,6 +10,8 @@ export interface GameContextType {
   loadingMessage: string;
   refreshData: (includeEncounter?: boolean) => Promise<void>;
   filteredCards: TransformedCard[];
+  seedVersion: number;
+  applySeed: (seed: string) => void;
 }
 
 export const GameContext = createContext<GameContextType | undefined>(undefined);

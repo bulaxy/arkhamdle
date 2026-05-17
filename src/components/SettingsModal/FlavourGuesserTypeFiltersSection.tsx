@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { FlavourGuesserSettings, TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
 import PackFilterControls from "./PackFilterControls";
+import MaxGuessesControl from "./MaxGuessesControl";
 
 interface FlavourGuesserTypeFiltersSectionProps {
   typeFilters: Record<TypeName, boolean>;
@@ -141,6 +142,12 @@ export default function FlavourGuesserTypeFiltersSection({
               ))}
             </div>
           </div>
+          {inputMode === 'Direct Input' && (
+            <>
+              <hr className="settings-divider" />
+              <MaxGuessesControl settings={settings} onChange={onChange} />
+            </>
+          )}
         </div>
       )}
     </div>

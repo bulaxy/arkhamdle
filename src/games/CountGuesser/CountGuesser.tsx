@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
+import { useStats } from '../../context/StatsContext';
 import type { GameProps } from '../../types';
 import { filterBySettings, filterDuplicateOfCode } from '../../services/CardFilter';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -8,8 +9,10 @@ import MultipleChoiceGrid from '../../components/MultipleChoiceGrid/MultipleChoi
 import { generateHowManyQuestion, type TriviaQuestion } from '../shared/trivia/triviaLogic';
 import './CountGuesser.scss';
 
-export default function CountGuesser({ onPlayAgainOverride }: GameProps = {}) {
+export default function CountGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = 'Count Guesser';
 
   const [question, setQuestion] = useState<TriviaQuestion | null>(null);
   const [win, setWin] = useState(false);
@@ -94,18 +97,28 @@ export default function CountGuesser({ onPlayAgainOverride }: GameProps = {}) {
     if (win || gaveUp) return;
     if (option === question?.correctAnswer) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setGaveUp(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
     }
   };
 
   const handleDirectInputSubmit = () => {
-    if (!question) return;
+    if (!question || win || gaveUp) return;
     if (parseInt(guessInputText, 10) === question.correctAnswer) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setGaveUp(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
     }
+  };
+
+  const handleGiveUp = () => {
+    if (win || gaveUp) return;
+    setGaveUp(true);
+    reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
   };
 
   if (pool.length === 0) {
@@ -166,7 +179,7 @@ export default function CountGuesser({ onPlayAgainOverride }: GameProps = {}) {
 
         {!isGameOver && settings.countGuesser.inputMode !== 'Direct Input' && (
           <div className="trivia-actions">
-            <button className="premium-btn guess-give-up" onClick={() => setGaveUp(true)}>Give Up</button>
+            <button className="premium-btn guess-give-up" onClick={handleGiveUp}>Give Up</button>
           </div>
         )}
       </div>

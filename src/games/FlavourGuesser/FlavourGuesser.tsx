@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useStats } from '../../context/StatsContext';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
@@ -10,8 +11,11 @@ import { getPackDisplayName } from '../../data/packStructure';
 import './FlavourGuesser.scss';
 
 
-export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) {
+export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
+  const { reportResult } = useStats();
+  const modeName = 'Flavour Text Guesser';
+  const maxGuesses = settings.flavourGuesser.maxGuesses ?? 6;
 
   const { guessableCards, answerPool } = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'flavourGuesser');
@@ -44,6 +48,7 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
   const [win, setWin] = useState(false);
   const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
+  const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
 
   // Helper to shuffle array
   const shuffle = <T,>(array: T[]): T[] => {
@@ -58,6 +63,7 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
   const resetGame = useCallback(() => {
     setWin(false);
     setGaveUp(false);
+    setHasReportedStreakLoss(false);
     setWrongGuesses([]);
     if (answerPool.length > 0) {
       const selected = answerPool[Math.floor(Math.random() * answerPool.length)];
@@ -140,12 +146,28 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
   const submitGuess = (card: TransformedCard) => {
     if (card.id === answer?.id) {
       setWin(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       if(settings.flavourGuesser.inputMode === 'Multiple Choice'){
-        setGaveUp(true)
+        setGaveUp(true);
+        reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+        setHasReportedStreakLoss(true);
       }else{
-        setWrongGuesses([card, ...wrongGuesses]);
+        const newWrong = [card, ...wrongGuesses];
+        setWrongGuesses(newWrong);
+        if (!hasReportedStreakLoss && newWrong.length >= maxGuesses) {
+          reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+          setHasReportedStreakLoss(true);
+        }
       }
+    }
+  };
+
+  const handleGiveUp = () => {
+    setGaveUp(true);
+    if (!hasReportedStreakLoss) {
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      setHasReportedStreakLoss(true);
     }
   };
 
@@ -195,8 +217,8 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
                 guesses={wrongGuesses}
                 onGuess={submitGuess}
                 placeholder="Type card name..."
-                onGiveUp={() => setGaveUp(true)}
-                giveUpThreshold={5}
+                onGiveUp={handleGiveUp}
+                giveUpThreshold={maxGuesses}
                 className="flavour-input-wrapper"
                 getDisplayText={getDisplayText}
                 getOptionColors={getCardFactionColors}
@@ -215,7 +237,7 @@ export default function FlavourGuesser({ onPlayAgainOverride }: GameProps = {}) 
 
             {settings.flavourGuesser.inputMode === 'Multiple Choice' && (
               <div className="mt-1rem">
-                <button className="premium-btn guess-give-up" onClick={() => setGaveUp(true)}>Give Up</button>
+                <button className="premium-btn guess-give-up" onClick={handleGiveUp}>Give Up</button>
               </div>
             )}
           </div>

@@ -115,6 +115,7 @@
 .nav-right {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .main-content {
@@ -222,6 +223,10 @@
   .settings-btn {
     padding: 0.5rem;
     min-width: unset;
+
+    .settings-text {
+      display: none;
+    }
   }
 
   .menu-overlay {
