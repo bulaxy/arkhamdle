@@ -165,17 +165,14 @@ export default function GeneralSettingsSection({
                 <Info size={16} />
                 <span>How to Compete</span>
               </div>
-              <p className="settings-text smaller">
-                To compete with others:
-                <br />
-                1. Select the <strong>Game Mode</strong> you will be playing.
-                <br />
-                2. <strong>Export</strong> your settings and share the file.
-                <br />
-                3. Others should <strong>Import</strong> the settings file.
-                <br />
-                4. Everyone enters the <strong>same Seed</strong> last.
-              </p>
+              <ul className="info-list">
+                <li>1. Select the <strong>Game Mode</strong> you will be playing.</li>
+                <li>2. <strong>Export</strong> your settings and share the file.</li>
+                <li>3. Others should <strong>Import</strong> the settings file.</li>
+                <li>4. Everyone enters the <strong>same Seed</strong> last.</li>
+                <li>5. <strong>Coordinate & Check:</strong> It is highly recommended to check/coordinate with other players on which games/questions you will be playing before starting the run.</li>
+                <li>6. <strong>Streaks & Leaderboard:</strong> Since custom seeds do not have a dedicated online leaderboard, players should clear/reset their streaks before starting to compete fairly, or track scores/guesses separately.</li>
+              </ul>
             </div>
 
             <div className="setting-item no-border">
