@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users, Copy, Clipboard } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users, Copy, Clipboard, Dices } from "lucide-react";
 import { useGameContext } from "../../hooks/useGameContext";
 import { useStats } from "../../context/StatsContext";
 import type { AppSettings } from "../../types";
 import StatsModal from "../StatsModal/StatsModal";
+import { generateRandomThematicSeed } from "../../utils/random";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;
@@ -28,6 +29,11 @@ export default function GeneralSettingsSection({
     setPrevSeed(currentSeed);
     setLocalSeed(currentSeed);
   }
+
+  const handleGenerateRandomSeed = () => {
+    const newSeed = generateRandomThematicSeed();
+    setLocalSeed(newSeed);
+  };
 
   return (
     <div className="settings-section">
@@ -188,7 +194,7 @@ export default function GeneralSettingsSection({
                 <li>1. Select the <strong>Game Mode</strong> everyone will play.</li>
                 <li>2. <strong>Match Settings:</strong> All players must use the exact same settings. You can manually configure them or use <strong>Copy Settings</strong> / <strong>Export Settings</strong> to share configurations.</li>
                 <li>3. Other players should <strong>Import</strong> the shared settings file to ensure everything matches exactly.</li>
-                <li>4. Once all settings are confirmed, everyone enters the <strong>same Seed</strong>.</li>
+                <li>4. Once all settings are confirmed, everyone enters the <strong>same Seed</strong> (a seed can be any random word or phrase).</li>
                 <li>5. <strong>Final Check:</strong> Before starting, confirm that all players have matching settings and identical card pools.</li>
                 <li>6. <strong>Streaks & Leaderboards:</strong> Custom seeds do not use a dedicated online leaderboard. To compete fairly, players should clear/reset their streaks before starting.</li>
                 <li>7. <strong>Desync Warning:</strong> Playing modes in a different order or switching modes differently between players can desynchronize the seed. All players must take actions and switch modes in the exact same sequence.</li>
@@ -199,7 +205,7 @@ export default function GeneralSettingsSection({
             <div className="setting-item no-border">
               <div className="setting-label">
                 <span>Game Seed</span>
-                <span className="setting-description">Ensure everyone uses the same seed for identical results</span>
+                <span className="setting-description">Ensure everyone uses the same seed for identical results (the seed can be any random word)</span>
               </div>
               <div className="seed-input-wrapper">
                 <Hash size={16} className="input-icon" />
@@ -210,9 +216,20 @@ export default function GeneralSettingsSection({
                   value={localSeed}
                   onChange={(e) => setLocalSeed(e.target.value)}
                 />
+                <button
+                  type="button"
+                  className="seed-dice-btn"
+                  title="Generate random seed word"
+                  onClick={handleGenerateRandomSeed}
+                >
+                  <Dices size={16} />
+                </button>
                 <button 
                   className="premium-btn small-btn" 
-                  onClick={() => applySeed(localSeed)}
+                  onClick={() => {
+                    applySeed(localSeed);
+                    alert(`Applied seed: "${localSeed}"`);
+                  }}
                 >
                   Apply
                 </button>

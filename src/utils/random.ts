@@ -26,3 +26,30 @@ export const initializeSeed = (seed?: string) => {
 };
 
 export const getCurrentSeed = () => currentSeed;
+
+const thematicPrefixes = [
+  "Elder", "Cthulhu", "Azathoth", "Hastur", "YogSothoth", "Miskatonic",
+  "Necronomicon", "Arkham", "Dunwich", "Carcosa", "Innsmouth", "Kingsport",
+  "Dreamlands", "Kadath", "Nyarlathotep", "Mythos", "Encounter", "Chaos",
+  "Cosmic", "Ancient", "Abyssal", "Forbidden", "Secret", "Whispering",
+  "Shadowy", "Haunted", "Lurking", "Eldritch", "Strange", "Sinister",
+  "Uncanny", "Curse", "Blessing", "Sanity", "Horror", "Dread", "Terror",
+  "Grimoire", "Tome", "Relic", "Acolyte", "Cultist", "Ghoul", "DeepOne",
+  "Shoggoth", "Nightgaunt", "Byakhee", "Spawn", "Phobia", "Rouse", "Rend"
+];
+
+const thematicSuffixes = [
+  "Sign", "Portal", "Token", "Ritual", "Tentacle", "Clue", "Doom",
+  "Sigil", "Artifact", "Resolve", "Courage", "Clarity",
+  "Willpower", "Intellect", "Combat", "Agility", "Stamina", "Gaze",
+  "Dream", "Gate", "Key", "Eye", "Star", "Void", "Whisper", "Shadow",
+  "Grave", "Altar", "Tomb", "Labyrinth", "Chronicle", "Legacy", "Path",
+  "Journey", "Riddle", "Conspiracy", "Seal", "Tear", "Breach", "Rift"
+];
+
+export const generateRandomThematicSeed = (): string => {
+  const prefix = thematicPrefixes[Math.floor(Math.random() * thematicPrefixes.length)];
+  const suffix = thematicSuffixes[Math.floor(Math.random() * thematicSuffixes.length)];
+  const num = Math.floor(Math.random() * 900) + 100; // 100 to 999
+  return `${prefix}-${suffix}-${num}`;
+};
