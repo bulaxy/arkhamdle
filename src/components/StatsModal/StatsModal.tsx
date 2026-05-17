@@ -24,11 +24,11 @@ export default function StatsModal({ onClose }: StatsModalProps) {
         <div className="modal-body">
           <div className="stats-summary">
             <div className="stats-item">
-              <span className="stats-label">Current Streak</span>
+              <span className="stats-label">Personal Combined Current</span>
               <span className="stats-value">{stats.globalStreak}</span>
             </div>
             <div className="stats-item">
-              <span className="stats-label">Longest Streak</span>
+              <span className="stats-label">Personal Combined Best</span>
               <span className="stats-value highlight">{stats.globalBestStreak || 0}</span>
             </div>
           </div>

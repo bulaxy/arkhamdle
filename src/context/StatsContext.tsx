@@ -118,7 +118,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } else {
         const streak = lastResult.globalStreak;
         if (streak <= 1) return null;
-        return `Overall streak of ${streak} broken!`;
+        return `Personal combined streak of ${streak} broken!`;
       }
     }
   }, [lastResult, settings?.streakDisplayType]);

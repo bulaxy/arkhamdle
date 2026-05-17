@@ -95,15 +95,15 @@ export default function GeneralSettingsSection({
             <div className="setting-item">
               <div className="setting-label">
                 <span>Win Streak Display</span>
-                <span className="setting-description">Choose to display the overall global streak or the specific game mode's streak</span>
+                <span className="setting-description">Choose to display the personal combined win streak across all game modes or a specific game mode's streak</span>
               </div>
               <select
                 value={settings.streakDisplayType || "global"}
                 onChange={(e) => setSettings({ ...settings, streakDisplayType: e.target.value as 'global' | 'mode' })}
                 className="premium-input"
               >
-                <option value="global">Overall Global Streak</option>
-                <option value="mode">Specific Game Mode Streak</option>
+                <option value="global">Personal Combined (All Game Modes)</option>
+                <option value="mode">Specific Game Mode Only</option>
               </select>
             </div>
 
