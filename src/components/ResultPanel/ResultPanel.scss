@@ -73,6 +73,12 @@
     border-radius: 20px;
     margin-top: -0.5rem;
     animation: bounceIn 0.5s ease-out;
+
+    &.broken {
+      color: var(--wrong-color);
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
   }
 }
 

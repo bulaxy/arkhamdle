@@ -27,8 +27,8 @@ export default function ResultPanel({
       <h2 className={win ? 'win' : 'lose'}>
         {win ? 'Correct!' : 'Game Over'}
       </h2>
-      {win && lastStreakText && (
-        <div className="streak-text">
+      {lastStreakText && (
+        <div className={`streak-text ${win ? '' : 'broken'}`}>
           {lastStreakText}
         </div>
       )}

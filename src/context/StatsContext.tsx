@@ -95,19 +95,31 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   } | null>(null);
 
   const lastStreakText = useMemo(() => {
-    if (!lastResult || !lastResult.won) return null;
+    if (!lastResult) return null;
     
     const streakDisplayType = settings?.streakDisplayType || 'global';
-    const template = STREAK_TEXTS[lastResult.templateIndex];
     
-    if (streakDisplayType === 'mode') {
-      const streak = lastResult.targetModeStreak;
-      if (streak <= 1) return null;
-      return template.replace("{n}", streak.toString()) + ` in ${lastResult.targetMode}`;
+    if (lastResult.won) {
+      const template = STREAK_TEXTS[lastResult.templateIndex];
+      if (streakDisplayType === 'mode') {
+        const streak = lastResult.targetModeStreak;
+        if (streak <= 1) return null;
+        return template.replace("{n}", streak.toString()) + ` in ${lastResult.targetMode}`;
+      } else {
+        const streak = lastResult.globalStreak;
+        if (streak <= 1) return null;
+        return template.replace("{n}", streak.toString());
+      }
     } else {
-      const streak = lastResult.globalStreak;
-      if (streak <= 1) return null;
-      return template.replace("{n}", streak.toString());
+      if (streakDisplayType === 'mode') {
+        const streak = lastResult.targetModeStreak;
+        if (streak <= 1) return null;
+        return `Streak of ${streak} broken in ${lastResult.targetMode}!`;
+      } else {
+        const streak = lastResult.globalStreak;
+        if (streak <= 1) return null;
+        return `Overall streak of ${streak} broken!`;
+      }
     }
   }, [lastResult, settings?.streakDisplayType]);
 
@@ -194,7 +206,17 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           templateIndex,
         });
       } else {
-        setLastResult(null);
+        const targetMode = modeList.includes('Random Trivia') ? 'Random Trivia' : modeList[0];
+        const prevGlobalStreak = prev.globalStreak;
+        const prevModeStreak = prev.modeStats[targetMode]?.streak || 0;
+
+        setLastResult({
+          won: false,
+          globalStreak: prevGlobalStreak,
+          targetModeStreak: prevModeStreak,
+          targetMode,
+          templateIndex: 0,
+        });
       }
 
       return newStats;

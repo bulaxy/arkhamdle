@@ -37,7 +37,7 @@ interface GameQuestion {
 }
 
 const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation'];
-const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign', 'Victory'];
+const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign'];
 const ACT_KEYWORD_TRAITS = ['Forced', 'Objective', 'Resign'];
 const AGENDA_KEYWORD_TRAITS = ['Forced', 'Resign'];
 const TREACHERY_KEYWORD_TRAITS = ['Forced', 'Surge'];
