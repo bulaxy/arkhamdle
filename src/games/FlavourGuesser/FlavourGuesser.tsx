@@ -14,7 +14,7 @@ import './FlavourGuesser.scss';
 export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Flavour Text Guesser';
+  const modeName = 'Flavour Text Guesser';
   const maxGuesses = settings.flavourGuesser.maxGuesses ?? 6;
 
   const { guessableCards, answerPool } = useMemo(() => {

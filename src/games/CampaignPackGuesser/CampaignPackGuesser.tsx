@@ -12,7 +12,7 @@ import './CampaignPackGuesser.scss';
 export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Campaign Pack Guesser';
+  const modeName = 'Campaign Pack Guesser';
   const maxGuesses = settings.campaignPackGuesser.maxGuesses ?? 6;
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<string[]>([]);

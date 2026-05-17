@@ -110,7 +110,7 @@ function getKeywordDisplayValue(
 export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'True or False';
+  const modeName = 'True or False';
   const [question, setQuestion] = useState<GameQuestion | null>(null);
   const [win, setWin] = useState(false);
   const [lose, setLose] = useState(false);

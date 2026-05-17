@@ -15,7 +15,7 @@ const ATTRIBUTES = ['class', 'health', 'sanity', 'willpower', 'intellect', 'comb
 export default function Investigatordle({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Investigatordle';
+  const modeName = 'Investigatordle';
   const maxGuesses = settings.investigatordle.maxGuesses ?? 6;
 
   const gameInvestigators = useMemo(() => {

@@ -1,6 +1,7 @@
 import localforage from "localforage";
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { nativeRandom } from "../utils/random";
+import { useGameContext } from "../hooks/useGameContext";
 
 interface ModeStats {
   streak: number;
@@ -84,7 +85,31 @@ const StatsContext = createContext<StatsContextType | undefined>(undefined);
 
 export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [stats, setStats] = useState<Stats>({ globalStreak: 0, globalBestStreak: 0, modeStats: {} });
-  const [lastStreakText, setLastStreakText] = useState<string | null>(null);
+  const { settings } = useGameContext();
+  const [lastResult, setLastResult] = useState<{
+    won: boolean;
+    globalStreak: number;
+    targetModeStreak: number;
+    targetMode: string;
+    templateIndex: number;
+  } | null>(null);
+
+  const lastStreakText = useMemo(() => {
+    if (!lastResult || !lastResult.won) return null;
+    
+    const streakDisplayType = settings?.streakDisplayType || 'global';
+    const template = STREAK_TEXTS[lastResult.templateIndex];
+    
+    if (streakDisplayType === 'mode') {
+      const streak = lastResult.targetModeStreak;
+      if (streak <= 1) return null;
+      return template.replace("{n}", streak.toString()) + ` in ${lastResult.targetMode}`;
+    } else {
+      const streak = lastResult.globalStreak;
+      if (streak <= 1) return null;
+      return template.replace("{n}", streak.toString());
+    }
+  }, [lastResult, settings?.streakDisplayType]);
 
   useEffect(() => {
     const loadStats = async () => {
@@ -156,11 +181,20 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       localforage.setItem("arkhamdle_stats", newStats);
 
-      if (won && newGlobalStreak > 1) {
-        const template = STREAK_TEXTS[Math.floor(nativeRandom() * STREAK_TEXTS.length)];
-        setLastStreakText(template.replace("{n}", newGlobalStreak.toString()));
+      if (won) {
+        const targetMode = modeList.includes('Random Trivia') ? 'Random Trivia' : modeList[0];
+        const targetModeStreak = newModeStats[targetMode]?.streak || 0;
+        const templateIndex = Math.floor(nativeRandom() * STREAK_TEXTS.length);
+        
+        setLastResult({
+          won: true,
+          globalStreak: newGlobalStreak,
+          targetModeStreak,
+          targetMode,
+          templateIndex,
+        });
       } else {
-        setLastStreakText(null);
+        setLastResult(null);
       }
 
       return newStats;
@@ -181,7 +215,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
       
       localforage.setItem("arkhamdle_stats", newStats);
-      setLastStreakText(null);
+      setLastResult(null);
       return newStats;
     });
   }, []);
@@ -189,7 +223,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const clearRecord = useCallback(() => {
     const cleared = { globalStreak: 0, globalBestStreak: 0, modeStats: {} };
     setStats(cleared);
-    setLastStreakText(null);
+    setLastResult(null);
     localforage.setItem("arkhamdle_stats", cleared);
   }, []);
 

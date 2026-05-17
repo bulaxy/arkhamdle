@@ -12,7 +12,7 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Story Guesser';
+  const modeName = 'Story Guesser';
   const maxGuesses = settings.storyGuesser.maxGuesses ?? 6;
 
   const uniqueInvestigators = useMemo(() => {

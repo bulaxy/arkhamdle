@@ -23,7 +23,7 @@ const parseSlot = (slotVal: string | undefined | null): string[] => {
 export default function WordleGame({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Classic Mode';
+  const modeName = 'Classic Mode';
   const maxGuesses = settings.wordle.maxGuesses ?? 6;
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);

@@ -31,6 +31,7 @@ const defaultSettings: AppSettings = {
   includeEncounter: false,
   showCampaignCards: true,
   enableHints: true,
+  streakDisplayType: "global",
   wordle: { ...defaultBaseGameSettings },
   picGuesser: {
     ...defaultBaseGameSettings,

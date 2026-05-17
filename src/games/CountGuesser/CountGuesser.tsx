@@ -12,7 +12,7 @@ import './CountGuesser.scss';
 export default function CountGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Count Guesser';
+  const modeName = 'Count Guesser';
 
   const [question, setQuestion] = useState<TriviaQuestion | null>(null);
   const [win, setWin] = useState(false);

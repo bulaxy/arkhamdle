@@ -11,7 +11,7 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Trait Guesser';
+  const modeName = 'Trait Guesser';
   const maxGuesses = settings.traitGuesser.maxGuesses ?? 6;
   const [trait, setTrait] = useState<string>('');
   const [win, setWin] = useState(false);

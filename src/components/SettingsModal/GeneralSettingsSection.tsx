@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, B
 import { useGameContext } from "../../hooks/useGameContext";
 import { useStats } from "../../context/StatsContext";
 import type { AppSettings } from "../../types";
+import StatsModal from "../StatsModal/StatsModal";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ export default function GeneralSettingsSection({
   onClose,
 }: GeneralSettingsSectionProps) {
   const { settings, setSettings, refreshData, applySeed } = useGameContext();
-  const { stats, stopStreak, clearRecord } = useStats();
+  const { stopStreak, clearRecord } = useStats();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [prevSeed, setPrevSeed] = useState(settings.seed || "");
@@ -89,6 +90,23 @@ export default function GeneralSettingsSection({
                 <li><strong>Random Trivia:</strong> Wins count for both the specific game and Random mode.</li>
               </ul>
             </div>
+
+            {/* Win Streak Display Selector */}
+            <div className="setting-item">
+              <div className="setting-label">
+                <span>Win Streak Display</span>
+                <span className="setting-description">Choose to display the overall global streak or the specific game mode's streak</span>
+              </div>
+              <select
+                value={settings.streakDisplayType || "global"}
+                onChange={(e) => setSettings({ ...settings, streakDisplayType: e.target.value as 'global' | 'mode' })}
+                className="premium-input"
+              >
+                <option value="global">Overall Global Streak</option>
+                <option value="mode">Specific Game Mode Streak</option>
+              </select>
+            </div>
+
             <div className="button-row tight">
               <button
                 className="premium-btn full-width"
@@ -267,64 +285,7 @@ export default function GeneralSettingsSection({
       )}
 
       {showStatsModal && (
-        <div className="modal-overlay confirm-modal-overlay" onClick={() => setShowStatsModal(false)}>
-          <div className="modal-content confirm-modal-content stats-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Win Statistics</h2>
-            </div>
-            <div className="modal-body">
-              <div className="stats-summary">
-                <div className="stats-item">
-                  <span className="stats-label">Current Streak</span>
-                  <span className="stats-value">{stats.globalStreak}</span>
-                </div>
-                <div className="stats-item">
-                  <span className="stats-label">Longest Streak</span>
-                  <span className="stats-value highlight">{stats.globalBestStreak || 0}</span>
-                </div>
-              </div>
-              <div className="stats-table-wrapper">
-                <table className="stats-table">
-                  <thead>
-                    <tr>
-                      <th>Game Mode</th>
-                      <th>Streak</th>
-                      <th>Best</th>
-                      <th>Win %</th>
-                      <th>W/L</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(stats.modeStats).length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="text-center">No records yet. Go play some games!</td>
-                      </tr>
-                    ) : (
-                      Object.entries(stats.modeStats)
-                        .sort((a, b) => b[1].wins - a[1].wins)
-                        .map(([mode, data]) => {
-                          const total = data.wins + data.losses;
-                          const winRate = total > 0 ? ((data.wins / total) * 100).toFixed(1) : "0.0";
-                          return (
-                            <tr key={mode}>
-                              <td>{mode}</td>
-                              <td>{data.streak}</td>
-                              <td>{data.bestStreak || 0}</td>
-                              <td>{winRate}%</td>
-                              <td>{data.wins}/{data.losses}</td>
-                            </tr>
-                          );
-                        })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="premium-btn" onClick={() => setShowStatsModal(false)}>Close</button>
-            </div>
-          </div>
-        </div>
+        <StatsModal onClose={() => setShowStatsModal(false)} />
       )}
 
       {showConfirm && (

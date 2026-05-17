@@ -1,5 +1,5 @@
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { Settings, Menu, X as CloseIcon, ChevronDown } from 'lucide-react';
+import { Settings, Menu, X as CloseIcon, ChevronDown, Trophy } from 'lucide-react';
 import './App.scss';
 import { useGameContext } from './hooks/useGameContext';
 import WordleGame from './games/WordleGame/WordleGame';
@@ -16,11 +16,13 @@ import TrueOrFalse from './games/TrueOrFalse/TrueOrFalse';
 import RandomTrivia from './games/RandomTrivia/RandomTrivia';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import WelcomeModal from './components/WelcomeModal/WelcomeModal';
+import StatsModal from './components/StatsModal/StatsModal';
 import { useState, useEffect, useRef } from 'react';
 
 function App() {
   const { isLoading, loadingMessage, seedVersion } = useGameContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => {
     return !localStorage.getItem('arkhamdle_visited');
@@ -92,6 +94,10 @@ function App() {
         </div>
 
         <div className="nav-right">
+          <button className="premium-btn settings-btn" onClick={() => { setIsStatsOpen(true); closeMenu(); }}>
+            <Trophy size={20} />
+            <span className="settings-text">Streaks</span>
+          </button>
           <button className="premium-btn settings-btn" onClick={() => { setIsSettingsOpen(true); closeMenu(); }}>
             <Settings size={20} />
             <span className="settings-text">Settings</span>
@@ -131,6 +137,10 @@ function App() {
 
       {isSettingsOpen && (
         <SettingsModal onClose={() => setIsSettingsOpen(false)} />
+      )}
+
+      {isStatsOpen && (
+        <StatsModal onClose={() => setIsStatsOpen(false)} />
       )}
 
       {isWelcomeOpen && (

@@ -91,6 +91,7 @@ export interface AppSettings {
   includeEncounter: boolean;
   showCampaignCards: boolean;
   enableHints: boolean;
+  streakDisplayType?: 'global' | 'mode';
 
   // Game-specific settings
   wordle: BaseGameSettings;

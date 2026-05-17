@@ -13,7 +13,7 @@ import './GuessCardByTrait.scss';
 export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
-  const modeName = streakModeName || 'Guess Card By Trait';
+  const modeName = 'Guess Card By Trait';
 
   const [question, setQuestion] = useState<TriviaQuestion | null>(null);
   const [win, setWin] = useState(false);
