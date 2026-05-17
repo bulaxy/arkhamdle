@@ -5,6 +5,7 @@ import { filterDuplicateOfCode } from "../../services/CardFilter";
 import type { TraitGuesserSettings, TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
 import PackFilterControls from "./PackFilterControls";
+import MaxGuessesControl from "./MaxGuessesControl";
 
 interface TraitGuesserSectionProps {
   minCards: number;
@@ -258,6 +259,8 @@ export default function TraitGuesserSection({
               </div>
             )}
           </div>
+          <hr className="settings-divider" />
+          <MaxGuessesControl settings={settings} onChange={onChange} />
         </div>
       )}
     </div>

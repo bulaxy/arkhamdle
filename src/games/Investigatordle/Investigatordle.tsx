@@ -16,6 +16,7 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
   const modeName = streakModeName || 'Investigatordle';
+  const maxGuesses = settings.investigatordle.maxGuesses ?? 6;
 
   const gameInvestigators = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'investigatordle');
@@ -73,7 +74,7 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
     } else {
       const newGuesses = [card, ...guesses];
       setGuesses(newGuesses);
-      if (!hasReportedStreakLoss && newGuesses.length === 6) {
+      if (!hasReportedStreakLoss && newGuesses.length === maxGuesses) {
         reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
         setHasReportedStreakLoss(true);
       }
@@ -148,13 +149,13 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
             onGuess={submitGuess}
             placeholder="Type investigator name..."
             onGiveUp={handleGiveUp}
-            giveUpThreshold={5}
+            giveUpThreshold={maxGuesses}
             getDisplayText={getDisplayText}
             getOptionColors={getCardFactionColors}
           />
           <div className="guess-limit-note">
-            <span>Attempts: {guesses.length} / 6</span>
-            {guesses.length >= 4 && <span className="warning-text"> (Win streak lost if 6th guess is wrong)</span>}
+            <span>Attempts: {guesses.length} / {maxGuesses}</span>
+            {guesses.length >= maxGuesses - 2 && <span className="warning-text"> (Win streak lost if {maxGuesses}th guess is wrong)</span>}
           </div>
         </div>
       )}

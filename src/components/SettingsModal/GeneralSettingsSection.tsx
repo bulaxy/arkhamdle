@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users } from "lucide-react";
 import { useGameContext } from "../../hooks/useGameContext";
 import { useStats } from "../../context/StatsContext";
 import type { AppSettings } from "../../types";
@@ -15,10 +15,17 @@ export default function GeneralSettingsSection({
   onToggle,
   onClose,
 }: GeneralSettingsSectionProps) {
-  const { settings, setSettings, refreshData } = useGameContext();
+  const { settings, setSettings, refreshData, applySeed } = useGameContext();
   const { stats, stopStreak, clearRecord } = useStats();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [prevSeed, setPrevSeed] = useState(settings.seed || "");
+  const [localSeed, setLocalSeed] = useState(settings.seed || "");
+
+  if (settings.seed !== prevSeed) {
+    setPrevSeed(settings.seed || "");
+    setLocalSeed(settings.seed || "");
+  }
 
   return (
     <div className="settings-section">
@@ -63,17 +70,21 @@ export default function GeneralSettingsSection({
           )}
 
           {/* Win Streaks Section */}
+          <hr className="settings-divider" />
           <div className="settings-group">
-            <label className="settings-text">Win Streaks & Records</label>
+            <div className="settings-group-header">
+              <Trophy size={18} />
+              <span>Win Streaks & Records</span>
+            </div>
             <div className="settings-info-box">
               <div className="info-header">
                 <Info size={16} />
                 <span>Streak Rules</span>
               </div>
               <ul className="info-list">
-                <li><strong>Wordle / Investigatordle:</strong> Loss triggered on 6th wrong guess or give up.</li>
-                <li><strong>Story / Flavour / Trait:</strong> Any wrong guess breaks the streak immediately.</li>
-                <li><strong>Trivia / Count / Icon:</strong> Single-attempt modes; any error resets the streak.</li>
+                <li><strong>Wordle / Investigatordle / Pic / Campaign:</strong> Loss triggered after the configured max guesses or give up. Set limit per mode in its settings tab.</li>
+                <li><strong>Story / Flavour (Direct) / Trait:</strong> Loss triggered after the configured max wrong guesses.</li>
+                <li><strong>Flavour (Multi-choice) / True-False / Icon / Count / Guess By Trait:</strong> Single-attempt; any error resets the streak.</li>
                 <li><strong>Random Trivia:</strong> Wins count for both the specific game and Random mode.</li>
               </ul>
             </div>
@@ -107,8 +118,12 @@ export default function GeneralSettingsSection({
             </div>
           </div>
 
+          <hr className="settings-divider" />
           <div className="settings-group">
-            <label className="settings-text">Data Management</label>
+            <div className="settings-group-header">
+              <Database size={18} />
+              <span>Data Management</span>
+            </div>
             <div className="button-row tight">
               <button
                 className={`premium-btn full-width ${settings.includeEncounter ? "active" : ""}`}
@@ -139,8 +154,12 @@ export default function GeneralSettingsSection({
           </div>
 
           {/* Competition & Seed Section */}
+          <hr className="settings-divider" />
           <div className="settings-group">
-            <label className="settings-text">Competition & Seed</label>
+            <div className="settings-group-header">
+              <Users size={18} />
+              <span>Competition & Seed</span>
+            </div>
             <div className="settings-info-box">
               <div className="info-header">
                 <Info size={16} />
@@ -164,15 +183,22 @@ export default function GeneralSettingsSection({
                 <span>Game Seed</span>
                 <span className="setting-description">Ensure everyone uses the same seed for identical results</span>
               </div>
-              <div className="seed-input-wrapper">
-                <Hash size={16} className="input-icon" />
+              <div className="seed-input-wrapper" style={{ display: 'flex', gap: '8px' }}>
+                <Hash size={16} className="input-icon" style={{ marginTop: '10px' }} />
                 <input
                   type="text"
                   className="seed-input"
                   placeholder="Enter seed (e.g. daily-123)"
-                  value={settings.seed || ""}
-                  onChange={(e) => setSettings({ ...settings, seed: e.target.value })}
+                  value={localSeed}
+                  onChange={(e) => setLocalSeed(e.target.value)}
                 />
+                <button 
+                  className="premium-btn small-btn" 
+                  onClick={() => applySeed(localSeed)}
+                  style={{ padding: '8px 16px', minWidth: '80px' }}
+                >
+                  Apply
+                </button>
               </div>
             </div>
 

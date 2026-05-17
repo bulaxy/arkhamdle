@@ -24,6 +24,7 @@ export interface BaseGameSettings {
   includeWeakness: boolean;
   includeSignatures: boolean;
   includeBondedCard: boolean;
+  maxGuesses: number;
 }
 
 export interface PicGuesserSettings extends BaseGameSettings {

@@ -1,5 +1,6 @@
 import localforage from "localforage";
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { nativeRandom } from "../utils/random";
 
 interface ModeStats {
   streak: number;
@@ -155,8 +156,8 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       localforage.setItem("arkhamdle_stats", newStats);
 
-      if (won) {
-        const template = STREAK_TEXTS[Math.floor(Math.random() * STREAK_TEXTS.length)];
+      if (won && newGlobalStreak > 1) {
+        const template = STREAK_TEXTS[Math.floor(nativeRandom() * STREAK_TEXTS.length)];
         setLastStreakText(template.replace("{n}", newGlobalStreak.toString()));
       } else {
         setLastStreakText(null);

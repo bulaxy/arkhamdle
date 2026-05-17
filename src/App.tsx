@@ -19,7 +19,7 @@ import WelcomeModal from './components/WelcomeModal/WelcomeModal';
 import { useState, useEffect, useRef } from 'react';
 
 function App() {
-  const { isLoading, loadingMessage } = useGameContext();
+  const { isLoading, loadingMessage, seedVersion } = useGameContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(() => {
@@ -108,7 +108,7 @@ function App() {
             <h2>{loadingMessage}</h2>
           </div>
         ) : (
-          <Routes>
+          <Routes key={seedVersion}>
             <Route path="/" element={<WordleGame />} />
             <Route path="/pic-guesser" element={<PicGuesser />} />
             <Route path="/investigatordle" element={<Investigatordle />} />

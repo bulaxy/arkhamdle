@@ -15,6 +15,7 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
   const modeName = streakModeName || 'Flavour Text Guesser';
+  const maxGuesses = settings.flavourGuesser.maxGuesses ?? 6;
 
   const { guessableCards, answerPool } = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'flavourGuesser');
@@ -154,7 +155,7 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
       }else{
         const newWrong = [card, ...wrongGuesses];
         setWrongGuesses(newWrong);
-        if (!hasReportedStreakLoss) {
+        if (!hasReportedStreakLoss && newWrong.length >= maxGuesses) {
           reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
           setHasReportedStreakLoss(true);
         }
@@ -217,7 +218,7 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
                 onGuess={submitGuess}
                 placeholder="Type card name..."
                 onGiveUp={handleGiveUp}
-                giveUpThreshold={5}
+                giveUpThreshold={maxGuesses}
                 className="flavour-input-wrapper"
                 getDisplayText={getDisplayText}
                 getOptionColors={getCardFactionColors}

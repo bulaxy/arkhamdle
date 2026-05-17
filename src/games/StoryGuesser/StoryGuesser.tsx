@@ -13,6 +13,7 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
   const modeName = streakModeName || 'Story Guesser';
+  const maxGuesses = settings.storyGuesser.maxGuesses ?? 6;
 
   const uniqueInvestigators = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'storyGuesser');
@@ -150,7 +151,7 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
     } else {
       const newWrong = [card, ...wrongGuesses];
       setWrongGuesses(newWrong);
-      if (!hasReportedStreakLoss) {
+      if (!hasReportedStreakLoss && newWrong.length >= maxGuesses) {
         reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
         setHasReportedStreakLoss(true);
       }
@@ -230,7 +231,7 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
               onGuess={submitGuess}
               placeholder="Type investigator name..."
               onGiveUp={handleGiveUp}
-              giveUpThreshold={5}
+              giveUpThreshold={maxGuesses}
               className="story-input-wrapper"
               getDisplayText={getDisplayText}
               getOptionColors={getCardFactionColors}

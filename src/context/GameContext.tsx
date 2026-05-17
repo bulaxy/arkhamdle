@@ -20,6 +20,7 @@ const defaultBaseGameSettings = {
   includeWeakness: false,
   includeSignatures: true,
   includeBondedCard: false,
+  maxGuesses: 6,
 };
 
 const defaultSettings: AppSettings = {
@@ -228,6 +229,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
 
 
+  const [seedVersion, setSeedVersion] = useState(0);
+
+  const applySeed = (seed: string) => {
+    const newSettings = { ...settings, seed };
+    setSettingsState(newSettings);
+    localforage.setItem("arkhamdle_settings", newSettings);
+    initializeSeed(seed);
+    setSeedVersion((v) => v + 1);
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -239,6 +250,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         loadingMessage,
         refreshData: (includeEnc?: boolean) => loadData(true, includeEnc ?? settings.includeEncounter),
         filteredCards,
+        seedVersion,
+        applySeed,
       }}
     >
       {children}

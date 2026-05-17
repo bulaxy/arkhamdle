@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import PackFilterControls from "./PackFilterControls";
+import MaxGuessesControl from "./MaxGuessesControl";
 import type { StoryGuesserSettings } from "../../types";
 
 interface StoryGuesserSectionProps {
@@ -129,6 +130,8 @@ export default function StoryGuesserSection({
               />
             </div>
           </div>
+          <hr className="settings-divider" />
+          <MaxGuessesControl settings={settings} onChange={onChange} />
         </div>
       )}
     </div>

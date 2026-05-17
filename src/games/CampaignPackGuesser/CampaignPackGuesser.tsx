@@ -13,6 +13,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
   const modeName = streakModeName || 'Campaign Pack Guesser';
+  const maxGuesses = settings.campaignPackGuesser.maxGuesses ?? 6;
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [win, setWin] = useState(false);
@@ -111,7 +112,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
       setTimeout(() => setAnimation(''), 300);
       setSelectedEncounter('');
       setEncounterSearch('');
-      if (!hasReportedStreakLoss && newGuesses.length === 6) {
+      if (!hasReportedStreakLoss && newGuesses.length === maxGuesses) {
         reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
         setHasReportedStreakLoss(true);
       }
@@ -262,7 +263,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
                     Guess
                   </button>
 
-                  {guesses.length >= 5 && (
+                  {guesses.length >= maxGuesses && (
                     <button
                       className="premium-btn give-up-btn"
                       onClick={handleGiveUp}

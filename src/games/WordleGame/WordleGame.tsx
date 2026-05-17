@@ -12,10 +12,19 @@ import ResultPanel from '../../components/ResultPanel/ResultPanel';
 const ATTRIBUTES = ['typeName', 'class', 'xp', 'traits', 'slot', 'cost', 'willpower', 'intellect', 'combat', 'agility', 'wild'] as const;
 
 
+const parseSlot = (slotVal: string | undefined | null): string[] => {
+  if (!slotVal) return [];
+  return slotVal
+    .split('.')
+    .map(s => s.replace(/\bx2\b/gi, '').trim())
+    .filter(Boolean);
+};
+
 export default function WordleGame({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
   const modeName = streakModeName || 'Classic Mode';
+  const maxGuesses = settings.wordle.maxGuesses ?? 6;
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
@@ -55,6 +64,7 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
     setDuplicateWarning(null);
     setGuesses([]);
     setAnswer(gameCards[Math.floor(Math.random() * gameCards.length)]);
+    // setAnswer(gameCards.find(c => c.id === '09080'));
   }, [gameCards]);
 
   useEffect(() => {
@@ -82,7 +92,7 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
-      if (!hasReportedStreakLoss && guesses.length === 5) { 
+      if (!hasReportedStreakLoss && guesses.length === maxGuesses - 1) { 
         reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
         setHasReportedStreakLoss(true);
       }
@@ -120,6 +130,18 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
     if (!answer) return '';
     const ansVal = answer[attr];
     const guessVal = guess[attr];
+
+    if (attr === 'slot') {
+      if (ansVal === guessVal) return 'makeGreen';
+
+      const ansSlots = parseSlot(ansVal as string | undefined);
+      const guessSlots = parseSlot(guessVal as string | undefined);
+
+      const common = ansSlots.filter(s => guessSlots.includes(s));
+      if (common.length > 0) return 'makeYellow';
+
+      return 'makeRed';
+    }
 
     const ansArray = Array.isArray(ansVal) ? ansVal : [ansVal];
     const guessArray = Array.isArray(guessVal) ? guessVal : [guessVal];
@@ -176,12 +198,12 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
             onGuess={submitGuess}
             placeholder="Type card name..."
             onGiveUp={handleGiveUp}
-            giveUpThreshold={5}
+            giveUpThreshold={maxGuesses}
             getDisplayText={getDisplayText}
           />
           <div className="guess-limit-note">
-            <span>Attempts: {guesses.length} / 6</span>
-            {guesses.length >= 4 && <span className="warning-text"> (Win streak lost if 6th guess is wrong)</span>}
+            <span>Attempts: {guesses.length} / {maxGuesses}</span>
+            {guesses.length >= maxGuesses - 2 && <span className="warning-text"> (Win streak lost if {maxGuesses}th guess is wrong)</span>}
           </div>
           {duplicateWarning && (
             <div className="wordle-warning fade-in">

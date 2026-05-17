@@ -10,10 +10,13 @@ import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import { getPackDisplayName } from '../../data/packStructure';
 
+const OUTLIER_CARDS = ['Holy Rosary'];
+
 export default function PicGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
   const modeName = streakModeName || 'Pic Guesser';
+  const maxGuesses = settings.picGuesser.maxGuesses ?? 6;
   const [answer, setAnswer] = useState<TransformedCard | null>(null);
   const [guesses, setGuesses] = useState<TransformedCard[]>([]);
   const [win, setWin] = useState(false);
@@ -25,6 +28,7 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
   const [gaveUp, setGaveUp] = useState(false);
   const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [outlierLogicUsed, setOutlierLogicUsed] = useState(false);
 
   // PicGuesser does NOT filter duplicate_of_code — exception per task spec
   const gameCards = useMemo(() => {
@@ -58,7 +62,10 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
     setWin(false);
     setGaveUp(false);
     setHasReportedStreakLoss(false);
+    setOutlierLogicUsed(false);
     setGuesses([]);
+
+    // setAnswer(gameCards.find(c => c.id === '01059'));
     setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
     setOffsetX(Math.floor(Math.random() * 301) - 150);
     setOffsetY(Math.floor(Math.random() * 251)+50);
@@ -88,9 +95,17 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
     const newGuesses = [card, ...guesses];
     setGuesses(newGuesses);
     
+    const isOutlier = OUTLIER_CARDS.some(oc => oc.toLowerCase() === card.name.toLowerCase());
+    const isNameMatch = card.name.toLowerCase() === answer?.name.toLowerCase();
+
     if (card.id === answer?.id) {
       setWin(true);
       setShowFull(true);
+      reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+    } else if (isOutlier && isNameMatch) {
+      setWin(true);
+      setShowFull(true);
+      setOutlierLogicUsed(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
     } else {
       setAnimation('shakeAnimation');
@@ -98,7 +113,7 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
       if (sizeMultiplier > 2) {
         setSizeMultiplier(prev => Math.max(2, prev - zoomOutRate));
       }
-      if (!hasReportedStreakLoss && newGuesses.length === 6) {
+      if (!hasReportedStreakLoss && newGuesses.length === maxGuesses) {
         reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
         setHasReportedStreakLoss(true);
       }
@@ -175,6 +190,11 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
 
             {(win || gaveUp) && (
               <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="pic-result" showImage={false}>
+                {win && outlierLogicUsed && (
+                  <div className="outlier-notice">
+                    💡 Outlier logic applied. Both card got the same art work
+                  </div>
+                )}
                 <div className="pic-result-buttons">
                   <button className="premium-btn pic-result-button" onClick={() => setShowFull(!showFull)}>
                     {showFull ? <><EyeOff size={18} /> Hide Full Picture</> : <><Eye size={18} /> Show Full Picture</>}
@@ -197,19 +217,30 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
                   onGuess={submitGuess}
                   placeholder="Type card name..."
                   onGiveUp={handleGiveUp}
-                  giveUpThreshold={5}
+                  giveUpThreshold={maxGuesses}
                   getDisplayText={getDisplayText}
                   getOptionColors={getCardFactionColors}
                   className={`pic-input-wrapper ${animation}`}
                 />
                 
                 <div className="pic-guesses-container">
-                  {guesses.map((g, i) => (
-                    <div key={`${g.id}-${i}`} className={`glass-panel pic-guess-item fade-in ${g.id === answer?.id ? 'correct' : 'incorrect'}`}>
-                      <span>{g.fullName}</span>
-                      <span className="result-text">{g.id === answer?.id ? 'Correct' : 'Incorrect'}</span>
-                    </div>
-                  ))}
+                  {guesses.map((g, i) => {
+                    const isOutlier = OUTLIER_CARDS.some(oc => oc.toLowerCase() === g.name.toLowerCase());
+                    const isNameMatch = g.name.toLowerCase() === answer?.name.toLowerCase();
+                    const isGuessCorrect = g.id === answer?.id || (isOutlier && isNameMatch);
+                    const usedOutlierLogic = isGuessCorrect && g.id !== answer?.id;
+
+                    return (
+                      <div key={`${g.id}-${i}`} className={`glass-panel pic-guess-item fade-in ${isGuessCorrect ? 'correct' : 'incorrect'}`}>
+                        <span>{g.fullName}</span>
+                        <span className="result-text">
+                          {isGuessCorrect
+                            ? (usedOutlierLogic ? 'Basically Correct (Outlier Rule)' : 'Correct')
+                            : 'Incorrect'}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

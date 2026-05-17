@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { PicGuesserSettings, TypeName } from "../../types";
 import { TypeName as TypeNameEnum } from "../../types/arkham";
 import PackFilterControls from "./PackFilterControls";
+import MaxGuessesControl from "./MaxGuessesControl";
 
 type Difficulty = "Hard" | "Normal" | "Easy";
 
@@ -132,6 +133,8 @@ export default function PicGuesserSection({
               ))}
             </div>
           </div>
+          <hr className="settings-divider" />
+          <MaxGuessesControl settings={settings} onChange={onChange} />
         </div>
       )}
     </div>

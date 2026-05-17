@@ -12,6 +12,7 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
   const { cards, settings } = useGameContext();
   const { reportResult } = useStats();
   const modeName = streakModeName || 'Trait Guesser';
+  const maxGuesses = settings.traitGuesser.maxGuesses ?? 6;
   const [trait, setTrait] = useState<string>('');
   const [win, setWin] = useState(false);
   const [correctGuesses, setCorrectGuesses] = useState<TransformedCard[]>([]);
@@ -120,7 +121,7 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
       if (!wrongGuesses.find(c => c.name === item.name)) {
         const newWrong = [item, ...wrongGuesses];
         setWrongGuesses(newWrong);
-        if (!hasReportedStreakLoss) {
+        if (!hasReportedStreakLoss && newWrong.length >= maxGuesses) {
           reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
           setHasReportedStreakLoss(true);
         }
@@ -207,7 +208,7 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
               onGuess={submitGuess}
               placeholder="Type name..."
               onGiveUp={handleGiveUp}
-              giveUpThreshold={5}
+              giveUpThreshold={maxGuesses}
               className="trait-input-wrapper"
               getDisplayText={getDisplayText}
               getOptionColors={getCardFactionColors}
