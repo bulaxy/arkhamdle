@@ -22,9 +22,10 @@ export default function GeneralSettingsSection({
   const [prevSeed, setPrevSeed] = useState(settings.seed || "");
   const [localSeed, setLocalSeed] = useState(settings.seed || "");
 
-  if (settings.seed !== prevSeed) {
-    setPrevSeed(settings.seed || "");
-    setLocalSeed(settings.seed || "");
+  const currentSeed = settings.seed || "";
+  if (currentSeed !== prevSeed) {
+    setPrevSeed(currentSeed);
+    setLocalSeed(currentSeed);
   }
 
   return (
