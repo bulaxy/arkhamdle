@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users, Copy, Clipboard } from "lucide-react";
 import { useGameContext } from "../../hooks/useGameContext";
 import { useStats } from "../../context/StatsContext";
 import type { AppSettings } from "../../types";
@@ -177,7 +177,7 @@ export default function GeneralSettingsSection({
           <div className="settings-group">
             <div className="settings-group-header">
               <Users size={18} />
-              <span>Competition & Seed</span>
+              <span>Competition & Seed (Beta)</span>
             </div>
             <div className="settings-info-box">
               <div className="info-header">
@@ -185,12 +185,14 @@ export default function GeneralSettingsSection({
                 <span>How to Compete</span>
               </div>
               <ul className="info-list">
-                <li>1. Select the <strong>Game Mode</strong> you will be playing.</li>
-                <li>2. <strong>Export</strong> your settings and share the file.</li>
-                <li>3. Others should <strong>Import</strong> the settings file.</li>
-                <li>4. Everyone enters the <strong>same Seed</strong> last.</li>
-                <li>5. <strong>Coordinate & Check:</strong> It is highly recommended to check/coordinate with other players on which games/questions you will be playing before starting the run.</li>
-                <li>6. <strong>Streaks & Leaderboard:</strong> Since custom seeds do not have a dedicated online leaderboard, players should clear/reset their streaks before starting to compete fairly, or track scores/guesses separately.</li>
+                <li>1. Select the <strong>Game Mode</strong> everyone will play.</li>
+                <li>2. <strong>Match Settings:</strong> All players must use the exact same settings. You can manually configure them or use <strong>Copy Settings</strong> / <strong>Export Settings</strong> to share configurations.</li>
+                <li>3. Other players should <strong>Import</strong> the shared settings file to ensure everything matches exactly.</li>
+                <li>4. Once all settings are confirmed, everyone enters the <strong>same Seed</strong>.</li>
+                <li>5. <strong>Final Check:</strong> Before starting, confirm that all players have matching settings and identical card pools.</li>
+                <li>6. <strong>Streaks & Leaderboards:</strong> Custom seeds do not use a dedicated online leaderboard. To compete fairly, players should clear/reset their streaks before starting.</li>
+                <li>7. <strong>Desync Warning:</strong> Playing modes in a different order or switching modes differently between players can desynchronize the seed. All players must take actions and switch modes in the exact same sequence.</li>
+                <li>8. <strong>Beta Notice:</strong> Seed-based competitive play is currently in Beta. Dedicated multiplayer lobbies/rooms are planned for a future update.</li>
               </ul>
             </div>
 
@@ -199,8 +201,8 @@ export default function GeneralSettingsSection({
                 <span>Game Seed</span>
                 <span className="setting-description">Ensure everyone uses the same seed for identical results</span>
               </div>
-              <div className="seed-input-wrapper" style={{ display: 'flex', gap: '8px' }}>
-                <Hash size={16} className="input-icon" style={{ marginTop: '10px' }} />
+              <div className="seed-input-wrapper">
+                <Hash size={16} className="input-icon" />
                 <input
                   type="text"
                   className="seed-input"
@@ -211,16 +213,76 @@ export default function GeneralSettingsSection({
                 <button 
                   className="premium-btn small-btn" 
                   onClick={() => applySeed(localSeed)}
-                  style={{ padding: '8px 16px', minWidth: '80px' }}
                 >
                   Apply
                 </button>
               </div>
             </div>
 
-            <div className="button-row tight">
+            <div className="settings-actions-row">
               <button
-                className="premium-btn full-width"
+                className="premium-btn"
+                onClick={async () => {
+                  try {
+                    const dataStr = JSON.stringify(settings, null, 2);
+                    await navigator.clipboard.writeText(dataStr);
+                    alert("Settings copied to clipboard!");
+                  } catch (err) {
+                    console.error(err);
+                    alert("Failed to copy settings to clipboard. Please try exporting instead.");
+                  }
+                }}
+              >
+                <Copy size={18} /> Copy
+              </button>
+
+              <button
+                className="premium-btn"
+                onClick={async () => {
+                  try {
+                    let text = "";
+                    try {
+                      text = await navigator.clipboard.readText();
+                    } catch (clipErr) {
+                      console.warn("Clipboard access denied/failed, falling back to prompt", clipErr);
+                    }
+
+                    if (!text) {
+                      text = prompt("Paste your copied settings JSON text here:") || "";
+                    }
+
+                    if (!text.trim()) return;
+
+                    const importedSettings = JSON.parse(text) as AppSettings;
+
+                    // Basic validation
+                    if (!importedSettings.wordle) {
+                      throw new Error("Invalid settings payload");
+                    }
+
+                    // Check if we need to load encounter cards
+                    if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                      if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                        setSettings(importedSettings);
+                        await refreshData(true);
+                      } else {
+                        setSettings({ ...importedSettings, includeEncounter: false });
+                      }
+                    } else {
+                      setSettings(importedSettings);
+                    }
+                    alert("Settings pasted and imported successfully!");
+                  } catch (err) {
+                    console.error(err);
+                    alert("Failed to parse settings. Make sure you copied the correct settings JSON.");
+                  }
+                }}
+              >
+                <Clipboard size={18} /> Paste
+              </button>
+
+              <button
+                className="premium-btn"
                 onClick={() => {
                   const dataStr = JSON.stringify(settings, null, 2);
                   const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
@@ -232,12 +294,12 @@ export default function GeneralSettingsSection({
                   linkElement.click();
                 }}
               >
-                <Download size={18} /> Export Settings
+                <Download size={18} /> Export
               </button>
 
-              <div className="file-input-wrapper full-width">
-                <button className="premium-btn full-width">
-                  <Upload size={18} /> Import Settings
+              <div className="file-input-wrapper">
+                <button className="premium-btn">
+                  <Upload size={18} /> Import
                   <input
                     type="file"
                     accept=".json"
