@@ -197,7 +197,7 @@ export default function GeneralSettingsSection({
                 <li>4. Once all settings are confirmed, everyone enters the <strong>same Seed</strong> (a seed can be any random word or phrase).</li>
                 <li>5. <strong>Final Check:</strong> Before starting, confirm that all players have matching settings and identical card pools.</li>
                 <li>6. <strong>Streaks & Leaderboards:</strong> Custom seeds do not use a dedicated online leaderboard. To compete fairly, players should clear/reset their streaks before starting.</li>
-                <li>7. <strong>Desync Warning:</strong> Playing modes in a different order or switching modes differently between players can desynchronize the seed. All players must take actions and switch modes in the exact same sequence.</li>
+                <li>7. <strong>Desync Warning:</strong> Playing modes in a different order or switching modes differently between players can desynchronize the seed. All players must take actions and switch modes in the exact same sequence. If you wish to change modes, ensure no one has clicked "Play again" in the current mode when you switch modes.</li>
                 <li>8. <strong>Beta Notice:</strong> Seed-based competitive play is currently in Beta. Dedicated multiplayer lobbies/rooms are planned for a future update.</li>
               </ul>
             </div>
