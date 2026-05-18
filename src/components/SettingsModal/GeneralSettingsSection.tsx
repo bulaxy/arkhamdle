@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users, Copy, Clipboard, Dices } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useGameContext } from "../../hooks/useGameContext";
 import { useStats } from "../../context/StatsContext";
 import type { AppSettings } from "../../types";
@@ -18,6 +19,7 @@ export default function GeneralSettingsSection({
   onToggle,
   onClose,
 }: GeneralSettingsSectionProps) {
+  const navigate = useNavigate();
   const { settings, setSettings, refreshData, applySeed } = useGameContext();
   const { stopStreak, clearRecord } = useStats();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -180,56 +182,75 @@ export default function GeneralSettingsSection({
             </div>
           </div>
 
-          {/* Competition & Seed Section */}
+          {/* Competition & Multiplayer Section */}
           <hr className="settings-divider" />
           <div className="settings-group">
             <div className="settings-group-header">
               <Users size={18} />
-              <span>Competition & Seed (Beta)</span>
+              <span>Multiplayer & Competition</span>
             </div>
             
-            <div className="setting-item no-border">
+            <div className="setting-item no-cursor no-border">
               <div className="setting-label">
-                <span>Game Seed</span>
-                <span className="setting-description">Ensure everyone uses the same seed for identical results (the seed can be any random word)</span>
-              </div>
-              <div className="seed-input-wrapper">
-                <Hash size={16} className="input-icon" />
-                <input
-                  type="text"
-                  className="seed-input"
-                  placeholder="Enter seed (e.g. daily-123)"
-                  value={localSeed}
-                  onChange={(e) => setLocalSeed(e.target.value)}
-                />
+                <span>Real-time Multiplayer</span>
+                <span className="setting-description">
+                  Play competitive or cooperative trivia rounds in real-time with friends! All settings, seeds, and lists sync automatically.
+                </span>
                 <button
-                  type="button"
-                  className="seed-dice-btn"
-                  title="Generate random seed word"
-                  onClick={handleGenerateRandomSeed}
-                >
-                  <Dices size={16} />
-                </button>
-                <button 
-                  className="premium-btn small-btn" 
+                  className="premium-btn mt-10"
+                  style={{ width: 'fit-content' }}
                   onClick={() => {
-                    applySeed(localSeed);
-                    alert(`Applied seed: "${localSeed}"`);
+                    onClose();
+                    navigate('/multiplayer');
                   }}
                 >
-                  Apply
+                  <Users size={18} /> Go to Multiplayer Lobby
                 </button>
               </div>
             </div>
 
             <details className="deprecated-settings-details">
               <summary className="deprecated-settings-summary">
-                <span>Deprecated (Settings Sync)</span>
+                <span>Deprecated (Settings Sync & Seeds)</span>
               </summary>
               <div className="deprecated-settings-content">
                 <p className="deprecated-warning-text">
-                  ⚠️ Note: Sharing settings via JSON copy/paste or file export/import is deprecated and no longer maintained. Please use the seed-based sharing options above.
+                  ⚠️ Note: Manual Game Seeds and Settings JSON copy/paste are deprecated and no longer maintained. Sync-based competitive play is now fully managed via the **Multiplayer** system. Use the **Multiplayer** button in the top navigation header or the button above to play together!
                 </p>
+                
+                <div className="setting-item no-border stacked">
+                  <div className="setting-label">
+                    <span>Game Seed</span>
+                    <span className="setting-description">Ensure everyone uses the same seed for identical results (the seed can be any random word)</span>
+                  </div>
+                  <div className="seed-input-wrapper w-full">
+                    <Hash size={16} className="input-icon" />
+                    <input
+                      type="text"
+                      className="seed-input"
+                      placeholder="Enter seed (e.g. daily-123)"
+                      value={localSeed}
+                      onChange={(e) => setLocalSeed(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="seed-dice-btn"
+                      title="Generate random seed word"
+                      onClick={handleGenerateRandomSeed}
+                    >
+                      <Dices size={16} />
+                    </button>
+                    <button 
+                      className="premium-btn small-btn" 
+                      onClick={() => {
+                        applySeed(localSeed);
+                        alert(`Applied seed: "${localSeed}"`);
+                      }}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
                 <div className="settings-actions-row">
                   <button
                     className="premium-btn"
