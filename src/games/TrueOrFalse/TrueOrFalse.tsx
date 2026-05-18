@@ -24,10 +24,10 @@ import {
 } from './trueOrFalseHelpers';
 import './TrueOrFalse.scss';
 
-const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation'];
-const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign'];
-const ACT_KEYWORD_TRAITS = ['Forced', 'Objective', 'Resign'];
-const AGENDA_KEYWORD_TRAITS = ['Forced', 'Resign'];
+const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation', 'Reaction', 'Action', 'Fast'];
+const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign', 'Reaction', 'Action', 'Fast', 'Revelation'];
+const ACT_KEYWORD_TRAITS = ['Forced', 'Action', 'Fast'];
+const AGENDA_KEYWORD_TRAITS = ['Forced', 'Action'];
 const TREACHERY_KEYWORD_TRAITS = ['Forced', 'Surge'];
 
 export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
@@ -95,12 +95,12 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
       const availableModes: { type: GameMode; weight: number }[] = [];
       
       if (settings.trueOrFalse.traitMode && traitPool.length > 0) availableModes.push({ type: 'Traits', weight: 10 });
-      if (settings.trueOrFalse.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 5 }); 
+      if (settings.trueOrFalse.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 20 }); 
       if (settings.trueOrFalse.locationTraitsMode && locationPool.length > 0) availableModes.push({ type: 'Location', weight: 20 }); 
-      if (settings.trueOrFalse.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 20 }); 
-      if (settings.trueOrFalse.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight:20 });
+      if (settings.trueOrFalse.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 5 }); 
+      if (settings.trueOrFalse.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight:5 });
       if (settings.trueOrFalse.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 20 }); 
-      if (settings.trueOrFalse.nameAndPicMode && settings.trueOrFalse.actTraitsMode && settings.trueOrFalse.agendaTraitsMode && agendaActPool.length > 0) availableModes.push({ type: 'AgendaAct', weight: 15 }); ;
+      if (settings.trueOrFalse.nameAndPicMode && settings.trueOrFalse.actTraitsMode && settings.trueOrFalse.agendaTraitsMode && agendaActPool.length > 0) availableModes.push({ type: 'AgendaAct', weight: 4 }); ;
 
       if (availableModes.length === 0) return null;
 
@@ -145,26 +145,27 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
           const isElite = randomCard.traits.some(t => t.toLowerCase() === 'elite');
           const group = getPackGroup(randomCard.pack_code);
           const options: { type: EnemyQuestionType; weight: number }[] = [
-            { type: 'Fight', weight: 1 }, { type: 'Horror', weight: 1 }, { type: 'Damage', weight: 1 },
-            { type: 'Evade', weight: 1 }, { type: 'Retaliate', weight: 1.5 }, { type: 'Hunter', weight: 1.5 },
-            { type: 'Spawn', weight: 1.5 }, { type: 'Forced', weight: 0.5 },
-            { type: 'Revelation', weight: 0.5 }
+            { type: 'PicMismatch', weight: settings.trueOrFalse.nameAndPicMode ? 3.5 : 0 },
+            { type: 'Retaliate', weight: 1.5 },
+            { type: 'Hunter', weight: 1.5 },
+            { type: 'Massive', weight: isElite ? 1.5 : 0 },
+            { type: 'Fight', weight: 1 },
+            { type: 'Horror', weight: 1 },
+            { type: 'Damage', weight: 1 },
+            { type: 'Evade', weight: 1 },
+            { type: 'Health', weight: randomCard.health !== 0 ? 1 : 0 },
+            { type: 'Alert', weight: packSameOrNewerThan(group, 'tfa') ? 1 : 0 },
+            { type: 'Elusive', weight: packSameOrNewerThan(group, 'fhv') ? 1 : 0 },
+            { type: 'Spawn', weight: 0.75 },
+            { type: 'Forced', weight: 0.75 },
+            { type: 'Revelation', weight: 0.75 },
+            { type: 'Aloof', weight: packSameOrNewerThan(group, 'dwl') ? 0.75 : 0 },
+            { type: 'Victory', weight: (randomCard.victory !== undefined || isElite) ? 0.5 : 0 },
+            { type: 'Prey', weight: 0.5 },
+            { type: 'Reaction', weight: 0.25 },
+            { type: 'Action', weight: 0.25 },
+            { type: 'Fast', weight: 0.25 }
           ];
-
-          if (settings.trueOrFalse.nameAndPicMode) {
-            options.push({ type: 'PicMismatch', weight: 2 });
-          }
-
-          if (randomCard.health !== 0) options.push({ type: 'Health', weight: 1 });
-          if (packSameOrNewerThan(group, 'tfa')) options.push({ type: 'Alert', weight: 1.5 });
-          if (packSameOrNewerThan(group, 'dwl')) options.push({ type: 'Aloof', weight: 0.5 });
-          if (packSameOrNewerThan(group, 'fhv')) options.push({ type: 'Elusive', weight: 1.5 });
-          if (randomCard.victory !== undefined || isElite) options.push({ type: 'Victory', weight: 0.5 });
-          
-          if (isElite) {
-            options.push({ type: 'Prey', weight: 1.5 });
-            options.push({ type: 'Massive', weight: 1.5 });
-          }
 
           const selectedOption = getWeightedRandom(options);
           
@@ -220,9 +221,10 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Act': {
           const randomCard = actPool[Math.floor(Math.random() * actPool.length)];
           const options: { type: ActQuestionType; weight: number }[] = [
-            {type: 'Clues', weight: 1}, 
-            {type: 'Forced', weight: 1}, {type: 'Objective', weight: 0.2}, 
-            {type: 'Resign', weight: 0.2}
+            { type: 'Clues', weight: 1 }, 
+            { type: 'Forced', weight: 1 },
+            { type: 'Action', weight: 0.5 }, 
+            { type: 'Fast', weight: 0.5 }
           ];
           const selectedOption = getWeightedRandom(options);
           
@@ -249,7 +251,9 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Agenda': {
           const randomCard = agendaPool[Math.floor(Math.random() * agendaPool.length)];
           const options: { type: AgendaQuestionType; weight: number }[] = [
-            {type: 'Doom', weight: 1}, {type: 'Forced', weight: 1}, {type: 'Resign', weight: 0.2}, 
+            { type: 'Doom', weight: 1 },
+            { type: 'Forced', weight: 1 },
+            { type: 'Action', weight: 1 }
           ];
           
           const selectedOption = getWeightedRandom(options);
@@ -277,12 +281,16 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Location': {
           const randomCard = locationPool[Math.floor(Math.random() * locationPool.length)];
           const options: { type: LocationQuestionType; weight: number }[] = [
-            {type: 'Clues', weight: 1}, {type: 'Shroud', weight: 1}, {type: 'Forced', weight: 0.5},
-            {type: 'Resign', weight: 0.1},
+            { type: 'PicMismatch', weight: settings.trueOrFalse.nameAndPicMode ? 2.5 : 0 },
+            { type: 'Clues', weight: 1 },
+            { type: 'Shroud', weight: 1 },
+            { type: 'Forced', weight: 0.75 },
+            { type: 'Action', weight: 0.5 },
+            { type: 'Revelation', weight: 0.5 },
+            { type: 'Reaction', weight: 0.25 },
+            { type: 'Fast', weight: 0.25 },
+            { type: 'Resign', weight: 0.1 }
           ];
-          if (settings.trueOrFalse.nameAndPicMode) {
-            options.push({ type: 'PicMismatch', weight: 1 });
-          }
           
           const selectedOption = getWeightedRandom(options);
 
@@ -316,11 +324,10 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Treachery': {
           const randomCard = treacheryPool[Math.floor(Math.random() * treacheryPool.length)];
           const options: { type: TreacheryQuestionType; weight: number }[] = [
-            { type: 'Forced', weight: 1 }, { type: 'Surge', weight: 1 }, 
+            { type: 'PicMismatch', weight: settings.trueOrFalse.nameAndPicMode ? 2 : 0 },
+            { type: 'Forced', weight: 1 },
+            { type: 'Surge', weight: 0.5 }
           ];
-          if (settings.trueOrFalse.nameAndPicMode) {
-            options.push({ type: 'PicMismatch', weight: 1 });
-          }
           
           const selectedOption = getWeightedRandom(options);
 

@@ -11,12 +11,12 @@ export function getPackGroup(packCode: string): string {
 export type EnemyQuestionType =  
   | 'PicMismatch' | 'Fight' | 'Horror' | 'Damage' | 'Evade' | 'Health' 
   | 'Retaliate' | 'Hunter' | 'Alert' | 'Aloof' | 'Elusive' | 'Victory'
-  | 'Prey' | 'Massive' | 'Spawn' | 'Forced' | 'Revelation';
+  | 'Prey' | 'Massive' | 'Spawn' | 'Forced' | 'Revelation' | 'Reaction' | 'Action' | 'Fast';
 
-export type LocationQuestionType = | 'PicMismatch' | 'Clues' | 'Shroud' | 'Forced' | 'Resign' | 'Victory';
-export type ActQuestionType = 'Clues' | 'Forced' | 'Objective' | 'Resign';
-export type AgendaQuestionType = 'Doom' | 'Forced' | 'Resign';
-export type TreacheryQuestionType = 'PicMismatch' | 'Forced'| 'Surge' ;
+export type LocationQuestionType = | 'PicMismatch' | 'Clues' | 'Shroud' | 'Forced' | 'Resign' | 'Reaction' | 'Action' | 'Fast' | 'Revelation';
+export type ActQuestionType = 'Clues' | 'Forced' | 'Action' | 'Fast';
+export type AgendaQuestionType = 'Doom' | 'Forced' | 'Action';
+export type TreacheryQuestionType = 'PicMismatch' | 'Forced'| 'Surge';
 
 export type AnyQuestionType = EnemyQuestionType | LocationQuestionType | ActQuestionType | AgendaQuestionType | TreacheryQuestionType | 'Traits' | 'AgendaAct';
 
@@ -125,13 +125,16 @@ export function generateFalseStatValue(
 
 // Helper: Get a random value based on given weights
 export function getWeightedRandom<T>(options: { type: T; weight: number }[]): T {
-  const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+  const activeOptions = options.filter(opt => opt.weight > 0);
+  if (activeOptions.length === 0) return options[0].type;
+  
+  const totalWeight = activeOptions.reduce((sum, opt) => sum + opt.weight, 0);
   let randomVal = Math.random() * totalWeight;
-  for (const opt of options) {
+  for (const opt of activeOptions) {
     randomVal -= opt.weight;
     if (randomVal <= 0) return opt.type;
   }
-  return options[0].type; // Fallback
+  return activeOptions[0].type;
 }
 
 // Helper: Filter and return random displayed keyword for questions
