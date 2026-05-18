@@ -5,6 +5,7 @@ import { useStats } from "../../context/StatsContext";
 import type { AppSettings } from "../../types";
 import StatsModal from "../StatsModal/StatsModal";
 import { generateRandomThematicSeed } from "../../utils/random";
+import { copyToClipboard } from "../../utils/clipboard";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export default function GeneralSettingsSection({
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [prevSeed, setPrevSeed] = useState(settings.seed || "");
   const [localSeed, setLocalSeed] = useState(settings.seed || "");
+
 
   const currentSeed = settings.seed || "";
   if (currentSeed !== prevSeed) {
@@ -185,23 +187,7 @@ export default function GeneralSettingsSection({
               <Users size={18} />
               <span>Competition & Seed (Beta)</span>
             </div>
-            <div className="settings-info-box">
-              <div className="info-header">
-                <Info size={16} />
-                <span>How to Compete</span>
-              </div>
-              <ul className="info-list">
-                <li>1. Select the <strong>Game Mode</strong> everyone will play.</li>
-                <li>2. <strong>Match Settings:</strong> All players must use the exact same settings. You can manually configure them or use <strong>Copy Settings</strong> / <strong>Export Settings</strong> to share configurations.</li>
-                <li>3. Other players should <strong>Import</strong> the shared settings file to ensure everything matches exactly.</li>
-                <li>4. Once all settings are confirmed, everyone enters the <strong>same Seed</strong> (a seed can be any random word or phrase).</li>
-                <li>5. <strong>Final Check:</strong> Before starting, confirm that all players have matching settings and identical card pools.</li>
-                <li>6. <strong>Streaks & Leaderboards:</strong> Custom seeds do not use a dedicated online leaderboard. To compete fairly, players should clear/reset their streaks before starting.</li>
-                <li>7. <strong>Desync Warning:</strong> Playing modes in a different order or switching modes differently between players can desynchronize the seed. All players must take actions and switch modes in the exact same sequence. If you wish to change modes, ensure no one has clicked "Play again" in the current mode when you switch modes.</li>
-                <li>8. <strong>Beta Notice:</strong> Seed-based competitive play is currently in Beta. Dedicated multiplayer lobbies/rooms are planned for a future update.</li>
-              </ul>
-            </div>
-
+            
             <div className="setting-item no-border">
               <div className="setting-label">
                 <span>Game Seed</span>
@@ -242,8 +228,12 @@ export default function GeneralSettingsSection({
                 onClick={async () => {
                   try {
                     const dataStr = JSON.stringify(settings, null, 2);
-                    await navigator.clipboard.writeText(dataStr);
-                    alert("Settings copied to clipboard!");
+                    const success = await copyToClipboard(dataStr);
+                    if (success) {
+                      alert("Settings copied to clipboard!");
+                    } else {
+                      alert("Failed to copy settings to clipboard. Please try exporting instead.");
+                    }
                   } catch (err) {
                     console.error(err);
                     alert("Failed to copy settings to clipboard. Please try exporting instead.");
@@ -259,7 +249,9 @@ export default function GeneralSettingsSection({
                   try {
                     let text = "";
                     try {
-                      text = await navigator.clipboard.readText();
+                      if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+                        text = await navigator.clipboard.readText();
+                      }
                     } catch (clipErr) {
                       console.warn("Clipboard access denied/failed, falling back to prompt", clipErr);
                     }

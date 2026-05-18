@@ -13,6 +13,8 @@ import PicGuesser from '../PicGuesser/PicGuesser';
 import Investigatordle from '../Investigatordle/Investigatordle';
 import './RandomTrivia.scss';
 
+import { useMultiplayer } from '../../context/MultiplayerContext';
+
 const ALL_GAMES = {
   StoryGuesser,
   TraitGuesser,
@@ -29,6 +31,7 @@ const ALL_GAMES = {
 
 export default function RandomTrivia() {
   const { settings } = useGameContext();
+  const { isMultiplayer, isHost, randomTriviaGameMode, setRandomTriviaGameMode } = useMultiplayer();
   const [currentGame, setCurrentGame] = useState<string | null>(null);
   const [gameKey, setGameKey] = useState(0);
 
@@ -54,8 +57,15 @@ export default function RandomTrivia() {
   }, [settings.randomTrivia.enabledModes, settings.includeEncounter]);
 
   const pickRandomGame = useCallback(() => {
+    if (isMultiplayer && !isHost) {
+      return; // Clients cannot pick the game
+    }
+
     if (availableModes.length === 0) {
       setCurrentGame(null);
+      if (isMultiplayer && isHost) {
+        setRandomTriviaGameMode(null);
+      }
       return;
     }
     
@@ -72,15 +82,32 @@ export default function RandomTrivia() {
 
     setCurrentGame(nextGame);
     setGameKey(k => k + 1);
-  }, [availableModes, currentGame]);
 
-  // Initial pick
+    if (isMultiplayer && isHost) {
+      setRandomTriviaGameMode(nextGame);
+    }
+  }, [availableModes, currentGame, isMultiplayer, isHost, setRandomTriviaGameMode]);
+
+  // Synchronize currentGame with randomTriviaGameMode in multiplayer
   useEffect(() => {
+    if (isMultiplayer) {
+      if (randomTriviaGameMode !== currentGame) {
+        setCurrentGame(randomTriviaGameMode);
+        setGameKey(k => k + 1);
+      }
+    }
+  }, [isMultiplayer, randomTriviaGameMode, currentGame]);
+
+  // Initial pick (host or single-player only)
+  useEffect(() => {
+    if (isMultiplayer && !isHost) {
+      return; // Clients wait for host to sync
+    }
+
     if (!currentGame && availableModes.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       pickRandomGame();
     }
-  }, [currentGame, pickRandomGame, availableModes.length]);
+  }, [currentGame, pickRandomGame, availableModes.length, isMultiplayer, isHost]);
 
   if (availableModes.length === 0) {
     return (
@@ -89,6 +116,16 @@ export default function RandomTrivia() {
         <p>No game modes are currently available for Random Trivia.</p>
         <p>Please go to <strong>Settings</strong> &gt; <strong>Random Trivia</strong> to enable at least one valid game mode.</p>
         <p className="small-note">Note: Classic Mode, Pic Guesser, and Investigatordle are not supported in this mode.</p>
+      </div>
+    );
+  }
+
+  if (isMultiplayer && !isHost && !currentGame) {
+    return (
+      <div className="random-trivia-error glass-panel fade-in">
+        <h2>Random Trivia</h2>
+        <div className="btn-spinner" style={{ margin: '2rem auto' }} />
+        <p>Waiting for Host to select the next game...</p>
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { Settings, Menu, X as CloseIcon, ChevronDown, Trophy } from 'lucide-react';
+import { Settings, Menu, X as CloseIcon, ChevronDown, Trophy, Users } from 'lucide-react';
 import './App.scss';
 import { useGameContext } from './hooks/useGameContext';
 import WordleGame from './games/WordleGame/WordleGame';
@@ -17,7 +17,11 @@ import RandomTrivia from './games/RandomTrivia/RandomTrivia';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import WelcomeModal from './components/WelcomeModal/WelcomeModal';
 import StatsModal from './components/StatsModal/StatsModal';
+import MultiplayerHUD from './components/MultiplayerHUD/MultiplayerHUD';
+import MultiplayerLobby from './pages/MultiplayerLobby/MultiplayerLobby';
+import { useMultiplayer } from './context/MultiplayerContext';
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const { isLoading, loadingMessage, seedVersion } = useGameContext();
@@ -34,8 +38,33 @@ function App() {
     }
   }, [isWelcomeOpen]);
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      navigate(customEvent.detail.path);
+    };
+    window.addEventListener('MULTIPLAYER_NAVIGATE', handleNavigate);
+    return () => window.removeEventListener('MULTIPLAYER_NAVIGATE', handleNavigate);
+  }, [navigate]);
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => { setIsMenuOpen(false); setIsMoreOpen(false); };
+  
+  const { isMultiplayer, isHost, leaveGame } = useMultiplayer();
+  
+  const handleNavClick = (e: React.MouseEvent) => {
+    if (isMultiplayer && !isHost) {
+      if (!confirm("Changing game modes will disconnect you from the multiplayer room. Continue?")) {
+        e.preventDefault();
+        return;
+      }
+      leaveGame();
+    }
+    closeMenu();
+  };
+
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -60,40 +89,52 @@ function App() {
     <div className="app-container">
       <nav className="top-nav">
         <div className="nav-left">
-          <button className="menu-toggle" onClick={toggleMenu} aria-label="Toggle menu">
-            {isMenuOpen ? <CloseIcon size={24} /> : <Menu size={24} />}
-          </button>
-          <NavLink to="/" className="title-logo" onClick={closeMenu}>Arkhamdle</NavLink>
+          {!isMultiplayer && (
+            <button className="menu-toggle" onClick={toggleMenu} aria-label="Toggle menu">
+              {isMenuOpen ? <CloseIcon size={24} /> : <Menu size={24} />}
+            </button>
+          )}
+          {isMultiplayer ? (
+            <span className="title-logo">Arkhamdle</span>
+          ) : (
+            <NavLink to="/" className="title-logo" onClick={closeMenu}>Arkhamdle</NavLink>
+          )}
         </div>
 
-        <div className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`}>
-          <NavLink to="/" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu} end>Classic Mode</NavLink>
-          <NavLink to="/pic-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Pic Guesser</NavLink>
-          <NavLink to="/investigatordle" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Investigatordle</NavLink>
-          <NavLink to="/random-trivia" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Random Trivia</NavLink>
-          
-          {/* Desktop and Mobile dropdown */}
-          <div className={`nav-dropdown ${isMoreOpen ? 'open' : ''}`} ref={dropdownRef}>
-            <button 
-              className={`nav-link nav-dropdown-trigger ${isMoreActive ? 'active' : ''}`}
-              onClick={() => setIsMoreOpen(!isMoreOpen)}
-            >
-              Individual Trivia Games <ChevronDown size={16} className={`dropdown-chevron ${isMoreOpen ? 'rotated' : ''}`} />
-            </button>
-            <div className="nav-dropdown-menu">
-              <NavLink to="/story-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Story Guesser</NavLink>
-              <NavLink to="/trait-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Trait Guesser</NavLink>
-              <NavLink to="/flavour-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Flavour Guesser</NavLink>
-              <NavLink to="/campaign-pack-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Campaign Pack Guesser</NavLink>
-              <NavLink to="/icon-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Icon Guesser</NavLink>
-              <NavLink to="/guess-card-by-trait" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Guess Card By Trait</NavLink>
-              <NavLink to="/count-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>Count Guesser</NavLink>
-              <NavLink to="/true-or-false" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={closeMenu}>True Or False</NavLink>
+        {!isMultiplayer && (
+          <div className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`}>
+            <NavLink to="/" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick} end>Classic Mode</NavLink>
+            <NavLink to="/pic-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Pic Guesser</NavLink>
+            <NavLink to="/investigatordle" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Investigatordle</NavLink>
+            <NavLink to="/random-trivia" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Random Trivia</NavLink>
+            
+            {/* Desktop and Mobile dropdown */}
+            <div className={`nav-dropdown ${isMoreOpen ? 'open' : ''}`} ref={dropdownRef}>
+              <button 
+                className={`nav-link nav-dropdown-trigger ${isMoreActive ? 'active' : ''}`}
+                onClick={() => setIsMoreOpen(!isMoreOpen)}
+              >
+                Individual Trivia Games <ChevronDown size={16} className={`dropdown-chevron ${isMoreOpen ? 'rotated' : ''}`} />
+              </button>
+              <div className="nav-dropdown-menu">
+                <NavLink to="/story-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Story Guesser</NavLink>
+                <NavLink to="/trait-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Trait Guesser</NavLink>
+                <NavLink to="/flavour-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Flavour Guesser</NavLink>
+                <NavLink to="/campaign-pack-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Campaign Pack Guesser</NavLink>
+                <NavLink to="/icon-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Icon Guesser</NavLink>
+                <NavLink to="/guess-card-by-trait" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Guess Card By Trait</NavLink>
+                <NavLink to="/count-guesser" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>Count Guesser</NavLink>
+                <NavLink to="/true-or-false" className={({isActive}) => isActive ? "nav-link active" : "nav-link"} onClick={handleNavClick}>True Or False</NavLink>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="nav-right">
+          <button className="premium-btn settings-btn" onClick={() => { navigate('/multiplayer'); closeMenu(); }}>
+            <Users size={20} />
+            <span className="settings-text">Multiplayer</span>
+          </button>
           <button className="premium-btn settings-btn" onClick={() => { setIsStatsOpen(true); closeMenu(); }}>
             <Trophy size={20} />
             <span className="settings-text">Streaks</span>
@@ -105,7 +146,7 @@ function App() {
         </div>
       </nav>
 
-      {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
+      {isMenuOpen && !isMultiplayer && <div className="menu-overlay" onClick={closeMenu}></div>}
 
       <main className="main-content">
         {isLoading ? (
@@ -127,6 +168,7 @@ function App() {
             <Route path="/campaign-pack-guesser" element={<CampaignPackGuesser />} />
             <Route path="/icon-guesser" element={<IconGuesser />} />
             <Route path="/true-or-false" element={<TrueOrFalse />} />
+            <Route path="/multiplayer" element={<MultiplayerLobby />} />
           </Routes>
         )}
       </main>
@@ -149,6 +191,8 @@ function App() {
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
       )}
+
+      <MultiplayerHUD />
     </div>
   );
 }

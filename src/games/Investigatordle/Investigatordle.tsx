@@ -3,6 +3,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './Investigatordle.scss';
@@ -18,7 +19,12 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
   const modeName = 'Investigatordle';
   const maxGuesses = settings.investigatordle.maxGuesses ?? 6;
 
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{ answerId: string; optionIds: string[] }>();
+
   const gameInvestigators = useMemo(() => {
+    if (syncedData) {
+      return syncedData.optionIds.map(id => cards.find(c => c.id === id)).filter(Boolean) as TransformedCard[];
+    }
     const baseFiltered = filterBySettings(cards, settings, 'investigatordle');
     const investigators = baseFiltered.filter(c => c.typeName === 'investigator');
     const noDupes = filterDuplicateOfCode(investigators);
@@ -26,6 +32,7 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
       noDupes,
       GAME_EVALUATION_CRITERIA.investigatordle
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards, settings]);
 
   const dupeNames = useMemo(() => findDuplicateNames(gameInvestigators), [gameInvestigators]);
@@ -46,8 +53,24 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
     setGaveUp(false);
     setHasReportedStreakLoss(false);
     setGuesses([]);
-    setAnswer(gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)]);
-  }, [gameInvestigators]);
+
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
+    }
+
+    const newAnswer = gameInvestigators[Math.floor(Math.random() * gameInvestigators.length)];
+    syncData({
+      answerId: newAnswer?.id,
+      optionIds: gameInvestigators.map(c => c.id)
+    });
+  }, [gameInvestigators, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      const syncedAnswer = cards.find(c => c.id === syncedData.answerId) || null;
+      setAnswer(syncedAnswer);
+    }
+  }, [syncedData, cards]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,6 +94,9 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
       setGuesses([card, ...guesses]);
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true, guesses: guesses.length + 1 }
+      }));
     } else {
       const newGuesses = [card, ...guesses];
       setGuesses(newGuesses);
@@ -86,6 +112,9 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
     if (!hasReportedStreakLoss) {
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
       setHasReportedStreakLoss(true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false, guesses: maxGuesses }
+      }));
     }
   };
 
@@ -139,7 +168,9 @@ export default function Investigatordle({ onPlayAgainOverride, streakModeName }:
         </div>
       </div>
 
-      {win || gaveUp ? (
+      {(isClientWaiting || !answer) ? (
+        <div className="waiting-for-host">Waiting for Host...</div>
+      ) : win || gaveUp ? (
         <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="investigator-result-panel" />
       ) : (
         <div className="investigator-input-section">

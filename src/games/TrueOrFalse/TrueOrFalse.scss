@@ -88,6 +88,10 @@
         height: 240px;
         background: #000;
         z-index: 2;
+
+        &.pic-mismatch {
+          top: 250px;
+        }
       }
 
       .image-obscure-box-act {
@@ -98,6 +102,10 @@
         height: 500px;
         background: #000;
         z-index: 2;
+
+        &.pic-mismatch {
+          top: 0px;
+        }
       }
 
       .image-obscure-box-agenda {
@@ -106,6 +114,20 @@
         left: 180px;
         width: 300px;
         height: 500px;
+        background: #000;
+        z-index: 2;
+
+        &.pic-mismatch {
+          top: 0px;
+        }
+      }
+
+      .image-obscure-box-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 300px;
+        height: 50px;
         background: #000;
         z-index: 2;
       }
@@ -118,6 +140,10 @@
         height: 240px;
         background: #000;
         z-index: 2;
+
+        &.pic-mismatch {
+          top: 230px;
+        }
       }
     }
 
@@ -244,33 +270,33 @@
     max-width: 450px !important;
     height: auto !important;
     max-height: 90vh !important;
-    
+
     .modal-body {
       flex: none;
-      
+
       .notification-text-primary {
         color: var(--text-primary);
         font-size: 1rem;
         margin-bottom: 1rem;
         line-height: 1.5;
       }
-      
+
       .notification-text-secondary {
         opacity: 0.8;
         margin-bottom: 1rem;
       }
     }
-    
+
     .modal-footer {
       padding: 1.5rem;
       display: flex;
       gap: 1rem;
       border-top: 1px solid var(--glass-border);
-      
+
       .notification-btn-primary {
         flex: 1;
       }
-      
+
       .notification-btn-secondary {
         flex: 1;
         background: transparent;
@@ -280,10 +306,11 @@
   }
 }
 
-.card-preview-image, .card-preview-image-side {
+.card-preview-image,
+.card-preview-image-side {
   opacity: 0;
   transition: opacity 0.3s ease;
-  
+
   &.loaded {
     opacity: 1;
   }

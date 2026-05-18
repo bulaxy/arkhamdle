@@ -127,6 +127,7 @@ const defaultSettings: AppSettings = {
     actTraitsMode: true,
     agendaTraitsMode: true,
     treacheryTraitsMode: true,
+    nameAndPicMode: true,
   },
   randomTrivia: {
     enabledModes: {
@@ -142,6 +143,30 @@ const defaultSettings: AppSettings = {
       IconGuesser: true,
       TrueOrFalse: true,
     }
+  },
+  scoringConfig: {
+    wordle: { 1: 10, 2: 8, 3: 6, 4: 4, 5: 2, 6: 1 },
+    retry: {
+      picGuesser: 5,
+      storyGuesser: 5,
+      traitGuesser: 5,
+      flavourGuesser: 5,
+      campaignPackGuesser: 3,
+      countGuesser: 5,
+    },
+    retryPenalty: {
+      picGuesser: 1,
+      storyGuesser: 1,
+      traitGuesser: 1,
+      flavourGuesser: 1,
+      campaignPackGuesser: 1,
+      countGuesser: 1,
+    },
+    singleAttempt: {
+      trueOrFalse: 1,
+      multipleChoice: 1,
+      iconGuesser: 3,
+    },
   },
 };
 
@@ -196,9 +221,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       const savedSettings =
         await localforage.getItem<AppSettings>("arkhamdle_settings");
       if (savedSettings && savedSettings.wordle) {
+        // Deeply merge scoringConfig to protect new fields like retryPenalty
+        const mergedScoringConfig = {
+          ...defaultSettings.scoringConfig,
+          ...(savedSettings.scoringConfig || {}),
+          retry: {
+            ...defaultSettings.scoringConfig.retry,
+            ...(savedSettings.scoringConfig?.retry || {}),
+          },
+          retryPenalty: {
+            ...defaultSettings.scoringConfig.retryPenalty,
+            ...(savedSettings.scoringConfig?.retryPenalty || {}),
+          },
+          singleAttempt: {
+            ...defaultSettings.scoringConfig.singleAttempt,
+            ...(savedSettings.scoringConfig?.singleAttempt || {}),
+          }
+        };
+
         setSettingsState({
           ...defaultSettings,
           ...savedSettings,
+          scoringConfig: mergedScoringConfig,
         });
         initializeSeed(savedSettings.seed);
         loadData(false, savedSettings.includeEncounter ?? false);

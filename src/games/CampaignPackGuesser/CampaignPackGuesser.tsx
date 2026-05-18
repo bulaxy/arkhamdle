@@ -4,6 +4,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { filterForCampaignPackGuesser, filterBySettings } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import { getPackDisplayName } from '../../data/packStructure';
@@ -26,6 +27,8 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
   const [encounterSearch, setEncounterSearch] = useState<string>('');
   const [showEncounterDropdown, setShowEncounterDropdown] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{ answerId: string }>();
 
   const gameCards = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'campaignPackGuesser');
@@ -75,12 +78,25 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
     setSelectedEncounter('');
     setEncounterSearch('');
     setImageLoaded(false);
-    if (gameCardsWithPic.length > 0) {
-      setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
-    } else {
-      setAnswer(null);
+
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
     }
-  }, [gameCardsWithPic]);
+
+    if (gameCardsWithPic.length > 0) {
+      const newAnswer = gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)];
+      syncData({ answerId: newAnswer.id });
+    } else {
+      syncData({ answerId: '' });
+    }
+  }, [gameCardsWithPic, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      const syncedAnswer = cards.find(c => c.id === syncedData.answerId) || null;
+      setAnswer(syncedAnswer);
+    }
+  }, [syncedData, cards]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -107,6 +123,9 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
     if (selectedEncounter === answer?.encounter_name) {
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true, wrongGuesses: guesses.length }
+      }));
     } else {
       setAnimation('shakeAnimation');
       setTimeout(() => setAnimation(''), 300);
@@ -124,6 +143,9 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
     if (!hasReportedStreakLoss) {
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
       setHasReportedStreakLoss(true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false, wrongGuesses: maxGuesses }
+      }));
     }
   };
 
@@ -158,6 +180,8 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
               Please go to General Settings and ensure "Include Encounter Cards" is enabled, and that you have packs with encounter cards selected.
             </p>
           </div>
+        ) : isClientWaiting ? (
+          <div className="waiting-for-host">Waiting for Host...</div>
         ) : (
           <>
             <div className="campaign-pack-image-container">
