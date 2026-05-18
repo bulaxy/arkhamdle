@@ -222,135 +222,145 @@ export default function GeneralSettingsSection({
               </div>
             </div>
 
-            <div className="settings-actions-row">
-              <button
-                className="premium-btn"
-                onClick={async () => {
-                  try {
-                    const dataStr = JSON.stringify(settings, null, 2);
-                    const success = await copyToClipboard(dataStr);
-                    if (success) {
-                      alert("Settings copied to clipboard!");
-                    } else {
-                      alert("Failed to copy settings to clipboard. Please try exporting instead.");
-                    }
-                  } catch (err) {
-                    console.error(err);
-                    alert("Failed to copy settings to clipboard. Please try exporting instead.");
-                  }
-                }}
-              >
-                <Copy size={18} /> Copy
-              </button>
-
-              <button
-                className="premium-btn"
-                onClick={async () => {
-                  try {
-                    let text = "";
-                    try {
-                      if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
-                        text = await navigator.clipboard.readText();
-                      }
-                    } catch (clipErr) {
-                      console.warn("Clipboard access denied/failed, falling back to prompt", clipErr);
-                    }
-
-                    if (!text) {
-                      text = prompt("Paste your copied settings JSON text here:") || "";
-                    }
-
-                    if (!text.trim()) return;
-
-                    const importedSettings = JSON.parse(text) as AppSettings;
-
-                    // Basic validation
-                    if (!importedSettings.wordle) {
-                      throw new Error("Invalid settings payload");
-                    }
-
-                    // Check if we need to load encounter cards
-                    if (importedSettings.includeEncounter && !settings.includeEncounter) {
-                      if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
-                        setSettings(importedSettings);
-                        await refreshData(true);
-                      } else {
-                        setSettings({ ...importedSettings, includeEncounter: false });
-                      }
-                    } else {
-                      setSettings(importedSettings);
-                    }
-                    alert("Settings pasted and imported successfully!");
-                  } catch (err) {
-                    console.error(err);
-                    alert("Failed to parse settings. Make sure you copied the correct settings JSON.");
-                  }
-                }}
-              >
-                <Clipboard size={18} /> Paste
-              </button>
-
-              <button
-                className="premium-btn"
-                onClick={() => {
-                  const dataStr = JSON.stringify(settings, null, 2);
-                  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-                  const exportFileDefaultName = `arkhamdle_settings_${new Date().toISOString().split('T')[0]}.json`;
-
-                  const linkElement = document.createElement('a');
-                  linkElement.setAttribute('href', dataUri);
-                  linkElement.setAttribute('download', exportFileDefaultName);
-                  linkElement.click();
-                }}
-              >
-                <Download size={18} /> Export
-              </button>
-
-              <div className="file-input-wrapper">
-                <button className="premium-btn">
-                  <Upload size={18} /> Import
-                  <input
-                    type="file"
-                    accept=".json"
-                    className="hidden-file-input"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-
-                      const reader = new FileReader();
-                      reader.onload = async (event) => {
-                        try {
-                          const content = event.target?.result as string;
-                          const importedSettings = JSON.parse(content) as AppSettings;
-
-                          // Basic validation
-                          if (!importedSettings.wordle) {
-                            throw new Error("Invalid settings file");
-                          }
-
-                          // Check if we need to load encounter cards
-                          if (importedSettings.includeEncounter && !settings.includeEncounter) {
-                            if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
-                              setSettings(importedSettings);
-                              await refreshData(true);
-                            } else {
-                              setSettings({ ...importedSettings, includeEncounter: false });
-                            }
-                          } else {
-                            setSettings(importedSettings);
-                          }
-                          alert("Settings imported successfully!");
-                        } catch (err) {
-                          console.error(err);
-                          alert("Failed to import settings. Please make sure it's a valid JSON file.");
+            <details className="deprecated-settings-details">
+              <summary className="deprecated-settings-summary">
+                <span>Deprecated (Settings Sync)</span>
+              </summary>
+              <div className="deprecated-settings-content">
+                <p className="deprecated-warning-text">
+                  ⚠️ Note: Sharing settings via JSON copy/paste or file export/import is deprecated and no longer maintained. Please use the seed-based sharing options above.
+                </p>
+                <div className="settings-actions-row">
+                  <button
+                    className="premium-btn"
+                    onClick={async () => {
+                      try {
+                        const dataStr = JSON.stringify(settings, null, 2);
+                        const success = await copyToClipboard(dataStr);
+                        if (success) {
+                          alert("Settings copied to clipboard!");
+                        } else {
+                          alert("Failed to copy settings to clipboard. Please try exporting instead.");
                         }
-                      };
-                      reader.readAsText(file);
+                      } catch (err) {
+                        console.error(err);
+                        alert("Failed to copy settings to clipboard. Please try exporting instead.");
+                      }
                     }}
-                  />
-                </button>
+                  >
+                    <Copy size={18} /> Copy
+                  </button>
+
+                  <button
+                    className="premium-btn"
+                    onClick={async () => {
+                      try {
+                        let text = "";
+                        try {
+                          if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+                            text = await navigator.clipboard.readText();
+                          }
+                        } catch (clipErr) {
+                          console.warn("Clipboard access denied/failed, falling back to prompt", clipErr);
+                        }
+
+                        if (!text) {
+                          text = prompt("Paste your copied settings JSON text here:") || "";
+                        }
+
+                        if (!text.trim()) return;
+
+                        const importedSettings = JSON.parse(text) as AppSettings;
+
+                        // Basic validation
+                        if (!importedSettings.wordle) {
+                          throw new Error("Invalid settings payload");
+                        }
+
+                        // Check if we need to load encounter cards
+                        if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                          if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                            setSettings(importedSettings);
+                            await refreshData(true);
+                          } else {
+                            setSettings({ ...importedSettings, includeEncounter: false });
+                          }
+                        } else {
+                          setSettings(importedSettings);
+                        }
+                        alert("Settings pasted and imported successfully!");
+                      } catch (err) {
+                        console.error(err);
+                        alert("Failed to parse settings. Make sure you copied the correct settings JSON.");
+                      }
+                    }}
+                  >
+                    <Clipboard size={18} /> Paste
+                  </button>
+
+                  <button
+                    className="premium-btn"
+                    onClick={() => {
+                      const dataStr = JSON.stringify(settings, null, 2);
+                      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                      const exportFileDefaultName = `arkhamdle_settings_${new Date().toISOString().split('T')[0]}.json`;
+
+                      const linkElement = document.createElement('a');
+                      linkElement.setAttribute('href', dataUri);
+                      linkElement.setAttribute('download', exportFileDefaultName);
+                      linkElement.click();
+                    }}
+                  >
+                    <Download size={18} /> Export
+                  </button>
+
+                  <div className="file-input-wrapper">
+                    <button className="premium-btn">
+                      <Upload size={18} /> Import
+                      <input
+                        type="file"
+                        accept=".json"
+                        className="hidden-file-input"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+
+                          const reader = new FileReader();
+                          reader.onload = async (event) => {
+                            try {
+                              const content = event.target?.result as string;
+                              const importedSettings = JSON.parse(content) as AppSettings;
+
+                              // Basic validation
+                              if (!importedSettings.wordle) {
+                                throw new Error("Invalid settings file");
+                              }
+
+                              // Check if we need to load encounter cards
+                              if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                                if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                                  setSettings(importedSettings);
+                                  await refreshData(true);
+                                } else {
+                                  setSettings({ ...importedSettings, includeEncounter: false });
+                                }
+                              } else {
+                                setSettings(importedSettings);
+                              }
+                              alert("Settings imported successfully!");
+                            } catch (err) {
+                              console.error(err);
+                              alert("Failed to import settings. Please make sure it's a valid JSON file.");
+                            }
+                          };
+                          reader.readAsText(file);
+                        }}
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         </div>
       )}
