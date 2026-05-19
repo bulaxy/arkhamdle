@@ -74,10 +74,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
 
     if (answerPool.length > 0) {
       const selected = answerPool[Math.floor(Math.random() * answerPool.length)];
-      console.log('[FlavourGuesser] Answer:', selected);
       
       let newOptions: TransformedCard[] = [];
-
+      const possibleOptions = guessableCards.filter(c => c.flavor !== selected.flavor);
       // Generate Multiple Choice Options
       if (settings.flavourGuesser.inputMode === 'Multiple Choice') {
         const optionsSet = new Set<TransformedCard>();
@@ -87,10 +86,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
         
         if (answerTraits.length > 0) {
           // 1. Try to find cards matching all traits
-          let matchingAll = guessableCards.filter(c => 
+          let matchingAll = possibleOptions.filter(c => 
             c.id !== selected.id && 
             c.name !== selected.name &&
-            c.flavor !== selected.flavor &&
             c.traits && 
             answerTraits.every(t => c.traits!.includes(t))
           );
@@ -102,10 +100,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
 
           // 2. If not enough, try finding cards matching at least 1 trait
           if (optionsSet.size < 4) {
-            let matchingAny = guessableCards.filter(c => 
+            let matchingAny = possibleOptions.filter(c => 
               c.id !== selected.id && 
               c.name !== selected.name &&
-              c.flavor !== selected.flavor &&
               !optionsSet.has(c) &&
               c.traits && 
               answerTraits.some(t => c.traits!.includes(t))
@@ -120,10 +117,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
 
         // 3. Fallback to random cards
         if (optionsSet.size < 4) {
-          const remaining = shuffle(guessableCards.filter(c => 
+          const remaining = shuffle(possibleOptions.filter(c => 
             !optionsSet.has(c) && 
-            c.name !== selected.name && 
-            c.flavor !== selected.flavor
+            c.name !== selected.name
           ));
           for (const card of remaining) {
             if (optionsSet.size >= 4) break;

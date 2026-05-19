@@ -61,8 +61,6 @@ export function generatePicMismatchQuestion(
   pool: TransformedCard[],
   packCodeThreshold: number = 0.75,
   isAgendaAct: boolean = false,
-  type: AnyQuestionType = 'PicMismatch',
-  useSpellingArstwork: boolean = false
 ): GameQuestion | null {
   let fakeCard: TransformedCard | undefined;
   
@@ -71,15 +69,12 @@ export function generatePicMismatchQuestion(
     if (!fake) return null;
     fakeCard = fake;
   }
-  
-  const artworkSpelling = useSpellingArstwork ? 'arstwork' : 'artwork';
-  
   return {
     card: randomCard,
     isTrue,
-    questionText: `Is this the right ${artworkSpelling} for ${fakeCard?.name ?? randomCard.name}?`,
+    questionText: `Is this the right artwork for ${fakeCard?.name ?? randomCard.name}?`,
     displayedValue: '',
-    type,
+    type: 'PicMismatch',
     fakeCard
   };
 }

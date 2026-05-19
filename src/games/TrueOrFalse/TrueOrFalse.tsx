@@ -490,8 +490,10 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         ) : (
           <>
             <div className="card-info">
+              {question.type !== 'PicMismatch' && <>
               <h2>{question.card.name}</h2>
               {question.card.subname && <div className="subname">{question.card.subname}</div>}
+              </>}
               
               <div className="card-details">
                 {question.type !== 'PicMismatch' && (

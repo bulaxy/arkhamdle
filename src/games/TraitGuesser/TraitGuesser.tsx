@@ -106,9 +106,7 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
     }
 
     if (localTraits.length > 0) {
-      const selected = localTraits[Math.floor(Math.random() * localTraits.length)];
-      console.log('[TraitGuesser] Trait:', selected, '| Possible answers:', localOptions.filter(c => c.traits.includes(selected)).map(c => c.fullName));
-      
+      const selected = localTraits[Math.floor(Math.random() * localTraits.length)];      
       syncData({
         answerId: selected, // answerId is the trait name here
         optionIds: localPossibleOptions.map(c => c.id)
