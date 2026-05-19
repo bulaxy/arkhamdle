@@ -213,7 +213,11 @@ export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }
                 onSelect={handleMultipleChoice}
                 getLabel={(opt) => {
                   if (typeof opt === 'string') {
-                    return allFilteredCards.find(c => c.id === opt)?.name || opt;
+                    const card = allFilteredCards.find(c => c.id === opt);
+                    if (card) {
+                      return card.subname ? `${card.name} - ${card.subname}` : card.name;
+                    }
+                    return opt;
                   }
                   return opt;
                 }}
@@ -228,8 +232,8 @@ export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }
                   onGuess={handleCardGuess}
                   placeholder="Type card name..."
                   onGiveUp={handleGiveUp}
-                  giveUpThreshold={1} // give up button always visible essentially
-                  getDisplayText={(c) => c.name}
+                  giveUpThreshold={1} 
+                  getDisplayText={(c) => c.subname ? `${c.name} - ${c.subname}` : c.name}
                   getOptionColors={getCardFactionColors}
                 />
               </div>

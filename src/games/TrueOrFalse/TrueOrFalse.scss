@@ -33,6 +33,38 @@
     border-radius: 12px;
     border: 1px solid var(--border-color);
 
+    .card-images-side-by-side {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      width: 100%;
+
+      .card-image-wrapper {
+        margin: 0;
+
+        .card-preview-image {
+          width: 240px;
+        }
+
+        .image-obscure-box-location {
+          width: 240px;
+          top: 160px;
+          height: 192px;
+
+          &.pic-mismatch {
+            top: 200px;
+          }
+        }
+
+        .image-obscure-box-top {
+          width: 240px;
+          height: 40px;
+        }
+      }
+    }
+
     .card-image-wrapper {
       position: relative;
       width: fit-content;

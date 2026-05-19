@@ -510,23 +510,50 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
             </div>
 
             {!isGameOver && question.type !== 'Traits' && question.card.imagesrc && (
-              <div className="card-image-wrapper">
-                {!imageLoaded && (
-                  <div className="image-loading-placeholder">
-                    <div className="spinner" />
+              question.card.typeName === 'location' && question.card.backimagesrc && question.card.backimagesrc.trim().length > 0 ? (
+                <div className="card-images-side-by-side">
+                  <div className="card-image-wrapper">
+                    <img 
+                      src={`https://arkhamdb.com${question.card.imagesrc}`} 
+                      alt={`${question.card.name} front`} 
+                      className="card-preview-image loaded"
+                    />
+                    <div className={`image-obscure-box-location ${question.type === 'PicMismatch' ? 'pic-mismatch' : ''}`} />
+                    {question.type === 'PicMismatch' && (
+                      <div className="image-obscure-box-top" />
+                    )}
                   </div>
-                )}
-                <img 
-                  src={`https://arkhamdb.com${question.card.backimagesrc && question.card.typeName==="location"?question.card.backimagesrc : question.card.imagesrc}`} 
-                  alt={question.card.name} 
-                  className={`${['agenda', 'act'].includes(question.card.typeName) ? 'card-preview-image-side' : 'card-preview-image'} ${imageLoaded ? 'loaded' : ''}`}
-                  onLoad={() => setImageLoaded(true)}
-                />
-                <div className={`image-obscure-box-${question.card.typeName} ${question.type === 'PicMismatch' ? 'pic-mismatch' : ''}`} />
-                {question.type === 'PicMismatch' && ['location', 'enemy', 'treachery'].includes(question.card.typeName) && (
-                  <div className="image-obscure-box-top" />
-                )}
-              </div>
+                  <div className="card-image-wrapper">
+                    <img 
+                      src={`https://arkhamdb.com${question.card.backimagesrc}`} 
+                      alt={`${question.card.name} back`} 
+                      className="card-preview-image loaded"
+                    />
+                    <div className={`image-obscure-box-location ${question.type === 'PicMismatch' ? 'pic-mismatch' : ''}`} />
+                    {question.type === 'PicMismatch' && (
+                      <div className="image-obscure-box-top" />
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="card-image-wrapper">
+                  {!imageLoaded && (
+                    <div className="image-loading-placeholder">
+                      <div className="spinner" />
+                    </div>
+                  )}
+                  <img 
+                    src={`https://arkhamdb.com${question.card.imagesrc}`} 
+                    alt={question.card.name} 
+                    className={`${['agenda', 'act'].includes(question.card.typeName) ? 'card-preview-image-side' : 'card-preview-image'} ${imageLoaded ? 'loaded' : ''}`}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                  <div className={`image-obscure-box-${question.card.typeName} ${question.type === 'PicMismatch' ? 'pic-mismatch' : ''}`} />
+                  {question.type === 'PicMismatch' && ['location', 'enemy', 'treachery'].includes(question.card.typeName) && (
+                    <div className="image-obscure-box-top" />
+                  )}
+                </div>
+              )
             )}
 
             <div className="question-box">

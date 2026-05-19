@@ -98,7 +98,7 @@ export function generateWhichCardQuestion(
   allCards: TransformedCard[] // used to find wrong options sharing traits
 ): TriviaQuestion {
   // We need to find a card that is uniquely identified by some combination of traits/type/class
-  const shuffledPool = shuffle(pool);
+  const shuffledPool = shuffle(pool)
 
   for (const card of shuffledPool) {
     if (!card.traits || card.traits.length === 0) continue;
@@ -108,11 +108,11 @@ export function generateWhichCardQuestion(
     const sig2 = `${card.typeName}, ${card.traits.join(', ')}`;
     const sig3 = `${card.class.join('/')}, ${card.typeName}, ${card.traits.join(', ')}`;
 
-    // Check uniqueness in pool
-    const matches1 = pool.filter(c => c.traits && c.traits.join(', ') === card.traits!.join(', '));
-    const matches2 = pool.filter(c => c.traits && c.typeName === card.typeName && c.traits.join(', ') === card.traits!.join(', '));
-    const matches3 = pool.filter(c => c.traits && c.class.join('/') === card.class.join('/') && c.typeName === card.typeName && c.traits.join(', ') === card.traits!.join(', '));
-
+    // Check uniqueness in the entire allCards database to ensure we don't select cards
+    // with duplicate printings/levels (e.g. Occult Lexicon) or shared traits.
+    const matches1 = allCards.filter(c => c.traits && c.traits.join(', ') === card.traits!.join(', '));
+    const matches2 = allCards.filter(c => c.traits && c.typeName === card.typeName && c.traits.join(', ') === card.traits!.join(', '));
+    const matches3 = allCards.filter(c => c.traits && c.class.join('/') === card.class.join('/') && c.typeName === card.typeName && c.traits.join(', ') === card.traits!.join(', '));
     let chosenSig = '';
     if (matches1.length === 1) chosenSig = sig1;
     else if (matches2.length === 1) chosenSig = sig2;

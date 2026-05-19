@@ -133,7 +133,7 @@ function App() {
         <div className="nav-right">
           <button className="premium-btn settings-btn" onClick={() => { navigate('/multiplayer'); closeMenu(); }}>
             <Users size={20} />
-            <span className="settings-text">Multiplayer</span>
+            <span className="settings-text">Multiplayer (Beta)</span>
           </button>
           <button className="premium-btn settings-btn" onClick={() => { setIsStatsOpen(true); closeMenu(); }}>
             <Trophy size={20} />

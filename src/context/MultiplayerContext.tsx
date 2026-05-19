@@ -62,8 +62,38 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const ablyRef = useRef<Realtime | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
+  const settingsRef = useRef(settings);
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  const playersRef = useRef(players);
+  useEffect(() => {
+    playersRef.current = players;
+  }, [players]);
+
+  const applySeedRef = useRef(applySeed);
+  useEffect(() => {
+    applySeedRef.current = applySeed;
+  }, [applySeed]);
+
+  const roomSettingsRef = useRef(roomSettings);
+  useEffect(() => {
+    roomSettingsRef.current = roomSettings;
+  }, [roomSettings]);
+
+  const sharedGameDataRef = useRef(sharedGameData);
+  useEffect(() => {
+    sharedGameDataRef.current = sharedGameData;
+  }, [sharedGameData]);
+
+  const randomTriviaGameModeRef = useRef(randomTriviaGameMode);
+  useEffect(() => {
+    randomTriviaGameModeRef.current = randomTriviaGameMode;
+  }, [randomTriviaGameMode]);
+
   // Helper to safely get the player name
-  const getPlayerName = useCallback(() => settings.playerName || 'Anonymous Investigator', [settings.playerName]);
+  const getPlayerName = useCallback(() => settingsRef.current.playerName || 'Anonymous Investigator', []);
 
   const cleanup = useCallback(() => {
     if (channelRef.current) {
@@ -98,13 +128,15 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     cleanup();
   }, [cleanup]);
 
-  // Synchronize presence list to players state
   const syncPresence = useCallback(async (channel: RealtimeChannel) => {
     try {
       const members = await channel.presence.get();
-      const mappedPlayers: MultiplayerPlayer[] = (members as PresenceMessage[]).map((m) => {
+      const uniquePlayersMap = new Map<string, MultiplayerPlayer>();
+
+      for (const m of members as PresenceMessage[]) {
+        if (!m.clientId) continue;
         const data = m.data as PlayerPresenceData | undefined;
-        return {
+        const player: MultiplayerPlayer = {
           id: m.clientId,
           name: data?.name || 'Anonymous Investigator',
           score: data?.score || 0,
@@ -112,9 +144,15 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           ready: data?.ready || false,
           isHost: data?.isHost || false
         };
-      });
 
-      // Sort: host first, then alphabetical or by ID
+        const existing = uniquePlayersMap.get(m.clientId);
+        if (!existing || (!existing.ready && player.ready) || (player.score > existing.score)) {
+          uniquePlayersMap.set(m.clientId, player);
+        }
+      }
+
+      const mappedPlayers = Array.from(uniquePlayersMap.values());
+
       mappedPlayers.sort((a, b) => {
         const aIsHost = a.id === roomCode || a.isHost;
         const bIsHost = b.id === roomCode || b.isHost;
@@ -129,10 +167,8 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, [roomCode]);
 
-  // Set up message subscription
   const subscribeToMessages = useCallback((channel: RealtimeChannel, localId: string, currentIsHost: boolean) => {
     channel.subscribe((msg: Message) => {
-      // Don't process our own broadcasted messages
       if (msg.clientId === localId) return;
 
       const type = msg.name;
@@ -140,16 +176,14 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
       if (type === 'GAME_START') {
         // Reset our own ready state in presence
-        const myPlayer = players.find(p => p.id === localId);
-        if (myPlayer) {
-          channel.presence.update({
-            name: getPlayerName(),
-            score: myPlayer.score,
-            modeScores: myPlayer.modeScores,
-            ready: false,
-            isHost: currentIsHost
-          });
-        }
+        const myPlayer = playersRef.current.find(p => p.id === localId);
+        channel.presence.update({
+          name: getPlayerName(),
+          score: myPlayer ? myPlayer.score : 0,
+          modeScores: myPlayer ? myPlayer.modeScores : {},
+          ready: false,
+          isHost: currentIsHost
+        });
 
         if (!currentIsHost) {
           const newRoomSettings = payload.settings;
@@ -157,21 +191,18 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           setSharedGameData(null);
           setRandomTriviaGameModeState(null);
           if (newRoomSettings?.seed) {
-            applySeed(newRoomSettings.seed);
+            applySeedRef.current(newRoomSettings.seed);
           }
         }
       } else if (type === 'NAVIGATE') {
-        // Reset ready state in presence
-        const myPlayer = players.find(p => p.id === localId);
-        if (myPlayer) {
-          channel.presence.update({
-            name: getPlayerName(),
-            score: myPlayer.score,
-            modeScores: myPlayer.modeScores,
-            ready: false,
-            isHost: currentIsHost
-          });
-        }
+        const myPlayer = playersRef.current.find(p => p.id === localId);
+        channel.presence.update({
+          name: getPlayerName(),
+          score: myPlayer ? myPlayer.score : 0,
+          modeScores: myPlayer ? myPlayer.modeScores : {},
+          ready: false,
+          isHost: currentIsHost
+        });
 
         const { path } = payload;
         window.dispatchEvent(new CustomEvent('MULTIPLAYER_NAVIGATE', { detail: { path } }));
@@ -190,14 +221,13 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           setSharedGameData(payload.sharedGameData);
           setRandomTriviaGameModeState(payload.randomTriviaGameMode);
           if (payload.settings?.seed) {
-            applySeed(payload.settings.seed);
+            applySeedRef.current(payload.settings.seed);
           }
         }
       }
     });
-  }, [applySeed, cleanup, getPlayerName, players]);
+  }, [cleanup, getPlayerName]);
 
-  // Synchronize player name change to presence
   useEffect(() => {
     if (!isMultiplayer || !channelRef.current || !myId) return;
     const myPlayer = players.find(p => p.id === myId);
@@ -215,9 +245,6 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, [settings.playerName, isMultiplayer, myId, players, isHost, getPlayerName]);
 
-  // ---------------------------------------------------------
-  // HOST LOGIC
-  // ---------------------------------------------------------
   const hostGame = (rawCode: string) => {
     cleanup();
 
@@ -249,9 +276,9 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       channel.presence.subscribe('enter', (member) => {
         if (member.clientId !== hostId) {
           channel.publish('ROOM_STATE_SYNC', {
-            settings: roomSettings || settings,
-            sharedGameData: sharedGameData,
-            randomTriviaGameMode: randomTriviaGameMode
+            settings: roomSettingsRef.current || settingsRef.current,
+            sharedGameData: sharedGameDataRef.current,
+            randomTriviaGameMode: randomTriviaGameModeRef.current
           });
         }
       });
@@ -344,10 +371,10 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       };
     }
 
-    const activeSettings = roomSettings || settings;
+    const activeSettings = roomSettingsRef.current || settingsRef.current;
     const calculatedScore = calculateGameScore(stats, activeSettings.scoringConfig);
 
-    const myPlayer = players.find(p => p.id === myId);
+    const myPlayer = playersRef.current.find(p => p.id === myId);
     if (!myPlayer || !channelRef.current) return;
 
     const newModeScores = { ...myPlayer.modeScores };
@@ -360,10 +387,10 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       ready: myPlayer.ready,
       isHost: isHost
     });
-  }, [roomSettings, settings, players, myId, getPlayerName, isHost]);
+  }, [myId, getPlayerName, isHost]);
 
   const reportReady = useCallback(() => {
-    const myPlayer = players.find(p => p.id === myId);
+    const myPlayer = playersRef.current.find(p => p.id === myId);
     if (!myPlayer || !channelRef.current) return;
 
     channelRef.current.presence.update({
@@ -373,14 +400,14 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       ready: true,
       isHost: isHost
     });
-  }, [players, myId, getPlayerName, isHost]);
+  }, [myId, getPlayerName, isHost]);
 
-  const broadcastGameStart = (mode: string, answer: unknown, newSettings: AppSettings) => {
+  const broadcastGameStart = useCallback((mode: string, answer: unknown, newSettings: AppSettings) => {
     setRoomSettings(newSettings);
     setSharedGameData(null);
     setRandomTriviaGameModeState(null);
 
-    const myPlayer = players.find(p => p.id === myId);
+    const myPlayer = playersRef.current.find(p => p.id === myId);
     if (myPlayer && channelRef.current) {
       channelRef.current.presence.update({
         name: getPlayerName(),
@@ -398,7 +425,7 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         settings: newSettings
       });
     }
-  };
+  }, [myId, getPlayerName, isHost]);
 
   const broadcastNavigate = useCallback((path: string) => {
     setSharedGameData(null);
@@ -409,7 +436,7 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       channelRef.current.publish('RANDOM_TRIVIA_MODE_SYNC', null);
     }
 
-    const myPlayer = players.find(p => p.id === myId);
+    const myPlayer = playersRef.current.find(p => p.id === myId);
     if (myPlayer && channelRef.current) {
       channelRef.current.presence.update({
         name: getPlayerName(),
@@ -423,7 +450,7 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (channelRef.current) {
       channelRef.current.publish('NAVIGATE', { path });
     }
-  }, [myId, getPlayerName, isHost, players]);
+  }, [myId, getPlayerName, isHost]);
 
   const broadcastGameData = useCallback((data: unknown) => {
     setSharedGameData(data);
@@ -447,13 +474,13 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const startNextRound = useCallback(() => {
     if (!isHost || !channelRef.current) return;
     const newSeed = generateRandomThematicSeed();
-    const newSettings = { ...settings, seed: newSeed };
-    applySeed(newSeed);
+    const newSettings = { ...settingsRef.current, seed: newSeed };
+    applySeedRef.current(newSeed);
 
     setSharedGameData(null);
     setRandomTriviaGameModeState(null);
 
-    const myPlayer = players.find(p => p.id === myId);
+    const myPlayer = playersRef.current.find(p => p.id === myId);
     if (myPlayer) {
       channelRef.current.presence.update({
         name: getPlayerName(),
@@ -469,7 +496,7 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       answer: null,
       settings: newSettings
     });
-  }, [isHost, settings, applySeed, players, myId, getPlayerName]);
+  }, [isHost, myId, getPlayerName]);
 
   useEffect(() => {
     if (!isMultiplayer) return;

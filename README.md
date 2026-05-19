@@ -74,7 +74,5 @@ This project is created by the community for the community. Card data is sourced
 *Happy investigating! 🔍*
 
 
-
-- Which enemy have 2 VP - Anon one
-- campaign pack guesser & true/false show both pic artwork and name matching
-- 
+## TODO:
+- Better questions, eg: Which enemy have 2 VP

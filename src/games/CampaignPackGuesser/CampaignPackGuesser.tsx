@@ -170,7 +170,7 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
         <p className="small-note">Note: Some encounter cards appear in multiple sets (e.g., Rotting Remains in Blood on the Altar and in Core Set). Make sure you pick the encounter set for the specific card version shown!</p>
       </div>
 
-      <div className="glass-panel campaign-pack-panel">
+      <div className={`glass-panel campaign-pack-panel ${answer && answer.typeName === 'location' && answer.backimagesrc && answer.backimagesrc.trim().length > 0 ? 'has-double-image' : ''}`}>
         {hasNoCardsError ? (
           <div className="campaign-pack-error-panel">
             <p className="settings-text error-title">
@@ -184,24 +184,49 @@ export default function CampaignPackGuesser({ onPlayAgainOverride, streakModeNam
           <div className="waiting-for-host">Waiting for Host...</div>
         ) : (
           <>
-            <div className="campaign-pack-image-container">
+            <div className={`campaign-pack-image-container ${answer && answer.typeName === 'location' && answer.backimagesrc && answer.backimagesrc.trim().length > 0 ? 'double-image' : 'standard-image'}`}>
               {answer && answer.imagesrc ? (
-                <>
-                  {!imageLoaded && (
-                    <div className="campaign-pack-image-loading">
-                      <div className="spinner" />
+                answer.typeName === 'location' && answer.backimagesrc && answer.backimagesrc.trim().length > 0 ? (
+                  <>
+                    <div className="campaign-pack-double-image-wrapper">
+                      <img
+                        src={`https://arkhamdb.com${answer.imagesrc}`}
+                        alt="Guess this encounter card front"
+                        className={`campaign-pack-image ${win || gaveUp ? 'campaign-pack-image-full' : 'campaign-pack-image-blurred'} loaded`}
+                        style={{
+                          filter: (!win && !gaveUp) ? `blur(${settings.campaignPackGuesser.blurAmount}px)` : 'none',
+                        }}
+                      />
                     </div>
-                  )}
-                  <img
-                    src={`https://arkhamdb.com${answer.imagesrc}`}
-                    alt="Guess this encounter card"
-                    className={`campaign-pack-image ${win || gaveUp ? 'campaign-pack-image-full' : 'campaign-pack-image-blurred'} ${imageLoaded ? 'loaded' : ''}`}
-                    style={{
-                      filter: (!win && !gaveUp) ? `blur(${settings.campaignPackGuesser.blurAmount}px)` : 'none',
-                    }}
-                    onLoad={() => setImageLoaded(true)}
-                  />
-                </>
+                    <div className="campaign-pack-double-image-wrapper">
+                      <img
+                        src={`https://arkhamdb.com${answer.backimagesrc}`}
+                        alt="Guess this encounter card back"
+                        className={`campaign-pack-image ${win || gaveUp ? 'campaign-pack-image-full' : 'campaign-pack-image-blurred'} loaded`}
+                        style={{
+                          filter: (!win && !gaveUp) ? `blur(${settings.campaignPackGuesser.blurAmount}px)` : 'none',
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {!imageLoaded && (
+                      <div className="campaign-pack-image-loading">
+                        <div className="spinner" />
+                      </div>
+                    )}
+                    <img
+                      src={`https://arkhamdb.com${answer.imagesrc}`}
+                      alt="Guess this encounter card"
+                      className={`campaign-pack-image ${win || gaveUp ? 'campaign-pack-image-full' : 'campaign-pack-image-blurred'} ${imageLoaded ? 'loaded' : ''}`}
+                      style={{
+                        filter: (!win && !gaveUp) ? `blur(${settings.campaignPackGuesser.blurAmount}px)` : 'none',
+                      }}
+                      onLoad={() => setImageLoaded(true)}
+                    />
+                  </>
+                )
               ) : (
                 <div className="campaign-pack-image-unavailable">Image not available</div>
               )}

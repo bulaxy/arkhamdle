@@ -30,7 +30,7 @@ export default function ResultPanel({
   const hostId = roomCode || (isHost ? myId : null);
   const clients = players.filter(p => p.id !== hostId);
   const readyCount = clients.filter(p => p.ready).length;
-  const totalCount = clients.length;
+  const totalCount = clients.length - 1; //excluding host
   const allReady = totalCount === 0 || readyCount === totalCount;
 
   // Diagnostic log to understand why counts aren't updating under some scenarios

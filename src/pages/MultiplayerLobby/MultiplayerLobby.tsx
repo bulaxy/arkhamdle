@@ -35,9 +35,12 @@ export default function MultiplayerLobby() {
     myId,
     broadcastNavigate,
     kickPlayer,
-    error
+    error,
+    roomSettings
   } = useMultiplayer();
   const { settings, setSettings } = useGameContext();
+  
+  const activeScoringConfig = roomSettings?.scoringConfig || settings.scoringConfig;
   
   const [joinInput, setJoinInput] = useState('');
   const [selectedMode, setSelectedMode] = useState<string>('/');
@@ -108,7 +111,11 @@ export default function MultiplayerLobby() {
         <div className="lobby-panel glass-panel">
           <div className="lobby-header">
             <Users size={28} />
-            <h1>Multiplayer Room</h1>
+            <h1>Multiplayer Room <span className="beta-badge">Beta</span></h1>
+          </div>
+
+          <div className="beta-notice-banner">
+            ⚠️ Multiplayer is currently in Beta. You may experience connection instability, desyncs, or visual latency.
           </div>
 
           <div className="lobby-form">
@@ -168,7 +175,7 @@ export default function MultiplayerLobby() {
       <div className={`glass-panel lobby-panel ${isHost ? 'host-panel' : ''}`}>
         <div className="lobby-header connected">
           <div>
-            <h1>Room Lobby</h1>
+            <h1>Room Lobby <span className="beta-badge">Beta</span></h1>
             <div className="room-code-row">
               <p className="room-code-display">Code: <strong>{showCode ? roomCode : '••••••••'}</strong></p>
               <button
@@ -355,10 +362,79 @@ export default function MultiplayerLobby() {
                 </div>
               </>
             ) : (
-              <div className="waiting-screen">
-                <div className="spinner large"></div>
-                <h2>Waiting for Host to start the game...</h2>
-                <p>The host is currently selecting a game mode.</p>
+              <div className="client-lobby-view">
+                <div className="scoring-config-section glass-panel mb-1rem">
+                  <button className="collapse-btn" onClick={() => setShowScoringConfig(!showScoringConfig)}>
+                    {showScoringConfig ? 'Hide Scoring Settings' : 'View Scoring Rules'}
+                  </button>
+                  {showScoringConfig && (
+                    <div className="scoring-config-content mt-1rem">
+                      <div className="table-responsive">
+                        <table className="scoring-rules-table">
+                          <thead>
+                            <tr>
+                              <th>Game / Rule</th>
+                              <th>Setting / Value</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {/* Wordle / Investigatordle */}
+                            <tr className="table-subheader-row">
+                              <td colSpan={2}>Wordle & Investigatordle (By Guess)</td>
+                            </tr>
+                            {Object.entries(activeScoringConfig.wordle).map(([guess, score]) => (
+                              <tr key={`wordle-${guess}`}>
+                                <td>Guess {guess}</td>
+                                <td>{score} pts</td>
+                              </tr>
+                            ))}
+                            {/* Retry Games */}
+                            <tr className="table-subheader-row">
+                              <td colSpan={2}>Retry Game Modes</td>
+                            </tr>
+                            {Object.entries(activeScoringConfig.retry).map(([game, maxVal]) => {
+                              const gameKey = game as keyof typeof activeScoringConfig.retry;
+                              const penaltyVal = activeScoringConfig.retryPenalty[gameKey] !== undefined
+                                ? activeScoringConfig.retryPenalty[gameKey]
+                                : 1;
+                              const formattedGameName = game
+                                .replace(/([A-Z])/g, ' $1')
+                                .replace(/^./, str => str.toUpperCase());
+                              return (
+                                <tr key={`retry-${game}`}>
+                                  <td>{formattedGameName}</td>
+                                  <td>Max: {maxVal} pts / Penalty: -{penaltyVal} pts</td>
+                                </tr>
+                              );
+                            })}
+                            {/* Single Attempt Games */}
+                            <tr className="table-subheader-row">
+                              <td colSpan={2}>Single Attempt Modes</td>
+                            </tr>
+                            {Object.entries(activeScoringConfig.singleAttempt).map(([game, val]) => {
+                              const formattedGameName = game
+                                .replace(/([A-Z])/g, ' $1')
+                                .replace(/^./, str => str.toUpperCase());
+                              return (
+                                <tr key={`single-${game}`}>
+                                  <td>{formattedGameName}</td>
+                                  <td>{val} pts</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="waiting-screen">
+                  <div className="spinner large"></div>
+                  <h2>Waiting for Host to start the game...</h2>
+                  <p>The host is currently selecting a game mode.</p>
+                  <p>If the host is already in game, they might need to return to the lobby to let you join in on the fun!</p>
+                </div>
               </div>
             )}
           </div>
