@@ -57,14 +57,6 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
       .map(([trait]) => trait);
   }, [localPossibleOptions, settings.traitGuesser.minCards, settings.traitGuesser.maxCards]);
 
-  // 4. Local options (independent of syncedData)
-  const localOptions = useMemo(() => {
-    return deduplicateByEvaluationCriteria(
-      localPossibleOptions,
-      GAME_EVALUATION_CRITERIA.traitGuesserCard
-    );
-  }, [localPossibleOptions]);
-
 
   const gameOptions = useMemo(() => {
     return deduplicateByEvaluationCriteria(
@@ -114,7 +106,7 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
     } else {
       syncData({ answerId: '', optionIds: [] });
     }
-  }, [localTraits, localOptions, localPossibleOptions, isMultiplayer, isHost, syncData]);
+  }, [localTraits, localPossibleOptions, isMultiplayer, isHost, syncData]);
 
   useEffect(() => {
     if (syncedData) {

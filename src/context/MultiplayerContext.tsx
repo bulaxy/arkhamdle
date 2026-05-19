@@ -1,9 +1,17 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
-import Peer, { type DataConnection } from 'peerjs';
-import type { AppSettings, MultiplayerMessage, MultiplayerPlayer, GameStats } from '../types';
+import { Realtime, type RealtimeChannel, type Message, type PresenceMessage } from 'ably';
+import type { AppSettings, MultiplayerPlayer } from '../types';
 import { useGameContext } from '../hooks/useGameContext';
 import { generateRandomThematicSeed } from '../utils/random';
 import { calculateGameScore } from '../utils/scoring';
+
+interface PlayerPresenceData {
+  name: string;
+  score: number;
+  modeScores: Record<string, number>;
+  ready: boolean;
+  isHost: boolean;
+}
 
 interface MultiplayerContextState {
   isMultiplayer: boolean;
@@ -51,23 +59,29 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [myId, setMyId] = useState<string | null>(null);
   const [randomTriviaGameMode, setRandomTriviaGameModeState] = useState<string | null>(null);
 
-  const peerRef = useRef<Peer | null>(null);
-  const connectionsRef = useRef<Map<string, DataConnection>>(new Map());
-  const hostConnectionRef = useRef<DataConnection | null>(null);
+  const ablyRef = useRef<Realtime | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   // Helper to safely get the player name
-  const getPlayerName = () => settings.playerName || 'Anonymous Investigator';
+  const getPlayerName = useCallback(() => settings.playerName || 'Anonymous Investigator', [settings.playerName]);
 
-  const cleanup = () => {
-    connectionsRef.current.forEach(conn => conn.close());
-    connectionsRef.current.clear();
-    if (hostConnectionRef.current) {
-      hostConnectionRef.current.close();
-      hostConnectionRef.current = null;
+  const cleanup = useCallback(() => {
+    if (channelRef.current) {
+      try {
+        channelRef.current.presence.leave();
+        channelRef.current.unsubscribe();
+      } catch (e) {
+        console.warn('Error during channel cleanup:', e);
+      }
+      channelRef.current = null;
     }
-    if (peerRef.current) {
-      peerRef.current.destroy();
-      peerRef.current = null;
+    if (ablyRef.current) {
+      try {
+        ablyRef.current.close();
+      } catch (e) {
+        console.warn('Error during Ably client close:', e);
+      }
+      ablyRef.current = null;
     }
     setIsMultiplayer(false);
     setIsHost(false);
@@ -78,230 +92,195 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setRandomTriviaGameModeState(null);
     setError(null);
     setMyId(null);
-  };
-
-  const leaveGame = () => {
-    cleanup();
-  };
-
-  const peerConfig = {
-    pingInterval: 10000,
-    debug: 3,
-    config: {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
-    }
-  };
-
-  const broadcast = useCallback((msg: MultiplayerMessage) => {
-    connectionsRef.current.forEach(conn => {
-      if (conn.open) {
-        conn.send(msg);
-      }
-    });
   }, []);
 
-  const setRandomTriviaGameMode = useCallback((mode: string | null) => {
-    setRandomTriviaGameModeState(mode);
-    if (isMultiplayer && isHost) {
-      broadcast({
-        type: 'RANDOM_TRIVIA_MODE_SYNC',
-        payload: mode
+  const leaveGame = useCallback(() => {
+    cleanup();
+  }, [cleanup]);
+
+  // Synchronize presence list to players state
+  const syncPresence = useCallback(async (channel: RealtimeChannel) => {
+    try {
+      const members = await channel.presence.get();
+      const mappedPlayers: MultiplayerPlayer[] = (members as PresenceMessage[]).map((m) => {
+        const data = m.data as PlayerPresenceData | undefined;
+        return {
+          id: m.clientId,
+          name: data?.name || 'Anonymous Investigator',
+          score: data?.score || 0,
+          modeScores: data?.modeScores || {},
+          ready: data?.ready || false,
+          isHost: data?.isHost || false
+        };
+      });
+
+      // Sort: host first, then alphabetical or by ID
+      mappedPlayers.sort((a, b) => {
+        const aIsHost = a.id === roomCode || a.isHost;
+        const bIsHost = b.id === roomCode || b.isHost;
+        if (aIsHost && !bIsHost) return -1;
+        if (!aIsHost && bIsHost) return 1;
+        return a.id.localeCompare(b.id);
+      });
+
+      setPlayers(mappedPlayers);
+    } catch (err) {
+      console.error('Error fetching presence members:', err);
+    }
+  }, [roomCode]);
+
+  // Set up message subscription
+  const subscribeToMessages = useCallback((channel: RealtimeChannel, localId: string, currentIsHost: boolean) => {
+    channel.subscribe((msg: Message) => {
+      // Don't process our own broadcasted messages
+      if (msg.clientId === localId) return;
+
+      const type = msg.name;
+      const payload = msg.data;
+
+      if (type === 'GAME_START') {
+        // Reset our own ready state in presence
+        const myPlayer = players.find(p => p.id === localId);
+        if (myPlayer) {
+          channel.presence.update({
+            name: getPlayerName(),
+            score: myPlayer.score,
+            modeScores: myPlayer.modeScores,
+            ready: false,
+            isHost: currentIsHost
+          });
+        }
+
+        if (!currentIsHost) {
+          const newRoomSettings = payload.settings;
+          setRoomSettings(newRoomSettings);
+          setSharedGameData(null);
+          setRandomTriviaGameModeState(null);
+          if (newRoomSettings?.seed) {
+            applySeed(newRoomSettings.seed);
+          }
+        }
+      } else if (type === 'NAVIGATE') {
+        // Reset ready state in presence
+        const myPlayer = players.find(p => p.id === localId);
+        if (myPlayer) {
+          channel.presence.update({
+            name: getPlayerName(),
+            score: myPlayer.score,
+            modeScores: myPlayer.modeScores,
+            ready: false,
+            isHost: currentIsHost
+          });
+        }
+
+        const { path } = payload;
+        window.dispatchEvent(new CustomEvent('MULTIPLAYER_NAVIGATE', { detail: { path } }));
+      } else if (type === 'SYNC_GAME_DATA') {
+        setSharedGameData(payload);
+      } else if (type === 'RANDOM_TRIVIA_MODE_SYNC') {
+        setRandomTriviaGameModeState(payload);
+      } else if (type === 'KICK') {
+        if (payload.targetId === localId) {
+          alert('You have been removed from the room by the host.');
+          cleanup();
+        }
+      } else if (type === 'ROOM_STATE_SYNC') {
+        if (!currentIsHost) {
+          setRoomSettings(payload.settings);
+          setSharedGameData(payload.sharedGameData);
+          setRandomTriviaGameModeState(payload.randomTriviaGameMode);
+          if (payload.settings?.seed) {
+            applySeed(payload.settings.seed);
+          }
+        }
+      }
+    });
+  }, [applySeed, cleanup, getPlayerName, players]);
+
+  // Synchronize player name change to presence
+  useEffect(() => {
+    if (!isMultiplayer || !channelRef.current || !myId) return;
+    const myPlayer = players.find(p => p.id === myId);
+    if (!myPlayer) return;
+
+    const currentName = getPlayerName();
+    if (myPlayer.name !== currentName) {
+      channelRef.current.presence.update({
+        name: currentName,
+        score: myPlayer.score,
+        modeScores: myPlayer.modeScores,
+        ready: myPlayer.ready,
+        isHost: isHost
       });
     }
-  }, [isMultiplayer, isHost, broadcast]);
+  }, [settings.playerName, isMultiplayer, myId, players, isHost, getPlayerName]);
 
   // ---------------------------------------------------------
   // HOST LOGIC
   // ---------------------------------------------------------
   const hostGame = (rawCode: string) => {
     cleanup();
-    
+
     const code = rawCode.toLowerCase();
-    const newPeer = new Peer(code, peerConfig);
-    peerRef.current = newPeer;
-    
-    newPeer.on('open', (id) => {
-      setMyId(id);
+    const hostId = 'p_' + Math.random().toString(36).substring(2, 11);
+
+    const client = new Realtime({
+      authUrl: '/api/ably-token',
+      clientId: hostId
+    });
+
+    ablyRef.current = client;
+    setMyId(hostId);
+
+    client.connection.on('connected', () => {
       setIsMultiplayer(true);
       setIsHost(true);
-      setRoomCode(id);
-      
-      // Add self to players
-      const hostPlayer: MultiplayerPlayer = {
-        id: id,
+      setRoomCode(code);
+
+      const channel = client.channels.get(`room:${code}`);
+      channelRef.current = channel;
+
+      // Subscribe to all presence events
+      channel.presence.subscribe(() => {
+        syncPresence(channel);
+      });
+
+      // Send current state to newly joined players
+      channel.presence.subscribe('enter', (member) => {
+        if (member.clientId !== hostId) {
+          channel.publish('ROOM_STATE_SYNC', {
+            settings: roomSettings || settings,
+            sharedGameData: sharedGameData,
+            randomTriviaGameMode: randomTriviaGameMode
+          });
+        }
+      });
+
+      subscribeToMessages(channel, hostId, true);
+
+      // Enter Presence
+      channel.presence.enter({
         name: getPlayerName(),
         score: 0,
         modeScores: {},
-        ready: false
-      };
-      setPlayers([hostPlayer]);
-      setRoomSettings(settings); // Host initializes room settings from their own
+        ready: false,
+        isHost: true
+      });
+
+      setRoomSettings(settings);
     });
 
-    newPeer.on('connection', (conn) => {
-      const handleOpen = () => {
-        console.log('[Multiplayer] Host: DataConnection opened with client:', conn.peer);
-        connectionsRef.current.set(conn.peer, conn);
-        // Force a heartbeat packet to unblock DataChannel buffer if needed
-        conn.send({ type: 'SETTINGS_UPDATE', payload: { name: 'HOST_ACK' } } as MultiplayerMessage);
-      };
-
-      if (conn.open) {
-        handleOpen();
-      } else {
-        conn.on('open', handleOpen);
+    client.connection.on('failed', (stateChange: { reason?: { message: string; code: number } }) => {
+      const reason = stateChange?.reason;
+      let errMsg = 'Failed to connect to the multiplayer server.';
+      if (reason) {
+        errMsg += ` Reason: ${reason.message} (Code: ${reason.code})`;
       }
-
-      conn.on('error', (err) => {
-        console.error('Host DataConnection Error:', err);
-      });
-
-      conn.on('data', (data: unknown) => {
-        handleMessageFromClient(conn.peer, data as MultiplayerMessage);
-      });
-
-      conn.on('close', () => {
-        connectionsRef.current.delete(conn.peer);
-        setPlayers(prev => {
-          const updated = prev.filter(p => p.id !== conn.peer);
-          broadcast({ type: 'LEADERBOARD_UPDATE', payload: updated });
-          return updated;
-        });
-      });
-
-      // Debug ICE connection state
-      if (conn.peerConnection) {
-        conn.peerConnection.addEventListener('iceconnectionstatechange', () => {
-          console.log(`[Multiplayer] Host ICE state with ${conn.peer}:`, conn.peerConnection?.iceConnectionState);
-        });
-      }
-    });
-
-    newPeer.on('disconnected', () => {
-      console.log('Host disconnected from signaling server, attempting to reconnect...');
-      newPeer.reconnect();
-    });
-
-    newPeer.on('error', (err: unknown) => {
-      console.error('PeerJS Host Error:', err);
-      const errorType = (err as Record<string, unknown>).type;
-      const errMsg = `Host error: ${errorType}`;
       setError(errMsg);
       alert(errMsg);
       cleanup();
     });
   };
-
-  const handleMessageFromClient = (clientId: string, msg: MultiplayerMessage) => {
-    if (msg.type === 'SETTINGS_UPDATE') {
-      // Used by clients initially to send their name
-      const payload = msg.payload as { name: string } | undefined;
-      const name = payload?.name || 'Unknown';
-      setPlayers(prev => {
-        const exists = prev.find(p => p.id === clientId);
-        if (exists) return prev;
-        const newPlayers = [...prev, { id: clientId, name, score: 0, modeScores: {}, ready: false }];
-        broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-        return newPlayers;
-      });
-    } else if (msg.type === 'STATS_UPDATE') {
-      const stats = (msg.payload || {}) as GameStats;
-      const calculatedScore = calculateGameScore(stats, settings.scoringConfig);
-      
-      setPlayers(prev => {
-        const newPlayers = prev.map(p => {
-          if (p.id === clientId) {
-            const modeScores = { ...p.modeScores };
-            modeScores[stats.mode] = (modeScores[stats.mode] || 0) + calculatedScore;
-            return { ...p, score: p.score + calculatedScore, modeScores };
-          }
-          return p;
-        });
-        broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-        return newPlayers;
-      });
-    }
-    else if (msg.type === 'PLAYER_READY') {
-      setPlayers(prev => {
-        const newPlayers = prev.map(p => 
-          p.id === clientId ? { ...p, ready: true } : p
-        );
-        broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-        return newPlayers;
-      });
-    }
-  };
-
-  const startNextRound = useCallback(() => {
-    if (!isHost) return;
-    const newSeed = generateRandomThematicSeed();
-    const newSettings = { ...settings, seed: newSeed };
-    applySeed(newSeed);
-    
-    setSharedGameData(null);
-    setPlayers(prev => {
-      const newPlayers = prev.map(p => ({ ...p, ready: false }));
-      broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-      return newPlayers;
-    });
-
-    broadcast({
-      type: 'GAME_START',
-      payload: { mode: 'same', answer: null, settings: newSettings }
-    });
-  }, [isHost, settings, applySeed, broadcast]);
-
-  const broadcastGameStart = (mode: string, answer: unknown, newSettings: AppSettings) => {
-    setRoomSettings(newSettings);
-    setSharedGameData(null); // Clear game data for the new round
-    setRandomTriviaGameModeState(null);
-    // Reset ready states for next round
-    setPlayers(prev => {
-      const newPlayers = prev.map(p => ({ ...p, ready: false }));
-      broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-      return newPlayers;
-    });
-
-    broadcast({
-      type: 'GAME_START',
-      payload: { mode, answer, settings: newSettings }
-    });
-  };
-
-  const broadcastNavigate = useCallback((path: string) => {
-    setSharedGameData(null); // Clear host's shared game data
-    setRandomTriviaGameModeState(null);
-    broadcast({
-      type: 'SYNC_GAME_DATA',
-      payload: null
-    }); // Clear all clients' shared game data
-    broadcast({
-      type: 'RANDOM_TRIVIA_MODE_SYNC',
-      payload: null
-    }); // Clear all clients' random trivia mode
-
-    setPlayers(prev => {
-      const newPlayers = prev.map(p => ({ ...p, ready: false }));
-      broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-      return newPlayers;
-    });
-
-    broadcast({
-      type: 'NAVIGATE',
-      payload: { path }
-    });
-  }, [broadcast]);
-
-  const broadcastGameData = useCallback((data: unknown) => {
-    setSharedGameData(data);
-    broadcast({
-      type: 'SYNC_GAME_DATA',
-      payload: data
-    });
-  }, [broadcast]);
 
   // ---------------------------------------------------------
   // CLIENT LOGIC
@@ -310,106 +289,53 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     cleanup();
 
     const code = rawCode.toLowerCase();
-    const newPeer = new Peer(peerConfig); // Random ID for client
-    peerRef.current = newPeer;
+    const clientId = 'p_' + Math.random().toString(36).substring(2, 11);
 
-    newPeer.on('open', (id) => {
-      setMyId(id);
-      // Slight delay to ensure PeerServer and local ICE gatherers are fully stabilized
-      setTimeout(() => {
-        const conn = newPeer.connect(code);
-        hostConnectionRef.current = conn;
-
-        const handleOpen = () => {
-          console.log('[Multiplayer] Client: DataConnection opened with host:', code);
-          setIsMultiplayer(true);
-          setIsHost(false);
-          setRoomCode(code);
-          
-          // Send initial connection data (name)
-          conn.send({
-            type: 'SETTINGS_UPDATE',
-            payload: { name: getPlayerName() }
-          } as MultiplayerMessage);
-        };
-
-        if (conn.open) {
-          handleOpen();
-        } else {
-          conn.on('open', handleOpen);
-        }
-
-        conn.on('error', (err) => {
-          console.error('Client DataConnection Error:', err);
-        });
-
-        conn.on('data', (data: unknown) => {
-          handleMessageFromHost(data as MultiplayerMessage);
-        });
-
-        conn.on('close', () => {
-          setError('Host disconnected.');
-          cleanup();
-        });
-
-        // Debug ICE connection state
-        if (conn.peerConnection) {
-          conn.peerConnection.addEventListener('iceconnectionstatechange', () => {
-            console.log('[Multiplayer] Client ICE state:', conn.peerConnection?.iceConnectionState);
-          });
-        }
-      }, 500);
+    const client = new Realtime({
+      authUrl: '/api/ably-token',
+      clientId: clientId
     });
 
-    newPeer.on('disconnected', () => {
-      console.log('Client disconnected from signaling server, attempting to reconnect...');
-      newPeer.reconnect();
+    ablyRef.current = client;
+    setMyId(clientId);
+
+    client.connection.on('connected', () => {
+      setIsMultiplayer(true);
+      setIsHost(false);
+      setRoomCode(code);
+
+      const channel = client.channels.get(`room:${code}`);
+      channelRef.current = channel;
+
+      channel.presence.subscribe(() => {
+        syncPresence(channel);
+      });
+
+      subscribeToMessages(channel, clientId, false);
+
+      channel.presence.enter({
+        name: getPlayerName(),
+        score: 0,
+        modeScores: {},
+        ready: false,
+        isHost: false
+      });
     });
 
-    newPeer.on('error', (err: unknown) => {
-      console.error('PeerJS Client Error:', err);
-      // 'peer-unavailable' usually means wrong room code
-      const errorType = (err as Record<string, unknown>).type;
-      const msg = errorType === 'peer-unavailable' 
-        ? "Room not found. Please check the code." 
-        : `Connection error: ${errorType}`;
-      setError(msg);
-      alert(msg);
-      cleanup();
-    });
-  };
-
-  const handleMessageFromHost = (msg: MultiplayerMessage) => {
-    if (msg.type === 'LEADERBOARD_UPDATE') {
-      setPlayers(msg.payload as MultiplayerPlayer[]);
-    } else if (msg.type === 'GAME_START') {
-      const payload = msg.payload as { settings: AppSettings };
-      const newRoomSettings = payload.settings;
-      setRoomSettings(newRoomSettings);
-      setSharedGameData(null); // Clear previous round's data
-      
-      // Update local settings with the new room settings (which includes the new seed)
-      // This will trigger GameContext to update seedVersion and remount the games!
-      if (newRoomSettings?.seed) {
-        applySeed(newRoomSettings.seed);
+    client.connection.on('failed', (stateChange: { reason?: { message: string; code: number } }) => {
+      const reason = stateChange?.reason;
+      let errMsg = 'Failed to connect to the multiplayer server.';
+      if (reason) {
+        errMsg += ` Reason: ${reason.message} (Code: ${reason.code})`;
       }
-    } else if (msg.type === 'NAVIGATE') {
-      const { path } = msg.payload as Record<string, unknown>;
-      window.dispatchEvent(new CustomEvent('MULTIPLAYER_NAVIGATE', { detail: { path } }));
-    } else if (msg.type === 'SYNC_GAME_DATA') {
-      setSharedGameData(msg.payload);
-    } else if (msg.type === 'RANDOM_TRIVIA_MODE_SYNC') {
-      setRandomTriviaGameModeState(msg.payload as string | null);
-    } else if (msg.type === 'KICK') {
-      alert('You have been removed from the room by the host.');
+      setError(errMsg);
+      alert(errMsg);
       cleanup();
-    }
+    });
   };
 
-  const reportGameStats = (rawStats: { mode: string; solved: boolean; guesses?: number; wrongGuesses?: number; isMultipleChoice?: boolean; subMode?: string }) => {
+  const reportGameStats = useCallback((rawStats: { mode: string; solved: boolean; guesses?: number; wrongGuesses?: number; isMultipleChoice?: boolean; subMode?: string }) => {
     let stats = { ...rawStats };
-    // If we are currently playing Random Trivia, rewrite the stats so they are filed under 'Random Trivia'
-    // but keep the subMode so the scoring engine calculates the score based on the actual sub-game.
     if (window.location.pathname.includes('/random-trivia')) {
       stats = {
         ...stats,
@@ -418,58 +344,132 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       };
     }
 
-    if (isHost) {
-      const calculatedScore = calculateGameScore(stats, settings.scoringConfig);
-      setPlayers(prev => {
-        const newPlayers = prev.map(p => {
-          if (p.id === peerRef.current?.id) {
-            const modeScores = { ...p.modeScores };
-            modeScores[stats.mode] = (modeScores[stats.mode] || 0) + calculatedScore;
-            return { ...p, score: p.score + calculatedScore, modeScores };
-          }
-          return p;
-        });
-        broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-        return newPlayers;
+    const activeSettings = roomSettings || settings;
+    const calculatedScore = calculateGameScore(stats, activeSettings.scoringConfig);
+
+    const myPlayer = players.find(p => p.id === myId);
+    if (!myPlayer || !channelRef.current) return;
+
+    const newModeScores = { ...myPlayer.modeScores };
+    newModeScores[stats.mode] = (newModeScores[stats.mode] || 0) + calculatedScore;
+
+    channelRef.current.presence.update({
+      name: getPlayerName(),
+      score: myPlayer.score + calculatedScore,
+      modeScores: newModeScores,
+      ready: myPlayer.ready,
+      isHost: isHost
+    });
+  }, [roomSettings, settings, players, myId, getPlayerName, isHost]);
+
+  const reportReady = useCallback(() => {
+    const myPlayer = players.find(p => p.id === myId);
+    if (!myPlayer || !channelRef.current) return;
+
+    channelRef.current.presence.update({
+      name: getPlayerName(),
+      score: myPlayer.score,
+      modeScores: myPlayer.modeScores,
+      ready: true,
+      isHost: isHost
+    });
+  }, [players, myId, getPlayerName, isHost]);
+
+  const broadcastGameStart = (mode: string, answer: unknown, newSettings: AppSettings) => {
+    setRoomSettings(newSettings);
+    setSharedGameData(null);
+    setRandomTriviaGameModeState(null);
+
+    const myPlayer = players.find(p => p.id === myId);
+    if (myPlayer && channelRef.current) {
+      channelRef.current.presence.update({
+        name: getPlayerName(),
+        score: myPlayer.score,
+        modeScores: myPlayer.modeScores,
+        ready: false,
+        isHost: isHost
       });
-    } else if (hostConnectionRef.current?.open) {
-      hostConnectionRef.current.send({
-        type: 'STATS_UPDATE',
-        payload: stats
+    }
+
+    if (channelRef.current) {
+      channelRef.current.publish('GAME_START', {
+        mode,
+        answer,
+        settings: newSettings
       });
     }
   };
 
-  const reportReady = () => {
-    if (isHost) {
-      setPlayers(prev => {
-        const newPlayers = prev.map(p => p.id === peerRef.current?.id ? { ...p, ready: true } : p);
-        broadcast({ type: 'LEADERBOARD_UPDATE', payload: newPlayers });
-        return newPlayers;
-      });
-    } else if (hostConnectionRef.current?.open) {
-      hostConnectionRef.current.send({
-        type: 'PLAYER_READY'
+  const broadcastNavigate = useCallback((path: string) => {
+    setSharedGameData(null);
+    setRandomTriviaGameModeState(null);
+
+    if (channelRef.current) {
+      channelRef.current.publish('SYNC_GAME_DATA', null);
+      channelRef.current.publish('RANDOM_TRIVIA_MODE_SYNC', null);
+    }
+
+    const myPlayer = players.find(p => p.id === myId);
+    if (myPlayer && channelRef.current) {
+      channelRef.current.presence.update({
+        name: getPlayerName(),
+        score: myPlayer.score,
+        modeScores: myPlayer.modeScores,
+        ready: false,
+        isHost: isHost
       });
     }
-  };
+
+    if (channelRef.current) {
+      channelRef.current.publish('NAVIGATE', { path });
+    }
+  }, [myId, getPlayerName, isHost, players]);
+
+  const broadcastGameData = useCallback((data: unknown) => {
+    setSharedGameData(data);
+    if (channelRef.current) {
+      channelRef.current.publish('SYNC_GAME_DATA', data);
+    }
+  }, []);
+
+  const setRandomTriviaGameMode = useCallback((mode: string | null) => {
+    setRandomTriviaGameModeState(mode);
+    if (isMultiplayer && isHost && channelRef.current) {
+      channelRef.current.publish('RANDOM_TRIVIA_MODE_SYNC', mode);
+    }
+  }, [isMultiplayer, isHost]);
 
   const kickPlayer = useCallback((playerId: string) => {
-    if (!isHost) return;
-    const conn = connectionsRef.current.get(playerId);
-    if (conn) {
-      conn.send({ type: 'KICK' } as MultiplayerMessage);
-      setTimeout(() => {
-        conn.close();
-        connectionsRef.current.delete(playerId);
-      }, 200);
+    if (!isHost || !channelRef.current) return;
+    channelRef.current.publish('KICK', { targetId: playerId });
+  }, [isHost]);
+
+  const startNextRound = useCallback(() => {
+    if (!isHost || !channelRef.current) return;
+    const newSeed = generateRandomThematicSeed();
+    const newSettings = { ...settings, seed: newSeed };
+    applySeed(newSeed);
+
+    setSharedGameData(null);
+    setRandomTriviaGameModeState(null);
+
+    const myPlayer = players.find(p => p.id === myId);
+    if (myPlayer) {
+      channelRef.current.presence.update({
+        name: getPlayerName(),
+        score: myPlayer.score,
+        modeScores: myPlayer.modeScores,
+        ready: false,
+        isHost: isHost
+      });
     }
-    setPlayers(prev => {
-      const updated = prev.filter(p => p.id !== playerId);
-      broadcast({ type: 'LEADERBOARD_UPDATE', payload: updated });
-      return updated;
+
+    channelRef.current.publish('GAME_START', {
+      mode: 'same',
+      answer: null,
+      settings: newSettings
     });
-  }, [isHost, broadcast]);
+  }, [isHost, settings, applySeed, players, myId, getPlayerName]);
 
   useEffect(() => {
     if (!isMultiplayer) return;
@@ -478,7 +478,7 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const customEvent = e as CustomEvent;
       reportGameStats(customEvent.detail);
     };
-    
+
     const handleReady = () => {
       reportReady();
     };
@@ -490,8 +490,13 @@ export const MultiplayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       window.removeEventListener('MULTIPLAYER_STATS_UPDATE', handleStatsUpdate);
       window.removeEventListener('MULTIPLAYER_PLAYER_READY', handleReady);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMultiplayer, isHost]);
+  }, [isMultiplayer, reportGameStats, reportReady]);
+
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [cleanup]);
 
   return (
     <MultiplayerContext.Provider value={{

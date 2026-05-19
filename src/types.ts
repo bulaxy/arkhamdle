@@ -143,6 +143,7 @@ export interface MultiplayerPlayer {
   score: number;
   ready: boolean;
   modeScores: Record<string, number>;
+  isHost?: boolean;
 }
 
 export type MultiplayerMessageType = 'GAME_START' | 'STATS_UPDATE' | 'PLAYER_READY' | 'LEADERBOARD_UPDATE' | 'SETTINGS_UPDATE' | 'NAVIGATE' | 'SYNC_GAME_DATA' | 'KICK' | 'RANDOM_TRIVIA_MODE_SYNC';
