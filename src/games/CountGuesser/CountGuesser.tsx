@@ -20,6 +20,7 @@ export default function CountGuesser({ onPlayAgainOverride, streakModeName }: Ga
   const [gaveUp, setGaveUp] = useState(false);
   const [guessInputText, setGuessInputText] = useState('');
   const [showImages, setShowImages] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<string | number | undefined>(undefined);
 
   const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{
     questionText: string;
@@ -42,6 +43,7 @@ export default function CountGuesser({ onPlayAgainOverride, streakModeName }: Ga
     setGaveUp(false);
     setGuessInputText('');
     setShowImages(false);
+    setSelectedOption(undefined);
     
     const packsInPool = Array.from(new Set(pool.map(c => c.pack_name)));
     const useAllPacks = packsInPool.length <= 1 || Math.random() > (1 - (1/packsInPool.length));
@@ -132,6 +134,7 @@ export default function CountGuesser({ onPlayAgainOverride, streakModeName }: Ga
 
   const handleMultipleChoice = (option: string | number) => {
     if (win || gaveUp) return;
+    setSelectedOption(option);
     if (option === question?.correctAnswer) {
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
@@ -213,10 +216,12 @@ export default function CountGuesser({ onPlayAgainOverride, streakModeName }: Ga
           <>
             <h2>{question.questionText}</h2>
 
-            {!isGameOver && settings.countGuesser.inputMode === 'Multiple Choice' && (
+            {settings.countGuesser.inputMode === 'Multiple Choice' && (
               <MultipleChoiceGrid
                 options={question.options}
                 onSelect={handleMultipleChoice}
+                correctOption={isGameOver ? question.correctAnswer : undefined}
+                selectedOption={selectedOption}
               />
             )}
 

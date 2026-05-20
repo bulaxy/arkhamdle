@@ -20,6 +20,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }
   const [win, setWin] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
   const [showImages, setShowImages] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<string | number | undefined>(undefined);
 
   const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{
     questionText: string;
@@ -47,6 +48,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }
     setWin(false);
     setGaveUp(false);
     setShowImages(false);
+    setSelectedOption(undefined);
     
     const packsInPool = Array.from(new Set(pool.map(c => c.pack_name)));
     const useAllPacks = Math.random() > 0.5 || packsInPool.length <= 1;
@@ -127,6 +129,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }
 
   const handleMultipleChoice = (option: string | number) => {
     if (win || gaveUp) return;
+    setSelectedOption(option);
     if (option === question?.correctAnswer) {
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
@@ -207,7 +210,7 @@ export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }
           <>
             <h2>{question.questionText}</h2>
 
-            {!isGameOver && settings.guessCardByTrait.inputMode === 'Multiple Choice' && (
+            {settings.guessCardByTrait.inputMode === 'Multiple Choice' && (
               <MultipleChoiceGrid
                 options={question.options}
                 onSelect={handleMultipleChoice}
@@ -221,6 +224,8 @@ export default function GuessCardByTrait({ onPlayAgainOverride, streakModeName }
                   }
                   return opt;
                 }}
+                correctOption={isGameOver ? question.correctAnswer : undefined}
+                selectedOption={selectedOption}
               />
             )}
 

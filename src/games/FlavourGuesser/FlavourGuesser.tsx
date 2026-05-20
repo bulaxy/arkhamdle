@@ -51,6 +51,7 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
   const [wrongGuesses, setWrongGuesses] = useState<TransformedCard[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
   const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<TransformedCard | undefined>(undefined);
 
   // Helper to shuffle array
   const shuffle = <T,>(array: T[]): T[] => {
@@ -67,6 +68,7 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
     setGaveUp(false);
     setHasReportedStreakLoss(false);
     setWrongGuesses([]);
+    setSelectedOption(undefined);
 
     if (isMultiplayer && !isHost) {
       return; // wait for sync
@@ -163,6 +165,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
   ]);
 
   const submitGuess = (card: TransformedCard) => {
+    if (settings.flavourGuesser.inputMode === 'Multiple Choice') {
+      setSelectedOption(card);
+    }
     if (card.id === answer?.id) {
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
@@ -234,8 +239,6 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
 
         {isClientWaiting ? (
           <div className="waiting-for-host">Waiting for Host...</div>
-        ) : win || gaveUp ? (
-          <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="flavour-result" />
         ) : (
           <div>
             {settings.flavourGuesser.inputMode === 'Multiple Choice' ? (
@@ -243,22 +246,26 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
                 options={multipleChoiceOptions}
                 onSelect={(card) => submitGuess(card)}
                 getLabel={(card) => getDisplayText(card)}
+                correctOption={(win || gaveUp) ? (answer || undefined) : undefined}
+                selectedOption={selectedOption}
               />
             ) : (
-              <GuessInput
-                options={guessableCards}
-                guesses={wrongGuesses}
-                onGuess={submitGuess}
-                placeholder="Type card name..."
-                onGiveUp={handleGiveUp}
-                giveUpThreshold={maxGuesses}
-                className="flavour-input-wrapper"
-                getDisplayText={getDisplayText}
-                getOptionColors={getCardFactionColors}
-              />
+              !(win || gaveUp) && (
+                <GuessInput
+                  options={guessableCards}
+                  guesses={wrongGuesses}
+                  onGuess={submitGuess}
+                  placeholder="Type card name..."
+                  onGiveUp={handleGiveUp}
+                  giveUpThreshold={maxGuesses}
+                  className="flavour-input-wrapper"
+                  getDisplayText={getDisplayText}
+                  getOptionColors={getCardFactionColors}
+                />
+              )
             )}
 
-            {settings.flavourGuesser.inputMode !== 'Multiple Choice' && wrongGuesses.length > 0 && (
+            {settings.flavourGuesser.inputMode !== 'Multiple Choice' && wrongGuesses.length > 0 && !(win || gaveUp) && (
               <div className="flavour-wrong-guesses">
                 {wrongGuesses.map(g => (
                   <div key={g.id} className="flavour-wrong-badge">
@@ -268,10 +275,14 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
               </div>
             )}
 
-            {settings.flavourGuesser.inputMode === 'Multiple Choice' && (
+            {settings.flavourGuesser.inputMode === 'Multiple Choice' && !(win || gaveUp) && (
               <div className="mt-1rem">
                 <button className="premium-btn guess-give-up" onClick={handleGiveUp}>Give Up</button>
               </div>
+            )}
+
+            {(win || gaveUp) && (
+              <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="flavour-result" />
             )}
           </div>
         )}
