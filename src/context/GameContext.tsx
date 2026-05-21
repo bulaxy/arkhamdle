@@ -239,9 +239,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         };
 
+        const mergedTrueOrFalse = {
+          ...defaultSettings.trueOrFalse,
+          ...(savedSettings.trueOrFalse || {}),
+          nameAndPicMode: true,
+        };
+
         setSettingsState({
           ...defaultSettings,
           ...savedSettings,
+          trueOrFalse: mergedTrueOrFalse,
           scoringConfig: mergedScoringConfig,
         });
         initializeSeed(savedSettings.seed);
