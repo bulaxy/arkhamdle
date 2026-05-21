@@ -72,6 +72,14 @@ export function cardHasKeyword(card: TransformedCard, keyword: string): boolean 
   for (const line of lines) {
     const stripped = line.trim();
 
+    // 1. Bracket keywords: reaction, action, fast
+    if (keyword === 'Reaction' || keyword === 'Action' || keyword === 'Fast') {
+      if (stripped.includes(`[${keyword.toLowerCase()}]`)) {
+        return true;
+      }
+      continue; // Skip standard parsing for these specific keywords
+    }
+
     // Skip lines that contain conditional granting patterns (inside quotes)
     // e.g. 'gains: "Hunter. Prey - ..."' or 'gains Hunter'
     if (/gains[^"]*"[^"]*$/.test(stripped) || /gains\s/.test(stripped)) {
@@ -80,14 +88,6 @@ export function cardHasKeyword(card: TransformedCard, keyword: string): boolean 
       if (quoteMatch && quoteMatch[1].includes(keyword)) {
         continue; // Skip - this is a conditional gain
       }
-    }
-
-    // 1. Bracket keywords: reaction, action, fast
-    if (keyword === 'Reaction' || keyword === 'Action' || keyword === 'Fast') {
-      if (stripped.includes(`[${keyword.toLowerCase()}]`)) {
-        return true;
-      }
-      continue; // Skip standard parsing for these specific keywords
     }
 
     // 2. Bold exact keywords: Revelation, Forced, Resign, Parley

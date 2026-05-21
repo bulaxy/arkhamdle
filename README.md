@@ -74,8 +74,5 @@ This project is created by the community for the community. Card data is sourced
 *Happy investigating! 🔍*
 
 
-## TODO
-True/False, add location/stats swapping. 
-Encounter cards encounter/disable per game mode
-
-If 2 cards/investigators have the same name in the wordle or investigatordle. if everything is "correct" but not correct answer, prompt the user, be like "almost there, but there are X more investigator/card got the same stats
+## TODO:
+- Better questions, eg: Which enemy have 2 VP

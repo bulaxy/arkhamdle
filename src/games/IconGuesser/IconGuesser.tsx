@@ -3,6 +3,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { filterBySettings, filterForIconGuesser } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { Eye, EyeOff } from 'lucide-react';
 import './IconGuesser.scss';
@@ -37,6 +38,8 @@ export default function IconGuesser({ onPlayAgainOverride, streakModeName }: Gam
   });
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{ answerId: string }>();
+
   // Icon Guesser: Asset/Event/Skill only, NO deduplication
   const gameCards = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'iconGuesser');
@@ -61,8 +64,25 @@ export default function IconGuesser({ onPlayAgainOverride, streakModeName }: Gam
       wild: '',
     });
     setImageLoaded(false);
-    setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
-  }, [gameCardsWithPic]);
+
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
+    }
+
+    if (gameCardsWithPic.length > 0) {
+      const newAnswer = gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)];
+      syncData({ answerId: newAnswer.id });
+    } else {
+      syncData({ answerId: '' });
+    }
+  }, [gameCardsWithPic, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      const syncedAnswer = cards.find(c => c.id === syncedData.answerId) || null;
+      setAnswer(syncedAnswer);
+    }
+  }, [syncedData, cards]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -99,10 +119,16 @@ export default function IconGuesser({ onPlayAgainOverride, streakModeName }: Gam
       setWin(true);
       setShowFull(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true }
+      }));
     } else {
       setLose(true);
       setShowFull(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false }
+      }));
     }
   };
 
@@ -137,6 +163,8 @@ export default function IconGuesser({ onPlayAgainOverride, streakModeName }: Gam
               Please increase your card pool in the Settings (e.g., enable more expansion packs or card types) to play this mode.
             </p>
           </div>
+        ) : isClientWaiting ? (
+          <div className="waiting-for-host">Waiting for Host...</div>
         ) : (
           <>
             <div className="icon-image-container">

@@ -1,111 +1,34 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
-import { type TransformedCard, type GameProps, TypeName } from '../../types';
+import { type GameProps, TypeName } from '../../types';
 import { filterBySettings, filterDuplicateOfCode, getCardFactionColors } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
 import falseTraitsData from '../../data/false_traits.json';
-import { buildPackCodeToGroupMap, packSameOrNewerThan, getPackDisplayName } from '../../data/packStructure';
-import { cardHasKeyword } from '../shared/trivia/triviaTemplates';
+import { packSameOrNewerThan, getPackDisplayName } from '../../data/packStructure';
+import {
+  generateFalseStatValue,
+  getWeightedRandom,
+  getKeywordDisplayValue,
+  getPackGroup,
+  generatePicMismatchQuestion,
+  type GameQuestion,
+  type AnyQuestionType,
+  type EnemyQuestionType,
+  type LocationQuestionType,
+  type ActQuestionType,
+  type AgendaQuestionType,
+  type TreacheryQuestionType
+} from './trueOrFalseHelpers';
 import './TrueOrFalse.scss';
 
-const packCodeToGroup = buildPackCodeToGroupMap();
-
-function getPackGroup(packCode: string): string {
-  return (packCodeToGroup.get(packCode) || 'OTHER').toLowerCase();
-}
-
-type EnemyQuestionType = 
-  | 'Fight' | 'Horror' | 'Damage' | 'Evade' | 'Health' 
-  | 'Retaliate' | 'Hunter' | 'Alert' | 'Aloof' | 'Elusive' | 'Victory'
-  | 'Prey' | 'Massive' | 'Spawn' | 'Forced' | 'Revelation';
-
-type LocationQuestionType = 'Clues' | 'Shroud' | 'Forced' | 'Resign' | 'Victory';
-type ActQuestionType = 'Clues' | 'Forced' | 'Objective' | 'Resign';
-type AgendaQuestionType = 'Doom' | 'Forced' | 'Resign';
-type TreacheryQuestionType = 'Forced'| 'Surge' ;
-
-type AnyQuestionType = EnemyQuestionType | LocationQuestionType | ActQuestionType | AgendaQuestionType | TreacheryQuestionType | 'Traits';
-
-interface GameQuestion {
-  card: TransformedCard;
-  isTrue: boolean;
-  questionText: string;
-  displayedValue: string;
-  type: AnyQuestionType;
-}
-
-const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation'];
-const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign'];
-const ACT_KEYWORD_TRAITS = ['Forced', 'Objective', 'Resign'];
-const AGENDA_KEYWORD_TRAITS = ['Forced', 'Resign'];
+const ENEMY_KEYWORD_TRAITS = ['Retaliate', 'Hunter', 'Alert', 'Aloof', 'Elusive', 'Prey', 'Massive', 'Spawn', 'Forced', 'Revelation', 'Reaction', 'Action', 'Fast'];
+const LOCATION_KEYWORD_TRAITS = ['Forced', 'Resign', 'Reaction', 'Action', 'Fast', 'Revelation'];
+const ACT_KEYWORD_TRAITS = ['Forced', 'Action', 'Fast'];
+const AGENDA_KEYWORD_TRAITS = ['Forced', 'Action'];
 const TREACHERY_KEYWORD_TRAITS = ['Forced', 'Surge'];
-
-function generateFalseStatValue(
-  val: number,
-  type: AnyQuestionType,
-  isElite?: boolean
-): number | null {
-  const isPlus = Math.random() >= 0.5;
-  let fakeValue = val + (isPlus ? 1 : -1);
-
-  if (type === 'Damage' || type === 'Horror') {
-    if (fakeValue < 0) fakeValue = val + 1;
-    if (fakeValue > 3) fakeValue = val - 1;
-    if (!isElite && fakeValue > 2) fakeValue = Math.min(fakeValue, 2);
-    if (fakeValue === val) fakeValue = val - 1;
-    if (fakeValue < 0 || fakeValue > (isElite ? 3 : 2)) return null;
-  } else if (type === 'Fight' || type === 'Health' || type === 'Evade') {
-    if (fakeValue <= 0) fakeValue = val + 1;
-    if (!isElite && fakeValue > 5) fakeValue = val - 1;
-    if (fakeValue === val || fakeValue <= 0 || (!isElite && fakeValue > 5)) return null;
-  } else if (type === 'Victory') {
-    if (fakeValue <= 0) fakeValue = val + 1;
-    if (isElite && fakeValue === 2) fakeValue = val === 1 ? 3 : 1; 
-    if (fakeValue === val || fakeValue <= 0) return null;
-  } else if (type === 'Clues') {
-    if (fakeValue < 0) fakeValue = val + 1;
-    if (fakeValue > 6) fakeValue = val - 1;
-    if (fakeValue < 0 || fakeValue > 6) return null;
-  } else if (type === 'Doom') {
-    if (fakeValue < 1) fakeValue = val + 1;
-    if (fakeValue < 1) return null;
-  } else if (type === 'Shroud') {
-    if (fakeValue < 0) fakeValue = val + 1;
-    if (fakeValue > 7) fakeValue = val - 1;
-    if (fakeValue < 0 || fakeValue > 7) return null;
-  }
-
-  return fakeValue === val ? null : fakeValue;
-}
-
-// Helper: Get a random value based on given weights
-function getWeightedRandom<T>(options: { type: T; weight: number }[]): T {
-  const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
-  let randomVal = Math.random() * totalWeight;
-  for (const opt of options) {
-    randomVal -= opt.weight;
-    if (randomVal <= 0) return opt.type;
-  }
-  return options[0].type; // Fallback
-}
-
-// Helper: Filter and return random displayed keyword for questions
-function getKeywordDisplayValue(
-  card: TransformedCard,
-  isTrue: boolean,
-  selectedOption: string,
-  allowedKeywords: string[]
-): string | null {
-  const hasKeywords = allowedKeywords.filter(k => cardHasKeyword(card, k));
-  const hasNotKeywords = allowedKeywords.filter(k => !cardHasKeyword(card, k));
-  const pool = isTrue ? hasKeywords : hasNotKeywords;
-  if (pool.length === 0) return null;
-  return pool.includes(selectedOption) 
-    ? selectedOption 
-    : pool[Math.floor(Math.random() * pool.length)];
-}
 
 export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
@@ -116,6 +39,14 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
   const [lose, setLose] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const { setSettings, refreshData } = useGameContext();
+  
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{
+    cardId: string;
+    isTrue: boolean;
+    questionText: string;
+    displayedValue: string;
+    type: AnyQuestionType;
+  }>();
   
   const [showNotification, setShowNotification] = useState(() => {
     return !localStorage.getItem('arkhamdle_tf_notification');
@@ -144,6 +75,7 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
   const actPool = useMemo(() => filteredBaseCards.filter(c => c.typeName === TypeName.ACT && c.imagesrc), [filteredBaseCards]);
   const agendaPool = useMemo(() => filteredBaseCards.filter(c => c.typeName === TypeName.AGENDA && c.imagesrc), [filteredBaseCards]);
   const treacheryPool = useMemo(() => filteredBaseCards.filter(c => c.typeName === TypeName.TREACHERY && c.imagesrc), [filteredBaseCards]);
+  const agendaActPool = useMemo(() => [...actPool, ...agendaPool], [actPool, agendaPool]);
 
   const isPoolReady = 
     (settings.trueOrFalse.traitMode && traitPool.length > 0) || 
@@ -159,15 +91,16 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
     setImageLoaded(false);
 
     const generateQuestion = (): GameQuestion | null => {
-      type GameMode = 'Traits' | 'Enemy' | 'Location' | 'Act' | 'Agenda' | 'Treachery';
+      type GameMode = 'Traits' | 'Enemy' | 'Location' | 'Act' | 'Agenda' | 'Treachery' | 'AgendaAct';
       const availableModes: { type: GameMode; weight: number }[] = [];
       
       if (settings.trueOrFalse.traitMode && traitPool.length > 0) availableModes.push({ type: 'Traits', weight: 10 });
-      if (settings.trueOrFalse.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 5 }); 
+      if (settings.trueOrFalse.enemyStatsMode && enemyPool.length > 0) availableModes.push({ type: 'Enemy', weight: 20 }); 
       if (settings.trueOrFalse.locationTraitsMode && locationPool.length > 0) availableModes.push({ type: 'Location', weight: 20 }); 
-      if (settings.trueOrFalse.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 20 }); 
-      if (settings.trueOrFalse.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight:20 });
+      if (settings.trueOrFalse.actTraitsMode && actPool.length > 0) availableModes.push({ type: 'Act', weight: 5 }); 
+      if (settings.trueOrFalse.agendaTraitsMode && agendaPool.length > 0) availableModes.push({ type: 'Agenda', weight:5 });
       if (settings.trueOrFalse.treacheryTraitsMode && treacheryPool.length > 0) availableModes.push({ type: 'Treachery', weight: 20 }); 
+      if (settings.trueOrFalse.nameAndPicMode && settings.trueOrFalse.actTraitsMode && settings.trueOrFalse.agendaTraitsMode && agendaActPool.length > 0) availableModes.push({ type: 'AgendaAct', weight: 4 }); ;
 
       if (availableModes.length === 0) return null;
 
@@ -196,30 +129,54 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
             type: 'Traits'
           };
 
+        case 'AgendaAct': {
+          const randomCard = agendaActPool[Math.floor(Math.random() * agendaActPool.length)];
+          return generatePicMismatchQuestion(
+            randomCard,
+            isTrue,
+            agendaActPool,
+            0.75,
+            true
+          );
+        }
+
         case 'Enemy': {
           const randomCard = enemyPool[Math.floor(Math.random() * enemyPool.length)];
           const isElite = randomCard.traits.some(t => t.toLowerCase() === 'elite');
           const group = getPackGroup(randomCard.pack_code);
           const options: { type: EnemyQuestionType; weight: number }[] = [
-            { type: 'Fight', weight: 1 }, { type: 'Horror', weight: 1 }, { type: 'Damage', weight: 1 },
-            { type: 'Evade', weight: 1 }, { type: 'Retaliate', weight: 1.5 }, { type: 'Hunter', weight: 1.5 },
-            { type: 'Spawn', weight: 1.5 }, { type: 'Forced', weight: 0.5 },
-            { type: 'Revelation', weight: 0.5 }
+            { type: 'PicMismatch', weight: settings.trueOrFalse.nameAndPicMode ? 3.5 : 0 },
+            { type: 'Retaliate', weight: 1.5 },
+            { type: 'Hunter', weight: 1.5 },
+            { type: 'Massive', weight: isElite ? 1.5 : 0 },
+            { type: 'Fight', weight: 1 },
+            { type: 'Horror', weight: 1 },
+            { type: 'Damage', weight: 1 },
+            { type: 'Evade', weight: 1 },
+            { type: 'Health', weight: randomCard.health !== 0 ? 1 : 0 },
+            { type: 'Alert', weight: packSameOrNewerThan(group, 'tfa') ? 1 : 0 },
+            { type: 'Elusive', weight: packSameOrNewerThan(group, 'fhv') ? 1 : 0 },
+            { type: 'Spawn', weight: 0.75 },
+            { type: 'Forced', weight: 0.75 },
+            { type: 'Revelation', weight: 0.75 },
+            { type: 'Aloof', weight: packSameOrNewerThan(group, 'dwl') ? 0.75 : 0 },
+            { type: 'Victory', weight: (randomCard.victory !== undefined || isElite) ? 0.5 : 0 },
+            { type: 'Prey', weight: 0.5 },
+            { type: 'Reaction', weight: 0.25 },
+            { type: 'Action', weight: 0.25 },
+            { type: 'Fast', weight: 0.25 }
           ];
-
-          if (randomCard.health !== 0) options.push({ type: 'Health', weight: 1 });
-          if (packSameOrNewerThan(group, 'tfa')) options.push({ type: 'Alert', weight: 1.5 });
-          if (packSameOrNewerThan(group, 'dwl')) options.push({ type: 'Aloof', weight: 0.5 });
-          if (packSameOrNewerThan(group, 'fhv')) options.push({ type: 'Elusive', weight: 1.5 });
-          if (randomCard.victory !== undefined || isElite) options.push({ type: 'Victory', weight: 0.5 });
-          
-          if (isElite) {
-            options.push({ type: 'Prey', weight: 1.5 });
-            options.push({ type: 'Massive', weight: 1.5 });
-          }
 
           const selectedOption = getWeightedRandom(options);
           
+
+          if (selectedOption === 'PicMismatch') {
+            return generatePicMismatchQuestion(
+              randomCard,
+              isTrue,
+              enemyPool
+            );
+          }
           if (ENEMY_KEYWORD_TRAITS.includes(selectedOption)) {
             const allowedKeywords = ENEMY_KEYWORD_TRAITS.filter(k => {
               if (k === 'Alert') return packSameOrNewerThan(group, 'tfa');
@@ -264,9 +221,10 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Act': {
           const randomCard = actPool[Math.floor(Math.random() * actPool.length)];
           const options: { type: ActQuestionType; weight: number }[] = [
-            {type: 'Clues', weight: 1}, 
-            {type: 'Forced', weight: 1}, {type: 'Objective', weight: 0.2}, 
-            {type: 'Resign', weight: 0.2}
+            { type: 'Clues', weight: 1 }, 
+            { type: 'Forced', weight: 1 },
+            { type: 'Action', weight: 0.5 }, 
+            { type: 'Fast', weight: 0.5 }
           ];
           const selectedOption = getWeightedRandom(options);
           
@@ -293,7 +251,9 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Agenda': {
           const randomCard = agendaPool[Math.floor(Math.random() * agendaPool.length)];
           const options: { type: AgendaQuestionType; weight: number }[] = [
-            {type: 'Doom', weight: 1}, {type: 'Forced', weight: 1}, {type: 'Resign', weight: 0.2}, 
+            { type: 'Doom', weight: 1 },
+            { type: 'Forced', weight: 1 },
+            { type: 'Action', weight: 1 }
           ];
           
           const selectedOption = getWeightedRandom(options);
@@ -321,12 +281,26 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Location': {
           const randomCard = locationPool[Math.floor(Math.random() * locationPool.length)];
           const options: { type: LocationQuestionType; weight: number }[] = [
-            {type: 'Clues', weight: 1}, {type: 'Shroud', weight: 1}, {type: 'Forced', weight: 0.5},
-            {type: 'Resign', weight: 0.1},
+            { type: 'PicMismatch', weight: settings.trueOrFalse.nameAndPicMode ? 2.5 : 0 },
+            { type: 'Clues', weight: 1 },
+            { type: 'Shroud', weight: 1 },
+            { type: 'Forced', weight: 0.75 },
+            { type: 'Action', weight: 0.5 },
+            { type: 'Revelation', weight: 0.5 },
+            { type: 'Reaction', weight: 0.25 },
+            { type: 'Fast', weight: 0.25 },
+            { type: 'Resign', weight: 0.1 }
           ];
           
           const selectedOption = getWeightedRandom(options);
 
+          if (selectedOption === 'PicMismatch') {
+            return generatePicMismatchQuestion(
+              randomCard,
+              isTrue,
+              locationPool
+            );
+          }
           if (LOCATION_KEYWORD_TRAITS.includes(selectedOption)) {
             const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, LOCATION_KEYWORD_TRAITS);
             if (!displayedValue) return null;
@@ -350,10 +324,22 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         case 'Treachery': {
           const randomCard = treacheryPool[Math.floor(Math.random() * treacheryPool.length)];
           const options: { type: TreacheryQuestionType; weight: number }[] = [
-            {type: 'Forced', weight: 1}, {type: 'Surge', weight: 1}, 
+            { type: 'PicMismatch', weight: settings.trueOrFalse.nameAndPicMode ? 2 : 0 },
+            { type: 'Forced', weight: 1 },
+            { type: 'Surge', weight: 0.5 }
           ];
           
           const selectedOption = getWeightedRandom(options);
+
+          if (selectedOption === 'PicMismatch') {
+            return generatePicMismatchQuestion(
+              randomCard,
+              isTrue,
+              treacheryPool,
+              0.65
+            );
+          }
+
           const displayedValue = getKeywordDisplayValue(randomCard, isTrue, selectedOption, TREACHERY_KEYWORD_TRAITS);
           if (!displayedValue) return null;
           return {
@@ -367,16 +353,41 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
       }
     };
 
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
+    }
+
     let attempts = 0;
     while (attempts < 100) {
       const q = generateQuestion();
       if (q) {
-        setQuestion(q);
+        syncData({
+          cardId: q.card.id,
+          isTrue: q.isTrue,
+          questionText: q.questionText,
+          displayedValue: q.displayedValue,
+          type: q.type
+        });
         return;
       }
       attempts++;
     }
-  }, [settings.trueOrFalse, traitPool, enemyPool, locationPool, actPool, agendaPool, treacheryPool]);
+  }, [settings.trueOrFalse, traitPool, enemyPool, locationPool, actPool, agendaPool, treacheryPool, agendaActPool, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      const syncedCard = cards.find(c => c.id === syncedData.cardId);
+      if (syncedCard) {
+        setQuestion({
+          card: syncedCard,
+          isTrue: syncedData.isTrue,
+          questionText: syncedData.questionText,
+          displayedValue: syncedData.displayedValue,
+          type: syncedData.type
+        });
+      }
+    }
+  }, [syncedData, cards]);
 
   const hasInitialized = useRef(false);
 
@@ -406,9 +417,15 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
     if (isCorrect) {
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true }
+      }));
     } else {
       setLose(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false }
+      }));
     }
   };
 
@@ -468,47 +485,89 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
       </div>
 
       <div className="trivia-question-section">
-        <div className="card-info">
-          <h2>{question.card.name}</h2>
-          {question.card.subname && <div className="subname">{question.card.subname}</div>}
-          
-          <div className="card-details">
-            <span className="detail-badge">{getPackDisplayName(question.card.pack_code, question.card.pack_name)}</span>
-            {question.type === 'Traits' && question.card.xp !== undefined && question.card.xp !== null && (
-              <span className="xp-badge" style={{ background: xpBackground }}>
-                XP: {question.card.xp}
-              </span>
-            )}
-          </div>
-        </div>
+        {(isClientWaiting || !question) ? (
+          <div className="waiting-for-host">Waiting for Host...</div>
+        ) : (
+          <>
+            <div className="card-info">
+              {question.type !== 'PicMismatch' && <>
+              <h2>{question.card.name}</h2>
+              {question.card.subname && <div className="subname">{question.card.subname}</div>}
+              </>}
+              
+              <div className="card-details">
+                {question.type !== 'PicMismatch' && (
+                  <span className="detail-badge">
+                    {getPackDisplayName(question.card.pack_code, question.card.pack_name)}
+                  </span>
+                )}
+                {question.type === 'Traits' && question.card.xp !== undefined && question.card.xp !== null && (
+                  <span className="xp-badge" style={{ background: xpBackground }}>
+                    XP: {question.card.xp}
+                  </span>
+                )}
+              </div>
+            </div>
 
-        {!isGameOver && question.type !== 'Traits' && question.card.imagesrc && (
-          <div className="card-image-wrapper">
-            {!imageLoaded && (
-              <div className="image-loading-placeholder">
-                <div className="spinner" />
+            {!isGameOver && question.type !== 'Traits' && question.card.imagesrc && (
+              question.card.typeName === 'location' && question.card.backimagesrc && question.card.backimagesrc.trim().length > 0 ? (
+                <div className="card-images-side-by-side">
+                  <div className="card-image-wrapper">
+                    <img 
+                      src={`https://arkhamdb.com${question.card.imagesrc}`} 
+                      alt={`${question.card.name} front`} 
+                      className="card-preview-image loaded"
+                    />
+                    <div className={`image-obscure-box-location ${question.type === 'PicMismatch' ? 'pic-mismatch' : ''}`} />
+                    {question.type === 'PicMismatch' && (
+                      <div className="image-obscure-box-top" />
+                    )}
+                  </div>
+                  <div className="card-image-wrapper">
+                    <img 
+                      src={`https://arkhamdb.com${question.card.backimagesrc}`} 
+                      alt={`${question.card.name} back`} 
+                      className="card-preview-image loaded"
+                    />
+                    <div className={`image-obscure-box-location ${question.type === 'PicMismatch' ? 'pic-mismatch' : ''}`} />
+                    {question.type === 'PicMismatch' && (
+                      <div className="image-obscure-box-top" />
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="card-image-wrapper">
+                  {!imageLoaded && (
+                    <div className="image-loading-placeholder">
+                      <div className="spinner" />
+                    </div>
+                  )}
+                  <img 
+                    src={`https://arkhamdb.com${question.card.imagesrc}`} 
+                    alt={question.card.name} 
+                    className={`${['agenda', 'act'].includes(question.card.typeName) ? 'card-preview-image-side' : 'card-preview-image'} ${imageLoaded ? 'loaded' : ''}`}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                  <div className={`image-obscure-box-${question.card.typeName} ${question.type === 'PicMismatch' ? 'pic-mismatch' : ''}`} />
+                  {question.type === 'PicMismatch' && ['location', 'enemy', 'treachery'].includes(question.card.typeName) && (
+                    <div className="image-obscure-box-top" />
+                  )}
+                </div>
+              )
+            )}
+
+            <div className="question-box">
+              <p>{question.questionText}</p>
+              <div className="traits-display">{question.displayedValue}</div>
+            </div>
+
+            {!isGameOver && (
+              <div className="true-false-actions">
+                <button className="tf-btn btn-true" onClick={() => handleGuess(true)} autoFocus>True</button>
+                <button className="tf-btn btn-false" onClick={() => handleGuess(false)}>False</button>
               </div>
             )}
-            <img 
-              src={`https://arkhamdb.com${question.card.backimagesrc && question.card.typeName==="location"?question.card.backimagesrc : question.card.imagesrc}`} 
-              alt={question.card.name} 
-              className={`${['agenda', 'act'].includes(question.card.typeName) ? 'card-preview-image-side' : 'card-preview-image'} ${imageLoaded ? 'loaded' : ''}`}
-              onLoad={() => setImageLoaded(true)}
-            />
-            <div className={`image-obscure-box-${question.card.typeName}`} />
-          </div>
-        )}
-
-        <div className="question-box">
-          <p>{question.questionText}</p>
-          <div className="traits-display">{question.displayedValue}</div>
-        </div>
-
-        {!isGameOver && (
-          <div className="true-false-actions">
-            <button className="tf-btn btn-true" onClick={() => handleGuess(true)} autoFocus>True</button>
-            <button className="tf-btn btn-false" onClick={() => handleGuess(false)}>False</button>
-          </div>
+          </>
         )}
       </div>
 
@@ -525,6 +584,10 @@ export default function TrueOrFalse({ onPlayAgainOverride, streakModeName }: Gam
         >
           {question.type === 'Traits' ? (
             <p>The actual traits are: <strong>{question.card.traits.join('. ') + '.'}</strong></p>
+          ) : question.fakeCard ? (
+            <>
+              <p>The correct answer was: <strong>{question.isTrue ? 'True' : 'False'}</strong>{!question.isTrue && `. It is the art work for ${question.card.name}`}</p>
+            </>
           ) : (
             <p>The correct answer was: <strong>{question.isTrue ? 'True' : 'False'}</strong></p>
           )}

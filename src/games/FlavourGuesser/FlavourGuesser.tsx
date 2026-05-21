@@ -2,14 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useStats } from '../../context/StatsContext';
 import GuessInput from '../../components/GuessInput/GuessInput';
 import ResultPanel from '../../components/ResultPanel/ResultPanel';
-import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
+import { filterForFlavourGuesser, filterDuplicateOfCode, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
+import { getPackDisplayName } from '../../data/packStructure';
 import { useGameContext } from '../../hooks/useGameContext';
 import type { TransformedCard, GameProps } from '../../types';
 import MultipleChoiceGrid from '../../components/MultipleChoiceGrid/MultipleChoiceGrid';
-import { filterForFlavourGuesser, filterDuplicateOfCode, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
-import { getPackDisplayName } from '../../data/packStructure';
+import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import './FlavourGuesser.scss';
-
 
 export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: GameProps = {}) {
   const { cards, settings } = useGameContext();
@@ -35,6 +35,8 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
 
     return { guessableCards: guessable, answerPool: answers };
   }, [cards, settings]);
+
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{ answerId: string; optionIds: string[] }>();
 
   const dupeNames = useMemo(() => findDuplicateNames(guessableCards), [guessableCards]);
 
@@ -65,11 +67,16 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
     setGaveUp(false);
     setHasReportedStreakLoss(false);
     setWrongGuesses([]);
+
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
+    }
+
     if (answerPool.length > 0) {
       const selected = answerPool[Math.floor(Math.random() * answerPool.length)];
-      console.log('[FlavourGuesser] Answer:', selected);
-      setAnswer(selected);
-
+      
+      let newOptions: TransformedCard[] = [];
+      const possibleOptions = guessableCards.filter(c => c.flavor !== selected.flavor);
       // Generate Multiple Choice Options
       if (settings.flavourGuesser.inputMode === 'Multiple Choice') {
         const optionsSet = new Set<TransformedCard>();
@@ -79,10 +86,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
         
         if (answerTraits.length > 0) {
           // 1. Try to find cards matching all traits
-          let matchingAll = guessableCards.filter(c => 
+          let matchingAll = possibleOptions.filter(c => 
             c.id !== selected.id && 
             c.name !== selected.name &&
-            c.flavor !== selected.flavor &&
             c.traits && 
             answerTraits.every(t => c.traits!.includes(t))
           );
@@ -94,10 +100,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
 
           // 2. If not enough, try finding cards matching at least 1 trait
           if (optionsSet.size < 4) {
-            let matchingAny = guessableCards.filter(c => 
+            let matchingAny = possibleOptions.filter(c => 
               c.id !== selected.id && 
               c.name !== selected.name &&
-              c.flavor !== selected.flavor &&
               !optionsSet.has(c) &&
               c.traits && 
               answerTraits.some(t => c.traits!.includes(t))
@@ -112,10 +117,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
 
         // 3. Fallback to random cards
         if (optionsSet.size < 4) {
-          const remaining = shuffle(guessableCards.filter(c => 
+          const remaining = shuffle(possibleOptions.filter(c => 
             !optionsSet.has(c) && 
-            c.name !== selected.name && 
-            c.flavor !== selected.flavor
+            c.name !== selected.name
           ));
           for (const card of remaining) {
             if (optionsSet.size >= 4) break;
@@ -123,10 +127,25 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
           }
         }
 
-        setMultipleChoiceOptions(shuffle(Array.from(optionsSet)));
+        newOptions = shuffle(Array.from(optionsSet));
+      }
+
+      syncData({
+        answerId: selected.id,
+        optionIds: newOptions.map(c => c.id)
+      });
+    }
+  }, [answerPool, guessableCards, settings.flavourGuesser.inputMode, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      const syncedAnswer = cards.find(c => c.id === syncedData.answerId) || null;
+      setAnswer(syncedAnswer);
+      if (settings.flavourGuesser.inputMode === 'Multiple Choice') {
+         setMultipleChoiceOptions(syncedData.optionIds.map(id => cards.find(c => c.id === id)).filter(Boolean) as TransformedCard[]);
       }
     }
-  }, [answerPool, guessableCards, settings.flavourGuesser.inputMode]);
+  }, [syncedData, cards, settings.flavourGuesser.inputMode]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -147,17 +166,26 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
     if (card.id === answer?.id) {
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true, wrongGuesses: wrongGuesses.length, isMultipleChoice: settings.flavourGuesser.inputMode === 'Multiple Choice' }
+      }));
     } else {
       if(settings.flavourGuesser.inputMode === 'Multiple Choice'){
         setGaveUp(true);
         reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
         setHasReportedStreakLoss(true);
+        window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+          detail: { mode: modeName, solved: false, isMultipleChoice: true }
+        }));
       }else{
         const newWrong = [card, ...wrongGuesses];
         setWrongGuesses(newWrong);
         if (!hasReportedStreakLoss && newWrong.length >= maxGuesses) {
           reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
           setHasReportedStreakLoss(true);
+          window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+            detail: { mode: modeName, solved: false, wrongGuesses: maxGuesses, isMultipleChoice: false }
+          }));
         }
       }
     }
@@ -168,6 +196,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
     if (!hasReportedStreakLoss) {
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
       setHasReportedStreakLoss(true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false, wrongGuesses: maxGuesses, isMultipleChoice: settings.flavourGuesser.inputMode === 'Multiple Choice' }
+      }));
     }
   };
 
@@ -201,7 +232,9 @@ export default function FlavourGuesser({ onPlayAgainOverride, streakModeName }: 
           </div>
         )}
 
-        {win || gaveUp ? (
+        {isClientWaiting ? (
+          <div className="waiting-for-host">Waiting for Host...</div>
+        ) : win || gaveUp ? (
           <ResultPanel win={win} item={answer} onPlayAgain={onPlayAgainOverride || resetGame} className="flavour-result" />
         ) : (
           <div>

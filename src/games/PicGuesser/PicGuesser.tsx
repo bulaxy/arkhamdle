@@ -3,6 +3,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { Eye, EyeOff } from 'lucide-react';
 import './PicGuesser.scss';
@@ -30,8 +31,20 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
   const [imageLoaded, setImageLoaded] = useState(false);
   const [outlierLogicUsed, setOutlierLogicUsed] = useState(false);
 
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{ 
+    answerId: string; 
+    offsetX: number; 
+    offsetY: number; 
+    optionIds: string[]; 
+  }>();
+
   // PicGuesser does NOT filter duplicate_of_code — exception per task spec
   const gameCards = useMemo(() => {
+    if (syncedData) {
+      return syncedData.optionIds
+        .map(id => cards.find(c => c.id === id))
+        .filter(Boolean) as TransformedCard[];
+    }
     const baseFiltered = filterBySettings(cards, settings, 'picGuesser');
     const filtered = filterForPicGuesser(baseFiltered);
     // Apply type filters from settings
@@ -42,6 +55,7 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
       GAME_EVALUATION_CRITERIA.picGuesser
     );
     return deduped as TransformedCard[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards, settings]);
 
   const gameCardsWithPic = useMemo(()=>{
@@ -64,15 +78,36 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
     setHasReportedStreakLoss(false);
     setOutlierLogicUsed(false);
     setGuesses([]);
-
-    // setAnswer(gameCards.find(c => c.id === '01059'));
-    setAnswer(gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)]);
-    setOffsetX(Math.floor(Math.random() * 301) - 150);
-    setOffsetY(Math.floor(Math.random() * 251)+50);
     setSizeMultiplier(8);
     setShowFull(false);
     setImageLoaded(false);
-  }, [gameCardsWithPic]);
+
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
+    }
+
+    const newAnswer = gameCardsWithPic[Math.floor(Math.random() * gameCardsWithPic.length)];
+    const newOffsetX = Math.floor(Math.random() * 301) - 150;
+    const newOffsetY = Math.floor(Math.random() * 251) + 50;
+
+    syncData({
+      answerId: newAnswer?.id,
+      offsetX: newOffsetX,
+      offsetY: newOffsetY,
+      optionIds: gameCards.map(c => c.id)
+    });
+  }, [gameCardsWithPic, gameCards, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      const syncedAnswer = cards.find(c => c.id === syncedData.answerId) || null;
+      setAnswer(syncedAnswer);
+      setOffsetX(syncedData.offsetX);
+      setOffsetY(syncedData.offsetY);
+    } else if (!isMultiplayer || isHost) {
+      // Local or host fallback (during reset before syncData resolves, or single player)
+    }
+  }, [syncedData, cards, isMultiplayer, isHost]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -102,11 +137,17 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
       setWin(true);
       setShowFull(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true, wrongGuesses: guesses.length }
+      }));
     } else if (isOutlier && isNameMatch) {
       setWin(true);
       setShowFull(true);
       setOutlierLogicUsed(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true, wrongGuesses: guesses.length }
+      }));
     } else {
       setAnimation('shakeAnimation');
       setTimeout(() => setAnimation(''), 300);
@@ -125,6 +166,9 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
     if (!hasReportedStreakLoss) {
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
       setHasReportedStreakLoss(true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false, wrongGuesses: maxGuesses }
+      }));
     }
   };
 
@@ -161,6 +205,8 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
               Please increase your card pool in the Settings (e.g., enable more expansion packs or card types) to play this mode.
             </p>
           </div>
+        ) : (isClientWaiting || !answer) ? (
+          <div className="waiting-for-host">Waiting for Host...</div>
         ) : (
           <>
             <div className="pic-image-container">

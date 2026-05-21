@@ -3,6 +3,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, getCardFactionColors, filterBySettings } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import './TraitGuesser.scss';
 import GuessInput from '../../components/GuessInput/GuessInput';
@@ -20,22 +21,33 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
   const [gaveUp, setGaveUp] = useState(false);
   const [hasReportedStreakLoss, setHasReportedStreakLoss] = useState(false);
 
-  const allPossibleOptions = useMemo(() => {
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{ answerId: string; optionIds: string[] }>();
+
+  // 1. Generate local options (never depends on syncedData)
+  const localPossibleOptions = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'traitGuesser');
     const uniqueCards = filterDuplicateOfCode(baseFiltered);
     return uniqueCards.filter(c => settings.traitGuesser.typeFilters[c.typeName] ?? true);
   }, [cards, settings]);
 
-  const gameTraits = useMemo(() => {
+  // 2. Options list used in dropdown/gameplay (depends on syncedData for clients)
+  const allPossibleOptions = useMemo(() => {
+    if (syncedData?.optionIds) {
+      return syncedData.optionIds.map(id => cards.find(c => c.id === id)).filter(Boolean) as TransformedCard[];
+    }
+    return localPossibleOptions;
+  }, [cards, syncedData, localPossibleOptions]);
+
+  // 3. Local traits (independent of syncedData)
+  const localTraits = useMemo(() => {
     const traitCountMap = new Map<string, Set<string>>();
-    allPossibleOptions.forEach(item => {
+    localPossibleOptions.forEach(item => {
       item.traits.forEach(t => {
         if (!traitCountMap.has(t)) traitCountMap.set(t, new Set());
         traitCountMap.get(t)!.add(item.name);
       });
     });
     
-    // Filter based on settings min and max cards
     return Array.from(traitCountMap.entries())
       .filter(([, names]) => {
         const count = names.size;
@@ -43,7 +55,8 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
                (settings.traitGuesser.maxCards === 0 || count <= settings.traitGuesser.maxCards);
       })
       .map(([trait]) => trait);
-  }, [allPossibleOptions, settings.traitGuesser.minCards, settings.traitGuesser.maxCards]);
+  }, [localPossibleOptions, settings.traitGuesser.minCards, settings.traitGuesser.maxCards]);
+
 
   const gameOptions = useMemo(() => {
     return deduplicateByEvaluationCriteria(
@@ -80,14 +93,26 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
     setCorrectGuesses([]);
     setWrongGuesses([]);
 
-    if (gameTraits.length > 0) {
-      const selected = gameTraits[Math.floor(Math.random() * gameTraits.length)];
-      console.log('[TraitGuesser] Trait:', selected, '| Possible answers:', gameOptions.filter(c => c.traits.includes(selected)).map(c => c.fullName));
-      setTrait(selected);
-    } else {
-      setTrait('');
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
     }
-  }, [gameTraits, gameOptions]);
+
+    if (localTraits.length > 0) {
+      const selected = localTraits[Math.floor(Math.random() * localTraits.length)];      
+      syncData({
+        answerId: selected, // answerId is the trait name here
+        optionIds: localPossibleOptions.map(c => c.id)
+      });
+    } else {
+      syncData({ answerId: '', optionIds: [] });
+    }
+  }, [localTraits, localPossibleOptions, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      setTrait(syncedData.answerId);
+    }
+  }, [syncedData]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -115,6 +140,9 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
         if (newGuesses.length >= requiredGuesses) {
           setWin(true);
           reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+          window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+            detail: { mode: modeName, solved: true, wrongGuesses: wrongGuesses.length }
+          }));
         }
       }
     } else {
@@ -134,6 +162,9 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
     if (!hasReportedStreakLoss) {
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
       setHasReportedStreakLoss(true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false, wrongGuesses: maxGuesses }
+      }));
     }
   };
 
@@ -156,11 +187,15 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
       </div>
 
       <div className="glass-panel trait-panel">
-        <div className="trait-name">
-          {trait || 'No traits match your current filters. Try adjusting them in Settings.'}
-        </div>
+        {(isClientWaiting || !trait) ? (
+          <div className="waiting-for-host">Waiting for Host...</div>
+        ) : (
+          <>
+            <div className="trait-name">
+              {trait || 'No traits match your current filters. Try adjusting them in Settings.'}
+            </div>
 
-        {win || gaveUp ? (
+            {win || gaveUp ? (
           <ResultPanel win={win} item={null} onPlayAgain={onPlayAgainOverride || resetGame} className="trait-result">
             <div className="trait-all-answers">
               <h3>All matches with "{trait}"</h3>
@@ -234,6 +269,8 @@ export default function TraitGuesser({ onPlayAgainOverride, streakModeName }: Ga
               </div>
             )}
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

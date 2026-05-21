@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "arkhamdle",
+  "main": "src/entry.worker.ts",
   "compatibility_date": "2026-04-29",
   "observability": {
     "enabled": true

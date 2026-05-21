@@ -45,6 +45,9 @@ export default function TrueOrFalseSection({
             <button className={`pack-btn ${settings.treacheryTraitsMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, treacheryTraitsMode: !settings.treacheryTraitsMode })}>
               Treachery Mode
             </button>
+            <button className={`pack-btn ${settings.nameAndPicMode ? 'active' : ''}`} onClick={() => onChange({ ...settings, nameAndPicMode: !settings.nameAndPicMode })}>
+              Name & Pic Matcher
+            </button>
           </div>
 
           <PackFilterControls

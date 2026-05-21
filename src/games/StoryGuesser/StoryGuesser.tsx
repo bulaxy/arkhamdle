@@ -3,6 +3,7 @@ import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
 import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, findDuplicateNames, getCardFactionColors, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
+import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
 import './StoryGuesser.scss';
@@ -15,7 +16,10 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
   const modeName = 'Story Guesser';
   const maxGuesses = settings.storyGuesser.maxGuesses ?? 6;
 
-  const uniqueInvestigators = useMemo(() => {
+  const { isClientWaiting, syncedData, syncData, isHost, isMultiplayer } = useGameSync<{ answerId: string; optionIds: string[] }>();
+
+  // 1. Generate local options (never depends on syncedData)
+  const localUniqueInvestigators = useMemo(() => {
     const baseFiltered = filterBySettings(cards, settings, 'storyGuesser');
     const investigators = baseFiltered.filter(c => c.typeName === 'investigator');
     const withFlavor = investigators.filter(inv => inv.back_flavor);
@@ -25,6 +29,14 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
       GAME_EVALUATION_CRITERIA.storyGuesser
     );
   }, [cards, settings]);
+
+  // 2. Options list used in dropdown (depends on syncedData for clients)
+  const uniqueInvestigators = useMemo(() => {
+    if (syncedData?.optionIds) {
+      return syncedData.optionIds.map(id => cards.find(c => c.id === id)).filter(Boolean) as TransformedCard[];
+    }
+    return localUniqueInvestigators;
+  }, [cards, syncedData, localUniqueInvestigators]);
 
   const dupeNames = useMemo(() => findDuplicateNames(uniqueInvestigators), [uniqueInvestigators]);
 
@@ -44,8 +56,24 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
     setGaveUp(false);
     setHasReportedStreakLoss(false);
     setWrongGuesses([]);
-    setAnswer(uniqueInvestigators[Math.floor(Math.random() * uniqueInvestigators.length)]);
-  }, [uniqueInvestigators]);
+
+    if (isMultiplayer && !isHost) {
+      return; // wait for sync
+    }
+
+    const newAnswer = localUniqueInvestigators[Math.floor(Math.random() * localUniqueInvestigators.length)];
+    syncData({
+      answerId: newAnswer?.id,
+      optionIds: localUniqueInvestigators.map(c => c.id)
+    });
+  }, [localUniqueInvestigators, isMultiplayer, isHost, syncData]);
+
+  useEffect(() => {
+    if (syncedData) {
+      const syncedAnswer = cards.find(c => c.id === syncedData.answerId) || null;
+      setAnswer(syncedAnswer);
+    }
+  }, [syncedData, cards]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -148,6 +176,9 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
     if (card.id === answer?.id) {
       setWin(true);
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: true, wrongGuesses: wrongGuesses.length }
+      }));
     } else {
       const newWrong = [card, ...wrongGuesses];
       setWrongGuesses(newWrong);
@@ -163,6 +194,9 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
     if (!hasReportedStreakLoss) {
       reportResult(streakModeName ? [modeName, streakModeName] : modeName, false);
       setHasReportedStreakLoss(true);
+      window.dispatchEvent(new CustomEvent('MULTIPLAYER_STATS_UPDATE', {
+        detail: { mode: modeName, solved: false, wrongGuesses: maxGuesses }
+      }));
     }
   };
 
@@ -213,6 +247,8 @@ export default function StoryGuesser({ onPlayAgainOverride, streakModeName }: Ga
               </div>
             </div>
           </ResultPanel>
+        ) : (isClientWaiting || !answer) ? (
+          <div className="waiting-for-host">Waiting for Host...</div>
         ) : (
           <div>
             <div className="story-text">

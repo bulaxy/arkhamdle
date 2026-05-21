@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Trash2, StopCircle, BarChart2, Info, Download, Upload, Hash, Trophy, Database, Users, Copy, Clipboard, Dices } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useGameContext } from "../../hooks/useGameContext";
 import { useStats } from "../../context/StatsContext";
 import type { AppSettings } from "../../types";
 import StatsModal from "../StatsModal/StatsModal";
 import { generateRandomThematicSeed } from "../../utils/random";
+import { copyToClipboard } from "../../utils/clipboard";
 
 interface GeneralSettingsSectionProps {
   isOpen: boolean;
@@ -17,12 +19,14 @@ export default function GeneralSettingsSection({
   onToggle,
   onClose,
 }: GeneralSettingsSectionProps) {
+  const navigate = useNavigate();
   const { settings, setSettings, refreshData, applySeed } = useGameContext();
   const { stopStreak, clearRecord } = useStats();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [prevSeed, setPrevSeed] = useState(settings.seed || "");
   const [localSeed, setLocalSeed] = useState(settings.seed || "");
+
 
   const currentSeed = settings.seed || "";
   if (currentSeed !== prevSeed) {
@@ -178,187 +182,206 @@ export default function GeneralSettingsSection({
             </div>
           </div>
 
-          {/* Competition & Seed Section */}
+          {/* Competition & Multiplayer Section */}
           <hr className="settings-divider" />
           <div className="settings-group">
             <div className="settings-group-header">
               <Users size={18} />
-              <span>Competition & Seed (Beta)</span>
+              <span>Multiplayer & Competition</span>
             </div>
-            <div className="settings-info-box">
-              <div className="info-header">
-                <Info size={16} />
-                <span>How to Compete</span>
-              </div>
-              <ul className="info-list">
-                <li>1. Select the <strong>Game Mode</strong> everyone will play.</li>
-                <li>2. <strong>Match Settings:</strong> All players must use the exact same settings. You can manually configure them or use <strong>Copy Settings</strong> / <strong>Export Settings</strong> to share configurations.</li>
-                <li>3. Other players should <strong>Import</strong> the shared settings file to ensure everything matches exactly.</li>
-                <li>4. Once all settings are confirmed, everyone enters the <strong>same Seed</strong> (a seed can be any random word or phrase).</li>
-                <li>5. <strong>Final Check:</strong> Before starting, confirm that all players have matching settings and identical card pools.</li>
-                <li>6. <strong>Streaks & Leaderboards:</strong> Custom seeds do not use a dedicated online leaderboard. To compete fairly, players should clear/reset their streaks before starting.</li>
-                <li>7. <strong>Desync Warning:</strong> Playing modes in a different order or switching modes differently between players can desynchronize the seed. All players must take actions and switch modes in the exact same sequence. If you wish to change modes, ensure no one has clicked "Play again" in the current mode when you switch modes.</li>
-                <li>8. <strong>Beta Notice:</strong> Seed-based competitive play is currently in Beta. Dedicated multiplayer lobbies/rooms are planned for a future update.</li>
-              </ul>
-            </div>
-
-            <div className="setting-item no-border">
+            
+            <div className="setting-item no-cursor no-border">
               <div className="setting-label">
-                <span>Game Seed</span>
-                <span className="setting-description">Ensure everyone uses the same seed for identical results (the seed can be any random word)</span>
-              </div>
-              <div className="seed-input-wrapper">
-                <Hash size={16} className="input-icon" />
-                <input
-                  type="text"
-                  className="seed-input"
-                  placeholder="Enter seed (e.g. daily-123)"
-                  value={localSeed}
-                  onChange={(e) => setLocalSeed(e.target.value)}
-                />
+                <span>Real-time Multiplayer</span>
+                <span className="setting-description">
+                  Play competitive or cooperative trivia rounds in real-time with friends! All settings, seeds, and lists sync automatically.
+                </span>
                 <button
-                  type="button"
-                  className="seed-dice-btn"
-                  title="Generate random seed word"
-                  onClick={handleGenerateRandomSeed}
-                >
-                  <Dices size={16} />
-                </button>
-                <button 
-                  className="premium-btn small-btn" 
+                  className="premium-btn mt-10"
+                  style={{ width: 'fit-content' }}
                   onClick={() => {
-                    applySeed(localSeed);
-                    alert(`Applied seed: "${localSeed}"`);
+                    onClose();
+                    navigate('/multiplayer');
                   }}
                 >
-                  Apply
+                  <Users size={18} /> Go to Multiplayer Lobby
                 </button>
               </div>
             </div>
 
-            <div className="settings-actions-row">
-              <button
-                className="premium-btn"
-                onClick={async () => {
-                  try {
-                    const dataStr = JSON.stringify(settings, null, 2);
-                    await navigator.clipboard.writeText(dataStr);
-                    alert("Settings copied to clipboard!");
-                  } catch (err) {
-                    console.error(err);
-                    alert("Failed to copy settings to clipboard. Please try exporting instead.");
-                  }
-                }}
-              >
-                <Copy size={18} /> Copy
-              </button>
-
-              <button
-                className="premium-btn"
-                onClick={async () => {
-                  try {
-                    let text = "";
-                    try {
-                      text = await navigator.clipboard.readText();
-                    } catch (clipErr) {
-                      console.warn("Clipboard access denied/failed, falling back to prompt", clipErr);
-                    }
-
-                    if (!text) {
-                      text = prompt("Paste your copied settings JSON text here:") || "";
-                    }
-
-                    if (!text.trim()) return;
-
-                    const importedSettings = JSON.parse(text) as AppSettings;
-
-                    // Basic validation
-                    if (!importedSettings.wordle) {
-                      throw new Error("Invalid settings payload");
-                    }
-
-                    // Check if we need to load encounter cards
-                    if (importedSettings.includeEncounter && !settings.includeEncounter) {
-                      if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
-                        setSettings(importedSettings);
-                        await refreshData(true);
-                      } else {
-                        setSettings({ ...importedSettings, includeEncounter: false });
-                      }
-                    } else {
-                      setSettings(importedSettings);
-                    }
-                    alert("Settings pasted and imported successfully!");
-                  } catch (err) {
-                    console.error(err);
-                    alert("Failed to parse settings. Make sure you copied the correct settings JSON.");
-                  }
-                }}
-              >
-                <Clipboard size={18} /> Paste
-              </button>
-
-              <button
-                className="premium-btn"
-                onClick={() => {
-                  const dataStr = JSON.stringify(settings, null, 2);
-                  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-                  const exportFileDefaultName = `arkhamdle_settings_${new Date().toISOString().split('T')[0]}.json`;
-
-                  const linkElement = document.createElement('a');
-                  linkElement.setAttribute('href', dataUri);
-                  linkElement.setAttribute('download', exportFileDefaultName);
-                  linkElement.click();
-                }}
-              >
-                <Download size={18} /> Export
-              </button>
-
-              <div className="file-input-wrapper">
-                <button className="premium-btn">
-                  <Upload size={18} /> Import
-                  <input
-                    type="file"
-                    accept=".json"
-                    className="hidden-file-input"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-
-                      const reader = new FileReader();
-                      reader.onload = async (event) => {
-                        try {
-                          const content = event.target?.result as string;
-                          const importedSettings = JSON.parse(content) as AppSettings;
-
-                          // Basic validation
-                          if (!importedSettings.wordle) {
-                            throw new Error("Invalid settings file");
-                          }
-
-                          // Check if we need to load encounter cards
-                          if (importedSettings.includeEncounter && !settings.includeEncounter) {
-                            if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
-                              setSettings(importedSettings);
-                              await refreshData(true);
-                            } else {
-                              setSettings({ ...importedSettings, includeEncounter: false });
-                            }
-                          } else {
-                            setSettings(importedSettings);
-                          }
-                          alert("Settings imported successfully!");
-                        } catch (err) {
-                          console.error(err);
-                          alert("Failed to import settings. Please make sure it's a valid JSON file.");
+            <details className="deprecated-settings-details">
+              <summary className="deprecated-settings-summary">
+                <span>Deprecated (Settings Sync & Seeds)</span>
+              </summary>
+              <div className="deprecated-settings-content">
+                <p className="deprecated-warning-text">
+                  ⚠️ Note: Manual Game Seeds and Settings JSON copy/paste are deprecated and no longer maintained. Sync-based competitive play is now fully managed via the **Multiplayer** system. Use the **Multiplayer** button in the top navigation header or the button above to play together!
+                </p>
+                
+                <div className="setting-item no-border stacked">
+                  <div className="setting-label">
+                    <span>Game Seed</span>
+                    <span className="setting-description">Ensure everyone uses the same seed for identical results (the seed can be any random word)</span>
+                  </div>
+                  <div className="seed-input-wrapper w-full">
+                    <Hash size={16} className="input-icon" />
+                    <input
+                      type="text"
+                      className="seed-input"
+                      placeholder="Enter seed (e.g. daily-123)"
+                      value={localSeed}
+                      onChange={(e) => setLocalSeed(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="seed-dice-btn"
+                      title="Generate random seed word"
+                      onClick={handleGenerateRandomSeed}
+                    >
+                      <Dices size={16} />
+                    </button>
+                    <button 
+                      className="premium-btn small-btn" 
+                      onClick={() => {
+                        applySeed(localSeed);
+                        alert(`Applied seed: "${localSeed}"`);
+                      }}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+                <div className="settings-actions-row">
+                  <button
+                    className="premium-btn"
+                    onClick={async () => {
+                      try {
+                        const dataStr = JSON.stringify(settings, null, 2);
+                        const success = await copyToClipboard(dataStr);
+                        if (success) {
+                          alert("Settings copied to clipboard!");
+                        } else {
+                          alert("Failed to copy settings to clipboard. Please try exporting instead.");
                         }
-                      };
-                      reader.readAsText(file);
+                      } catch (err) {
+                        console.error(err);
+                        alert("Failed to copy settings to clipboard. Please try exporting instead.");
+                      }
                     }}
-                  />
-                </button>
+                  >
+                    <Copy size={18} /> Copy
+                  </button>
+
+                  <button
+                    className="premium-btn"
+                    onClick={async () => {
+                      try {
+                        let text = "";
+                        try {
+                          if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+                            text = await navigator.clipboard.readText();
+                          }
+                        } catch (clipErr) {
+                          console.warn("Clipboard access denied/failed, falling back to prompt", clipErr);
+                        }
+
+                        if (!text) {
+                          text = prompt("Paste your copied settings JSON text here:") || "";
+                        }
+
+                        if (!text.trim()) return;
+
+                        const importedSettings = JSON.parse(text) as AppSettings;
+
+                        // Basic validation
+                        if (!importedSettings.wordle) {
+                          throw new Error("Invalid settings payload");
+                        }
+
+                        // Check if we need to load encounter cards
+                        if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                          if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                            setSettings(importedSettings);
+                            await refreshData(true);
+                          } else {
+                            setSettings({ ...importedSettings, includeEncounter: false });
+                          }
+                        } else {
+                          setSettings(importedSettings);
+                        }
+                        alert("Settings pasted and imported successfully!");
+                      } catch (err) {
+                        console.error(err);
+                        alert("Failed to parse settings. Make sure you copied the correct settings JSON.");
+                      }
+                    }}
+                  >
+                    <Clipboard size={18} /> Paste
+                  </button>
+
+                  <button
+                    className="premium-btn"
+                    onClick={() => {
+                      const dataStr = JSON.stringify(settings, null, 2);
+                      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                      const exportFileDefaultName = `arkhamdle_settings_${new Date().toISOString().split('T')[0]}.json`;
+
+                      const linkElement = document.createElement('a');
+                      linkElement.setAttribute('href', dataUri);
+                      linkElement.setAttribute('download', exportFileDefaultName);
+                      linkElement.click();
+                    }}
+                  >
+                    <Download size={18} /> Export
+                  </button>
+
+                  <div className="file-input-wrapper">
+                    <button className="premium-btn">
+                      <Upload size={18} /> Import
+                      <input
+                        type="file"
+                        accept=".json"
+                        className="hidden-file-input"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+
+                          const reader = new FileReader();
+                          reader.onload = async (event) => {
+                            try {
+                              const content = event.target?.result as string;
+                              const importedSettings = JSON.parse(content) as AppSettings;
+
+                              // Basic validation
+                              if (!importedSettings.wordle) {
+                                throw new Error("Invalid settings file");
+                              }
+
+                              // Check if we need to load encounter cards
+                              if (importedSettings.includeEncounter && !settings.includeEncounter) {
+                                if (confirm("Imported settings require campaign cards. Download them now? (11MB)")) {
+                                  setSettings(importedSettings);
+                                  await refreshData(true);
+                                } else {
+                                  setSettings({ ...importedSettings, includeEncounter: false });
+                                }
+                              } else {
+                                setSettings(importedSettings);
+                              }
+                              alert("Settings imported successfully!");
+                            } catch (err) {
+                              console.error(err);
+                              alert("Failed to import settings. Please make sure it's a valid JSON file.");
+                            }
+                          };
+                          reader.readAsText(file);
+                        }}
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         </div>
       )}

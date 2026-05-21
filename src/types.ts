@@ -73,11 +73,37 @@ export interface TrueOrFalseSettings extends BaseGameSettings {
   actTraitsMode: boolean;
   agendaTraitsMode: boolean;
   treacheryTraitsMode: boolean;
+  nameAndPicMode: boolean;
 }
 
 
 export interface RandomTriviaSettings {
   enabledModes: Record<string, boolean>;
+}
+
+export interface ScoringConfig {
+  wordle: Record<number, number>;
+  retry: {
+    picGuesser: number;
+    storyGuesser: number;
+    traitGuesser: number;
+    flavourGuesser: number;
+    campaignPackGuesser: number;
+    countGuesser: number;
+  };
+  retryPenalty: {
+    picGuesser: number;
+    storyGuesser: number;
+    traitGuesser: number;
+    flavourGuesser: number;
+    campaignPackGuesser: number;
+    countGuesser: number;
+  };
+  singleAttempt: {
+    trueOrFalse: number;
+    multipleChoice: number;
+    iconGuesser: number;
+  };
 }
 
 export interface AppSettings {
@@ -106,7 +132,34 @@ export interface AppSettings {
   iconGuesser: BaseGameSettings;
   trueOrFalse: TrueOrFalseSettings;
   seed?: string;
+  playerName?: string;
   randomTrivia: RandomTriviaSettings;
+  scoringConfig: ScoringConfig;
+}
+
+export interface MultiplayerPlayer {
+  id: string;
+  name: string;
+  score: number;
+  ready: boolean;
+  modeScores: Record<string, number>;
+  isHost?: boolean;
+}
+
+export type MultiplayerMessageType = 'GAME_START' | 'STATS_UPDATE' | 'PLAYER_READY' | 'LEADERBOARD_UPDATE' | 'SETTINGS_UPDATE' | 'NAVIGATE' | 'SYNC_GAME_DATA' | 'KICK' | 'RANDOM_TRIVIA_MODE_SYNC';
+
+export interface GameStats {
+  mode: string;
+  solved: boolean;
+  guesses?: number;
+  wrongGuesses?: number;
+  isMultipleChoice?: boolean;
+  subMode?: string;
+}
+
+export interface MultiplayerMessage {
+  type: MultiplayerMessageType;
+  payload?: unknown;
 }
 
 export interface TransformedCard {
