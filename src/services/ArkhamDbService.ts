@@ -41,7 +41,7 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
     .map(o => {
       const name = o.real_name || o.name;
       const subname = o.subname || '';
-      const xp = o.xp ?? 0;
+      const xp = o.xp;
       const rawTypeName = toLowerCamelCase(o.type_code);
       const typeName = VALID_TYPES.has(rawTypeName as TypeName) ? (rawTypeName as TypeName) : TypeName.OTHER;
       if (typeName === "other") {
@@ -49,7 +49,15 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
       }
 
       const pack_name = (packGroupMap.get(o.pack_code) || 'OTHER').toUpperCase();
-      const fullName = typeName === TypeName.INVESTIGATOR ? `${name} (${pack_name})` : `${name}${subname ? ' ' + subname : ''}${xp > 0 ? ' (' + xp + ')' : ''}`;
+      const fullName = typeName === TypeName.INVESTIGATOR ? `${name} (${pack_name})` : `${name}${subname ? ' ' + subname : ''}${xp !== undefined && xp > 0 ? ' (' + xp + ')' : ''}`;
+      
+      // Determine final XP value based on conditions
+      // If card is asset/event/skill/story AND any of the conditions is met, set XP to null
+      const shouldNullifyXp = 
+        ['asset', 'event', 'skill', 'story'].includes(o.type_code) &&
+        (o.encounter_code || o.restrictions?.investigator || o.bonded_to != null);
+      
+      const finalXp = shouldNullifyXp ? null : xp;
       
       return {
         id: o.code,
@@ -64,7 +72,7 @@ export const transformCards = (cards: ArkhamCard[]): TransformedCard[] => {
         cardName: o.subname ? `${o.real_name || o.name} - ${o.subname}` : (o.real_name || o.name),
         typeName: typeName,
         class: Array.from(new Set([o.faction_code, o.faction2_code, o.faction3_code].filter(Boolean) as FactionCode[])),
-        xp: xp,
+        xp: finalXp,
         traits: o.traits?.trim().split('.').filter(Boolean).map(t => t.trim()) || [],
         slot: o.slot as Slot | undefined,
         cost: o.cost ?? 0,

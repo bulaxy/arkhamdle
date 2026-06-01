@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
-import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle, filterBySettings } from '../../services/CardFilter';
+import { deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, filterDuplicateOfCode, findDuplicateNames, filterForWordle, filterBySettings, normalizeXpForComparison } from '../../services/CardFilter';
 import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import '../../components/GuessGrid/GuessGrid.scss';
@@ -58,8 +58,9 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
     if (dupeNames.has(card.name) && card.subname) {
       text += ` (${card.subname})`;
     }
-    if (card.xp > 0) {
-      text += ` (${card.xp})`;
+    const xpLabel = card.xp !== undefined && card.xp !== null ? String(card.xp) : 'None';
+    if (dupeNames.has(card.name) && (card.xp !== undefined && card.xp !== null || card.xp === undefined)) {
+      text += ` (${xpLabel})`;
     }
     return text;
   };
@@ -187,9 +188,17 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
   const getArrow = (guess: TransformedCard, attr: typeof ATTRIBUTES[number]) => {
     if (!answer) return '';
     if (!['xp', 'cost', 'wild', 'intellect', 'willpower', 'combat', 'agility'].includes(attr)) return '';
+
+    if (attr === 'xp') {
+      const ansXp = normalizeXpForComparison(answer.xp);
+      const guessXp = normalizeXpForComparison(guess.xp);
+      if (ansXp < guessXp) return ' ↓';
+      if (ansXp > guessXp) return ' ↑';
+      return '';
+    }
+
     const ansVal = answer[attr];
     const guessVal = guess[attr];
-
     const ansArray = Array.isArray(ansVal) ? ansVal : [ansVal];
     const guessArray = Array.isArray(guessVal) ? guessVal : [guessVal];
 
@@ -210,7 +219,7 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
               cardTypes: 'Skill, Asset, Event, Weakness',
               answerEvaluation: 'Must match: Name, Subname, XP, Class',
               currentFilters: 'Applied: Pack filters, Weakness filter, Signature filter',
-              howToPlay: 'Start by typing any player card name. The feedback will indicate if the type, class, cost, and other stats match the target card. Green means an exact match, yellow means a partial match (like one shared class), and red means no match. Arrows indicate if the target\'s value is higher or lower.'
+              howToPlay: 'Start by typing any player card name. The feedback will indicate if the type, class, cost, and other stats match the target card. XP is shown as None for cards with no level, and missing XP is treated as below 0 for arrow hints. Green means an exact match, yellow means a partial match, and red means no match.'
             }}
           />
         </div>
@@ -270,7 +279,11 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
                     <td className="wordle-guess-cell wordle-name-cell">{g.fullName}</td>
                     {ATTRIBUTES.map(attr => (
                       <td key={attr} className={`wordle-guess-cell ${getAttributeClass(g, attr)}`}>
-                        {attr === 'slot' && !g[attr] ? 'None' : (Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr])}
+                        {attr === 'slot' && !g[attr]
+                          ? 'None'
+                          : attr === 'xp' && (g[attr] === undefined || g[attr] === null)
+                            ? 'None'
+                            : (Array.isArray(g[attr]) && g[attr].length > 1 ? g[attr].join(', ') : g[attr])}
                         {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                       </td>
                     ))}
@@ -291,7 +304,11 @@ export default function WordleGame({ onPlayAgainOverride, streakModeName }: Game
                 {ATTRIBUTES.map(attr => (
                   <div key={attr} className={`guess-cell ${getAttributeClass(g, attr)}`}>
                     <span className="label">{attr === 'typeName' ? 'Type' : attr}</span>
-                    {attr === 'slot' && !g[attr] ? 'None' : (Array.isArray(g[attr]) && (g[attr] as (string | number)[]).length > 1 ? (g[attr] as (string | number)[]).join(', ') : (g[attr] as string | number))}
+                    {attr === 'slot' && !g[attr]
+                      ? 'None'
+                      : attr === 'xp' && (g[attr] === undefined || g[attr] === null)
+                        ? 'None'
+                        : (Array.isArray(g[attr]) && (g[attr] as (string | number)[]).length > 1 ? (g[attr] as (string | number)[]).join(', ') : (g[attr] as string | number))}
                     {getArrow(g, attr) && <span className="arrow-bold">{getArrow(g, attr)}</span>}
                   </div>
                 ))}

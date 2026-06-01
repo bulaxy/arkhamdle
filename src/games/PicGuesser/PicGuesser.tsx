@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameContext } from '../../hooks/useGameContext';
 import { useStats } from '../../context/StatsContext';
 import type { TransformedCard, GameProps } from '../../types';
-import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings } from '../../services/CardFilter';
+import { filterForPicGuesser, deduplicateByEvaluationCriteria, GAME_EVALUATION_CRITERIA, getCardFactionColors, findDuplicateNames, filterDuplicateOfCode, filterBySettings, formatXpForDisplay } from '../../services/CardFilter';
 import { useGameSync } from '../../hooks/useGameSync';
 import GameInfoButton from '../../components/GameInfoButton/GameInfoButton';
 import { Eye, EyeOff } from 'lucide-react';
@@ -65,7 +65,7 @@ export default function PicGuesser({ onPlayAgainOverride, streakModeName }: Game
 
   const getDisplayText = (card: TransformedCard): string => {
     if (!dupeNames.has(card.name)) return card.name;
-    return `${card.name} (${getPackDisplayName(card.pack_code, card.pack_name)} - ${card.xp}XP)`;
+    return `${card.name} (${getPackDisplayName(card.pack_code, card.pack_name)} - ${formatXpForDisplay(card.xp)} XP)`;
   };
 
   let zoomOutRate = 1;

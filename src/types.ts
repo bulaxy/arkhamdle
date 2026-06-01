@@ -175,7 +175,7 @@ export interface TransformedCard {
   cardName: string;
   typeName: TypeName;
   class: FactionCode[];
-  xp: number;
+  xp?: number | null;
   traits: string[];
   slot?: Slot;
   cost: number;

@@ -1,6 +1,21 @@
 import type { TransformedCard, TypeName, FactionCode, AppSettings } from '../types';
 import { TypeName as TypeNameEnum } from '../types/arkham';
 
+export const MISSING_XP_VALUE = -5;
+export const UNDEFINED_XP_VALUE = -99;
+
+export function normalizeXpForComparison(xp?: number | null): number {
+  if (xp === null) return MISSING_XP_VALUE;
+  if (xp === undefined) return UNDEFINED_XP_VALUE;
+  return xp;
+}
+
+export function formatXpForDisplay(xp?: number | null): string {
+  if (xp === null) return 'None';
+  if (xp === undefined) return 'None';
+  return String(xp);
+}
+
 /**
  * Filter cards based on game-specific or global settings.
  */
@@ -86,7 +101,7 @@ export function findDuplicateNames(items: { name: string }[]): Set<string> {
 export function findDuplicateNameXp(items: { name: string; xp?: number }[]): Set<string> {
   const counts = new Map<string, number>();
   for (const item of items) {
-    const key = `${item.name}|${item.xp ?? 0}`;
+    const key = `${item.name}|${normalizeXpForComparison(item.xp)}`;
     counts.set(key, (counts.get(key) || 0) + 1);
   }
   const dupes = new Set<string>();
@@ -158,8 +173,8 @@ function buildKeyFromCriteria(
   }
 
   if (criteria.xp) {
-    const xp = 'xp' in card ? card.xp : 0;
-    parts.push(String(xp ?? 0));
+    const xp = 'xp' in card ? card.xp : undefined;
+    parts.push(String(normalizeXpForComparison(xp)));
   }
 
   if (criteria.health) {

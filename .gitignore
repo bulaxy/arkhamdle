@@ -29,3 +29,6 @@ dist-ssr
 !.dev.vars.example
 .env*
 !.env.example
+
+# Ignore any ad-hoc JS in sample-data (test scripts)
+/sample-data/*.js

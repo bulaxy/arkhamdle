@@ -205,7 +205,7 @@ export const TRIVIA_TEMPLATES: QuestionTemplate[] = [
     condition: (card, xp) => card.xp === xp,
     generateValues: (cards) => {
       const xps = new Set<number>();
-      cards.forEach(c => { if (c.xp !== undefined) xps.add(c.xp); });
+      cards.forEach(c => { if (c.xp !== undefined && c.xp !== null) xps.add(c.xp); });
       return Array.from(xps).filter(xp => !isNaN(xp));
     },
     formatQuestion: (xp, _, packName) => `How many ${xp} XP cards are in ${packName}?`
